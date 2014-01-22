@@ -1,17 +1,24 @@
+#
+# Defines the interface for a server command handler.
+# All command handlers should be derived from the ServerCommand class.
+#
+
 import datetime
 
 class ServerCommand:
 
   def Execute(self, request):
-    r = CreateResponse()
-    r['X10Response']['resultcode'] = 404
-    r['X10Response']['error'] = "Command not recognized"
-    r['X10Response']['datetime'] = str(datetime.datetime.now())
-    r['X10Response']['data'] = "none"
+    response = CreateResponse()
+    r = response["X10Response"]
+    r['resultcode'] = 404
+    r['error'] = "Command not recognized"
+    r['datetime'] = str(datetime.datetime.now())
+    r['message'] = "none"
 
-    return r
+    return response
     
-# Create an empty response instance    
-def CreateResponse():
-  r = {"X10Response": {}}
-  return r
+  # Create an empty response instance    
+  @classmethod
+  def CreateResponse(self):
+    response = {"X10Response": {}}
+    return response
