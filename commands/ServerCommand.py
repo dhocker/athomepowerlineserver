@@ -19,6 +19,6 @@ class ServerCommand:
     
   # Create an empty response instance    
   @classmethod
-  def CreateResponse(self):
+  def CreateResponse(cls):
     response = {"X10Response": {}}
     return response

@@ -1,8 +1,10 @@
 import json
 import datetime
+import commands.ServerCommand
 import commands.LoadTimers
 import commands.ServerCommand
 import commands.StatusRequest
+import commands.DeviceOn
 
 class CommandHandler:
   
@@ -35,8 +37,8 @@ class CommandHandler:
     
     if ci_command == "loadtimers":
       handler = commands.LoadTimers.LoadTimers()
-    elif ci_command == "on":
-      handler = None
+    elif ci_command == "deviceon":
+      handler = commands.DeviceOn.DeviceOn()
     elif ci_command == "off":
       handler = None
     elif ci_command == "allunitsoff":
@@ -66,7 +68,9 @@ class CommandHandler:
       r['X10Response']['callsequence'] = CommandHandler.call_sequence
       r['X10Response']['datetime'] = str(datetime.datetime.now())
     else:
-      r = ServerCommand.CreateResponse()
+      print "No handler for command:", request["command"]
+      r = commands.ServerCommand.ServerCommand.CreateResponse()
+      r['X10Response']['command'] = request["command"]
       r['X10Response']['server'] = "AtHomePowerlineServer"
       r['X10Response']['serverversion'] = "1.0.0.0"
       r['X10Response']['resultcode'] = 404

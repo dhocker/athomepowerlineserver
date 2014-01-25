@@ -34,11 +34,14 @@ class MyTCPHandlerJson(SocketServer.BaseRequestHandler):
       
       # Return the response to the client
       self.request.sendall(json.JSONEncoder().encode(response))
-    except Exception as ex:
-      print "Exception occurred while parsing json request"
-      print str(ex)
-      print self.raw_json
-      # Send an error response???
+    # except Exception as ex:
+      # print "Exception occurred while parsing json request"
+      # print str(ex)
+      # print self.raw_json
+      # # Send an error response???
+      # raise ex
+    finally:
+      pass
       
     MyTCPHandlerJson.call_sequence += 1
   

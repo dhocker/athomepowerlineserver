@@ -1,5 +1,79 @@
+#
+# Defines the interface contract for an X10 controller driver
+#
+
+import abc
 
 class X10ControllerInterface:
+  __metaclass__ = abc.ABCMeta
   
   def __init__(self):
+    print "X10 controller base class initialized"
     pass
+    
+  @abc.abstractmethod
+  def Open(self):
+    pass
+    
+  @abc.abstractmethod
+  def Close(self):
+    pass    
+    
+  @abc.abstractmethod
+  def SelectAddress(self, house_device_code):
+    pass        
+    
+  # TODO Consider defining a method for each device function
+  @abc.abstractmethod
+  def ExecuteFunction(self, house_code, dim_amount, device_function):
+    pass        
+    
+  # Return a datetime type
+  @abc.abstractmethod
+  def GetTime(self):
+    pass        
+    
+  # TODO Consider defining this as SetCurrentTime taking no parameters.
+  # Set the controller time to the current, local time.
+  @abc.abstractmethod
+  def SetTime(self, time_value):
+    pass 
+
+  #####################
+  # X10 common methods
+  #####################
+  
+  DeviceCodeLookup = { 1: 6, 2: 14, 3: 2, 4: 10, 5: 1, 6: 9, 7: 5, 8: 13, \
+    9: 7, 10: 15, 11: 3, 12: 11, 13: 0, 14: 8, 15: 4, 16: 12 }
+    
+  # Return the X10 device code for a device  
+  @staticmethod
+  def GetDeviceCode(device_code):
+    return X10ControllerInterface.DeviceCodeLookup[int(device_code)]
+    
+  HouseCodeLookup = { "a": 6, "b": 14, "c": 2, "d": 10, "e": 1, "f": 9, "g": 5, "h": 13, \
+    "i": 7, "j": 15, "k": 3, "l": 11, "m": 0, "n": 8, "o": 4, "p": 12 }
+    
+  # Return the X10 house code for a house  
+  # house_code is case insensitive
+  @staticmethod
+  def GetHouseCode(house_code):
+    return X10ControllerInterface.HouseCodeLookup[house_code.lower()]
+    
+  #************************************************************************
+  #
+  # Returns day of week mask for set time
+  # NOTE: This method is not required for this implementation since
+  # the X10 controller does not support downloaded programs.
+  #
+  # Bit
+  #    7  6  5  4  3  2  1  0
+  #    0  Sa F  Th W  Tu M  Su
+  #************************************************************************
+  DayOfWeekLookup = [0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x01]
+  @staticmethod
+  def GetDayOfWeek(dt):
+    # day of week where Monday = 0 and Sunday = 7
+    dow = dt.weekday()
+    return DayOfWeekLookup[dow]
+    

@@ -71,6 +71,41 @@ def DisplayResponse(response):
       if k != "command":
         print " ", k, ":", v
         
+# Test the Device On command        
+def DeviceOn():
+  # 
+  data = CreateRequest("DeviceOn")
+  data["args"].append({})
+  data["args"][0]["housedevicecode"] = "A1"
+  data["args"][0]["dimamount"] = 0
+
+  # Convert the payload structure into json text.
+  # Effectively this serializes the payload.
+  #print "raw json:", data
+  json_data = json.JSONEncoder().encode(data)
+
+  # Create a socket connection to the server
+  sock = ConnectToServer()
+  if sock is None:
+    return
+
+  # send status request to server
+  try:
+    print "Sending status request:", json_data
+    sock.sendall(json_data)
+
+    # Receive data from the server and shut down
+    #received = sock.recv(1024)
+    json_data = ReadJson(sock)
+    
+    #print "Sent:     {}".format(data)
+    #print "Received: {}".format(json_data)
+    DisplayResponse(json_data)
+  except Exception as ex:
+    print str(ex)
+  finally:
+    sock.close()
+        
 # Test the status request command        
 def StatusRequest():
   # This DOES NOT work. Why?
@@ -183,4 +218,6 @@ if __name__ == "__main__":
   StatusRequest()
 
   # Try some timer programs
-  LoadTimers()
+  #LoadTimers()
+  
+  DeviceOn()
