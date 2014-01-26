@@ -56,7 +56,8 @@ class XTB232(X10ControllerInterface.X10ControllerInterface):
   #************************************************************************
   # Close the device
   def Close(self):
-    self.port.close()
+    if self.port is not None:
+      self.port.close()
 
   #************************************************************************
   # Turn a device on
@@ -124,6 +125,7 @@ class XTB232(X10ControllerInterface.X10ControllerInterface):
       self.port = serial.Serial(self.com_port, baudrate=4800, bytesize=serial.EIGHTBITS, parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE, timeout=2)
       print "XTB232 controller on COM port:", self.com_port
     except Exception as ex:
+      self.port = None
       print "Unable to open COM port:", self.com_port
       print str(ex)
       return
