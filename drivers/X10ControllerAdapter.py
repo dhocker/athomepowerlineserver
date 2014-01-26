@@ -36,14 +36,23 @@ class X10ControllerAdapter:
   def Open(cls, driver):
     cls.Driver = driver
     print "X10ControllerAdapter has been injected with driver:", str(driver)
-    cls.Driver.Open()
+    return cls.Driver.Open()
     
   #************************************************************************
   # Close the singleton copy of the controller driver
   @classmethod
   def Close(cls):
-    cls.Driver.Close()
+    result = cls.Driver.Close()
     print "X10ControllerAdapter has been closed"
+    return result
+
+  @classmethod
+  def GetLastErrorCode(cls):
+    return cls.Driver.LastErrorCode
+
+  @classmethod
+  def GetLastError(cls):
+    return cls.Driver.LastError
 
   #************************************************************************
   # Turn a device on

@@ -31,6 +31,8 @@ class MyTCPHandlerJson(SocketServer.BaseRequestHandler):
 
       # The command handler generates the response
       response = CommandHandler.CommandHandler().Execute(self.json)
+
+      print "Request completed"
       
       # Return the response to the client
       self.request.sendall(json.JSONEncoder().encode(response))

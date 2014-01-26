@@ -19,6 +19,11 @@ class ServerCommand:
     
   # Create an empty response instance    
   @classmethod
-  def CreateResponse(cls):
+  def CreateResponse(cls, command):
     response = {"X10Response": {}}
+    r = response["X10Response"]    
+    r['command'] = command
+    r['datetime'] = str(datetime.datetime.now())
+    r['server'] = "AtHomePowerlineServer"
+    r['serverversion'] = "1.0.0.0"
     return response

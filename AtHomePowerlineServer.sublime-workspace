@@ -4,6 +4,42 @@
 		"selected_items":
 		[
 			[
+				"X",
+				"XTB232"
+			],
+			[
+				"La",
+				"LastErrorCode"
+			],
+			[
+				"S",
+				"Success"
+			],
+			[
+				"Che",
+				"ChecksumTimeout"
+			],
+			[
+				"g",
+				"good_checksum"
+			],
+			[
+				"good",
+				"GetHouseCode"
+			],
+			[
+				"In",
+				"InterfaceReadyTimeout"
+			],
+			[
+				"L",
+				"LastError"
+			],
+			[
+				"Las",
+				"LastErrorCode"
+			],
+			[
 				"bor",
 				"border-bottom"
 			],
@@ -40,18 +76,58 @@
 			}
 		},
 		{
-			"file": "AtHomePowerlineServer.conf",
-			"settings":
-			{
-				"buffer_size": 107,
-				"line_ending": "Windows"
-			}
-		},
-		{
 			"file": "Configuration.py",
 			"settings":
 			{
 				"buffer_size": 2278,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "testclient/tcplcient_json.py",
+			"settings":
+			{
+				"buffer_size": 5561,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "drivers/X10ControllerInterface.py",
+			"settings":
+			{
+				"buffer_size": 2357,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "drivers/XTB232.py",
+			"settings":
+			{
+				"buffer_size": 8090,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "drivers/X10ControllerAdapter.py",
+			"settings":
+			{
+				"buffer_size": 2279,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "commands/DeviceOn.py",
+			"settings":
+			{
+				"buffer_size": 856,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "CommandHandler.py",
+			"settings":
+			{
+				"buffer_size": 2370,
 				"line_ending": "Windows"
 			}
 		}
@@ -80,7 +156,14 @@
 	},
 	"file_history":
 	[
+		"/C/Users/dhocker/ElfstoneGit/elfstone_athomeserver/AtHomePowerlineServer.conf",
+		"/C/Users/dhocker/ElfstoneGit/elfstone_athomeserver/commands/ServerCommand.py",
+		"/C/Users/dhocker/ElfstoneGit/elfstone_athomeserver/AtHomePowerlineServer.sublime-project",
 		"/C/Users/dhocker/AppData/Roaming/Sublime Text 2/Packages/Default/Preferences.sublime-settings",
+		"/C/Users/dhocker/ElfstoneGit/elfstone_athomeserver/commands/StatusRequest.py",
+		"/C/Users/dhocker/ElfstoneGit/elfstone_athomeserver/commands/LoadTimers.py",
+		"/C/Users/dhocker/ElfstoneGit/elfstone_athomeserver/MyTCPHandlerJson.py",
+		"/C/Users/dhocker/ElfstoneGit/elfstone_athomeserver/CommandHandler.py",
 		"/C/Users/dhocker/ElfstoneGit/elfstone_athomeserver/Configuration.py",
 		"/C/Users/dhocker/AppData/Roaming/Sublime Text 2/Packages/User/Preferences.sublime-settings",
 		"/C/Users/dhocker/AppData/Roaming/Sublime Text 2/Packages/User/Python.sublime-settings",
@@ -97,9 +180,10 @@
 	},
 	"find_in_files":
 	{
-		"height": 0.0,
+		"height": 90.0,
 		"where_history":
 		[
+			""
 		]
 	},
 	"find_state":
@@ -107,6 +191,9 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"side bar",
+			"folders",
+			"CreateResponse",
 			"start",
 			"32"
 		],
@@ -126,7 +213,7 @@
 	"groups":
 	[
 		{
-			"selected": 2,
+			"selected": 0,
 			"sheets":
 			[
 				{
@@ -141,8 +228,8 @@
 						"selection":
 						[
 							[
-								745,
-								745
+								1653,
+								1653
 							]
 						],
 						"settings":
@@ -159,32 +246,6 @@
 				},
 				{
 					"buffer": 1,
-					"file": "AtHomePowerlineServer.conf",
-					"settings":
-					{
-						"buffer_size": 107,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								101,
-								101
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/Text/Plain text.tmLanguage"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 2,
 					"file": "Configuration.py",
 					"settings":
 					{
@@ -207,6 +268,174 @@
 						},
 						"translation.x": 0.0,
 						"translation.y": 628.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "testclient/tcplcient_json.py",
+					"settings":
+					{
+						"buffer_size": 5561,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								5122,
+								5122
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 3079.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "drivers/X10ControllerInterface.py",
+					"settings":
+					{
+						"buffer_size": 2357,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								953,
+								953
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 11.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "drivers/XTB232.py",
+					"settings":
+					{
+						"buffer_size": 8090,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								7131,
+								7131
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 3223.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "drivers/X10ControllerAdapter.py",
+					"settings":
+					{
+						"buffer_size": 2279,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1958,
+								1958
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 143.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 6,
+					"file": "commands/DeviceOn.py",
+					"settings":
+					{
+						"buffer_size": 856,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								515,
+								515
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 7,
+					"file": "CommandHandler.py",
+					"settings":
+					{
+						"buffer_size": 2370,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2370,
+								2370
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 823.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"

@@ -62,23 +62,17 @@ class CommandHandler:
   def Execute(self, request):
     handler = self.GetHandler(request["command"])
     if handler is not None:
-      r = handler.Execute(request)
-      r['X10Response']['server'] = "AtHomePowerlineServer"
-      r['X10Response']['serverversion'] = "1.0.0.0"
-      r['X10Response']['callsequence'] = CommandHandler.call_sequence
-      r['X10Response']['datetime'] = str(datetime.datetime.now())
+      response = handler.Execute(request)
+      response['X10Response']['callsequence'] = CommandHandler.call_sequence
     else:
       print "No handler for command:", request["command"]
-      r = commands.ServerCommand.ServerCommand.CreateResponse()
-      r['X10Response']['command'] = request["command"]
-      r['X10Response']['server'] = "AtHomePowerlineServer"
-      r['X10Response']['serverversion'] = "1.0.0.0"
-      r['X10Response']['resultcode'] = 404
-      r['X10Response']['error'] = "Command is not recognized or implemented"
-      r['X10Response']['callsequence'] = CommandHandler.call_sequence
-      r['X10Response']['datetime'] = str(datetime.datetime.now())
-      r['X10Response']['data'] = "none"
+      response = commands.ServerCommand.ServerCommand.CreateResponse(request["command"])
+      r = response['X10Response']
+      r['resultcode'] = 404
+      r['error'] = "Command is not recognized or implemented"
+      r['callsequence'] = CommandHandler.call_sequence
+      r['data'] = ""
       
     CommandHandler.call_sequence += 1
     
-    return r
+    return response

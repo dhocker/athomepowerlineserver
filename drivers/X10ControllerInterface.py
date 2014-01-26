@@ -1,13 +1,19 @@
 #
-# Defines the interface contract for an X10 controller driver
+# Defines the interface contract for an X10 controller driver.
+# Uses the abstract base class.
 #
 
 import abc
 
 class X10ControllerInterface:
   __metaclass__ = abc.ABCMeta
-  
+
+  # Error codes
+  Success = 0
+
   def __init__(self):
+    self.LastErrorCode = 0
+    self.LastError = None
     print "X10 controller base class initialized"
     pass
     
@@ -19,18 +25,14 @@ class X10ControllerInterface:
   def Close(self):
     pass    
     
-  @abc.abstractmethod
-  def SelectAddress(self, house_device_code):
-    pass        
-    
-  # TODO Consider defining a method for each device function
-  @abc.abstractmethod
-  def ExecuteFunction(self, house_code, dim_amount, device_function):
-    pass        
-    
   # Return a datetime type
   @abc.abstractmethod
   def GetTime(self):
+    pass        
+    
+  # Return controller status
+  @abc.abstractmethod
+  def GetStatus(self):
     pass        
     
   # TODO Consider defining this as SetCurrentTime taking no parameters.
@@ -38,6 +40,11 @@ class X10ControllerInterface:
   @abc.abstractmethod
   def SetTime(self, time_value):
     pass 
+
+  # Reset the last error info  
+  def ClearLastError(self):
+    self.LastErrorCode = X10ControllerInterface.Success
+    self.LastError = None
 
   #####################
   # X10 common methods

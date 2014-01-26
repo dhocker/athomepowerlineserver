@@ -34,6 +34,15 @@ class XTB232(X10ControllerInterface.X10ControllerInterface):
   # Function header constants
   HdrFunction = 0x02;
   HdrAlwaysOne = 0x04;  
+
+  # Error codes
+  ChecksumTimeout = 1
+  InterfaceReadyTimeout = 2
+  AckNotReceived = 3
+  PortNotAvailable = 4
+  AccessException = 5
+  ChecksumError = 6
+
     
   #************************************************************************
   def __init__(self):
@@ -54,7 +63,8 @@ class XTB232(X10ControllerInterface.X10ControllerInterface):
   # house_device_code = Ex. 'A1'
   # dim_amount 0 <= v <= 22
   def DeviceOn(self, house_device_code, dim_amount):
-    self.ExecuteFunction(house_device_code, dim_amount, XTB232.On)
+    self.ClearLastError()
+    return self.ExecuteFunction(house_device_code, dim_amount, XTB232.On)
     
   #************************************************************************
   def SelectAddress(self, house_device_code):
@@ -72,8 +82,12 @@ class XTB232(X10ControllerInterface.X10ControllerInterface):
   # Common function for sending a complete function to the controller.
   # The device function code is treated as a data value.
   def ExecuteFunction(self, house_device_code, dim_amount, device_function):
-    self.SelectAddress(house_device_code)
+    # First part of two step sequence. Select the specific device that is the command target.
+    if not self.SelectAddress(house_device_code):
+      print "SelectAddress failed"
+      return False
     
+    # Second part, send the command for all devices selected for the house code.
     Xfunction = array.array('B', [0, 0])
 
     Xfunction[0] = ((dim_amount << 3) + XTB232.HdrAlwaysOne + XTB232.HdrFunction)
@@ -85,12 +99,20 @@ class XTB232(X10ControllerInterface.X10ControllerInterface):
   #************************************************************************
   # Return a datetime type
   def GetTime(self):
+    self.ClearLastError()
+    pass        
+    
+  #************************************************************************
+  # Return controller status
+  def GetStatus(self):
+    self.ClearLastError()
     pass        
     
   #************************************************************************
   # TODO Consider defining this as SetCurrentTime taking no parameters.
   # Set the controller time to the current, local time.
   def SetTime(self, time_value):
+    self.ClearLastError()
     pass  
 
   #************************************************************************
@@ -121,6 +143,8 @@ class XTB232(X10ControllerInterface.X10ControllerInterface):
   # Note that the XTB232 ignores the time value. But, this is kept for CM11A compatibility.
   # See section 8 of the spec.
   def SendTime(self, time_value):
+    self.ClearLastError()
+
     #The set time command is 7 bytes long
     TimeData = array.array('B', [0,0,0,0,0,0,0])
     
@@ -156,7 +180,6 @@ class XTB232(X10ControllerInterface.X10ControllerInterface):
   #
   #************************************************************************
   def SendCommand(self, cmd):
-    success = False
     expected_checksum = XTB232.CalculateChecksum(cmd)
     
     good_checksum = False
@@ -173,20 +196,33 @@ class XTB232(X10ControllerInterface.X10ControllerInterface):
       if expected_checksum == response:
         # Send commit byte
         self.port.write([XTB232.InterfaceAck])
-        # Wait for interface ready signal
+        # Wait for interface ready signal. The retry count is purely arbitrary.
         for i in range(0,10):
           response = self.port.read()
           if response == XTB232.InterfaceReady:
             break
+        # If we got an interface ready signal, the command was successfully transmitted.
         if response == XTB232.InterfaceReady:
-          success = True
+          self.LastErrorCode = XTB232.Success
+          self.LastError = ""
+          return True
         else:
-          print "Expected interface ready signal, but none received"
-          success = False
+          self.LastErrorCode = XTB232.InterfaceReadyTimeout
+          self.LastError = "Expected interface ready signal, but none received"
+          #print self.LastError
+          return False
+      elif response == '':
+        self.LastErrorCode = XTB232.ChecksumTimeout
+        self.LastError = "Timeout waiting for checksum from controller"
+        #print self.LastError
+        return False
       else:
         retry_count += 1
-        
-      return success
+      
+      # If we have fallen to here, the command transmission failed.
+      self.LastErrorCode = XTB232.ChecksumError
+      self.LastError = "Checksum error attempting to transmit command"
+      return False
     
   #************************************************************************
   # Calculate the simple checksum of an iterable list of bytes  

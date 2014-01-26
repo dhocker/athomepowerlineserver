@@ -14,18 +14,15 @@ class DeviceOn(ServerCommand.ServerCommand):
     result = drivers.X10ControllerAdapter.X10ControllerAdapter.DeviceOn(request["args"][0]["housedevicecode"], int(request["args"][0]["dimamount"]))
     
     # Generate a successful response
-    response = DeviceOn.CreateResponse()
+    response = DeviceOn.CreateResponse("DeviceOn")
     r = response["X10Response"]    
-    r['command'] = "DeviceOn"
-    r['datetime'] = str(datetime.datetime.now())
     
+    r['resultcode'] = drivers.X10ControllerAdapter.X10ControllerAdapter.GetLastErrorCode()
     if result:
-      r['resultcode'] = 0
       #r['error'] = "Command not fully implemented"
       r['message'] = "Success"
     else:
-      r['resultcode'] = 400
-      #r['error'] = "Command not fully implemented"
+      r['error'] = drivers.X10ControllerAdapter.X10ControllerAdapter.GetLastError()
       r['message'] = "Failure"
 
       return response

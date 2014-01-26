@@ -24,13 +24,11 @@ class LoadTimers(ServerCommand.ServerCommand):
     # TODO Put new timer programs into effect.
     
     # Generate a successful response
-    response = LoadTimers.CreateResponse()
+    response = LoadTimers.CreateResponse("LoadTimers")
     r = response["X10Response"]
     
-    r['command'] = "LoadTimers"
     r['resultcode'] = 0
     #r['error'] = "Command not implemented"
-    r['datetime'] = str(datetime.datetime.now())
     r['message'] = "Success"
 
     return response

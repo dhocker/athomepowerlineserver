@@ -214,6 +214,7 @@ def LoadTimers():
 # Main
 #
 if __name__ == "__main__":
+  #import pdb; pdb.set_trace()
   # Try a status request command
   StatusRequest()
 
