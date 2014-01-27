@@ -5,6 +5,12 @@
 import socket
 import sys
 import json
+from optparse import OptionParser
+
+#Host, Port = "localHost", 9999
+Host, Port = "hedwig", 9999
+#Host, Port = "192.168.1.111", 9999
+
 
 # tcpclient
 # Sends and receives JSON formatted payloads
@@ -26,20 +32,17 @@ def CreateRequest(command):
 # Note that a socket can only be used for one request.
 # The server seems to close the socket at when it is
 # finished handling the request. 
-def ConnectToServer():
-  #HOST, PORT = "localhost", 9999
-  HOST, PORT = "hedwig", 9999
-  #HOST, PORT = "192.168.1.111", 9999
+def ConnectToServer(Host):
   
   # Create a socket (SOCK_STREAM means a TCP socket)
   sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
   try:
     # Connect to server and check status
-    sock.connect((HOST, PORT))
+    sock.connect((Host, Port))
     return sock
   except Exception as ex:
-    print "Unable to connect to server"
+    print "Unable to connect to server:", Host, Port
     print str(ex)
   
   return None
@@ -85,7 +88,7 @@ def DeviceOn():
   json_data = json.JSONEncoder().encode(data)
 
   # Create a socket connection to the server
-  sock = ConnectToServer()
+  sock = ConnectToServer(Host)
   if sock is None:
     return
 
@@ -120,7 +123,7 @@ def StatusRequest():
   json_data = json.JSONEncoder().encode(data)
 
   # Create a socket connection to the server
-  sock = ConnectToServer()
+  sock = ConnectToServer(Host)
   if sock is None:
     return
 
@@ -214,7 +217,16 @@ def LoadTimers():
 # Main
 #
 if __name__ == "__main__":
-  #import pdb; pdb.set_trace()
+  #imPort pdb; pdb.set_trace()
+
+  parser = OptionParser()
+  parser.add_option("-s")
+  (options, args) = parser.parse_args()
+  #print options
+
+  if options.s is not None:
+    Host = options.s
+
   # Try a status request command
   StatusRequest()
 
