@@ -11,7 +11,7 @@ class DeviceOn(ServerCommand.ServerCommand):
   
   # Execute the "on" command.
   def Execute(self, request):     
-    result = drivers.X10ControllerAdapter.X10ControllerAdapter.DeviceOn(request["args"][0]["housedevicecode"], int(request["args"][0]["dimamount"]))
+    result = drivers.X10ControllerAdapter.X10ControllerAdapter.DeviceOn(request["args"]["housedevicecode"], int(request["args"]["dimamount"]))
     
     # Generate a successful response
     response = DeviceOn.CreateResponse("DeviceOn")

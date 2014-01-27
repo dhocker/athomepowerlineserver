@@ -15,6 +15,7 @@ Host, Port = "hedwig", 9999
 # tcpclient
 # Sends and receives JSON formatted payloads
 
+#######################################################################
 # Create an empty server request
 # This is the safe way to create an empty request.
 # The json module seems to be a bit finicky about the
@@ -22,12 +23,11 @@ Host, Port = "hedwig", 9999
 def CreateRequest(command):
   request = {}
   request["command"] = command
-  # The args parameter is an array. For commands like load timer programs,
-  # each array element is a dict that defines a timer program. For commands
-  # that  have a single arg, there is only a single array element.
-  request["args"] = []
+  # The args parameter is an dictionary.
+  request["args"] = {}
   return request
 
+#######################################################################
 # Open a socket to the server 
 # Note that a socket can only be used for one request.
 # The server seems to close the socket at when it is
@@ -47,6 +47,7 @@ def ConnectToServer(Host):
   
   return None
   
+#######################################################################
 # Read a JSON payload from a socket
 def ReadJson(sock):
   depth = 0
@@ -63,6 +64,7 @@ def ReadJson(sock):
       if (depth == 0):
         return json_data
 
+#######################################################################
 # Display a formatted response on the console        
 def DisplayResponse(response):
     jr = json.loads(response)["X10Response"]
@@ -74,13 +76,13 @@ def DisplayResponse(response):
       if k != "command":
         print " ", k, ":", v
         
+#######################################################################
 # Test the Device On command        
 def DeviceOn():
   # 
   data = CreateRequest("DeviceOn")
-  data["args"].append({})
-  data["args"][0]["housedevicecode"] = "A1"
-  data["args"][0]["dimamount"] = 0
+  data["args"]["housedevicecode"] = "A1"
+  data["args"]["dimamount"] = 0
 
   # Convert the payload structure into json text.
   # Effectively this serializes the payload.
@@ -109,10 +111,11 @@ def DeviceOn():
   finally:
     sock.close()
         
+#######################################################################
 # Test the status request command        
 def StatusRequest():
   # This DOES NOT work. Why?
-  data = "{ \"command\": \"StatusRequest\", \"args\": {\"a\": 1} }"
+  #data = "{ \"command\": \"StatusRequest\", \"args\": {\"a\": 1} }"
   
   # This DOES work. Why?
   data = CreateRequest("StatusRequest")
@@ -144,9 +147,10 @@ def StatusRequest():
   finally:
     sock.close()
 
+#######################################################################
 def LoadTimers():
   # New socket. 
-  sock = ConnectToServer()
+  sock = ConnectToServer(Host)
   if sock is None:
     return
   
@@ -164,8 +168,10 @@ def LoadTimers():
       
   data = CreateRequest("LoadTimers")
   
-  # For the LoadTimers command, args is a simple sequence/list of dict's where each dict
+  # For the LoadTimers command, the args dictionary contains a single
+  # "programs" key/value pair. The value is a simple sequence/list of dict's where each dict
   # defines a timer initiator program.
+  data["args"]["programs"] = []
   
   program = {\
     "housedevicecode": "a1", \
@@ -188,9 +194,9 @@ def LoadTimers():
   program3["daymask"] = "smtwtfs"
   program3["actionmacro"] = "macroname"
     
-  data["args"].append(program)
-  data["args"].append(program2)
-  data["args"].append(program3)
+  data["args"]["programs"].append(program)
+  data["args"]["programs"].append(program2)
+  data["args"]["programs"].append(program3)
   
   # for i in range(0, 98):
     # data["args"].append(program)
@@ -213,6 +219,7 @@ def LoadTimers():
   #print "Received: {}".format(json_data)
   DisplayResponse(response)
   
+#######################################################################
 #
 # Main
 #
@@ -234,6 +241,6 @@ if __name__ == "__main__":
   StatusRequest()
 
   # Try some timer programs
-  #LoadTimers()
+  LoadTimers()
   
   DeviceOn()

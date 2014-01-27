@@ -21,6 +21,8 @@ if __name__ == "__main__":
   # We'll use the current host name
   # TODO Work on this to use 0.0.0.0 as the host (accept from any interface)
   #HOST, PORT = socket.gethostbyname(socket.gethostname()), Configuration.Configuration.Port()
+  # This accepts connections from any network interface. It was the only
+  # way to get it to work in the RPi from remote machines.
   HOST, PORT = "0.0.0.0", Configuration.Configuration.Port()
 
   # Create the server, binding to localhost on port 9999

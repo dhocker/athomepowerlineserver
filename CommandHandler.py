@@ -39,7 +39,7 @@ class CommandHandler:
       handler = commands.LoadTimers.LoadTimers()
     elif ci_command == "deviceon":
       handler = commands.DeviceOn.DeviceOn()
-    elif ci_command == "off":
+    elif ci_command == "deviceoff":
       handler = None
     elif ci_command == "allunitsoff":
       handler = None
@@ -53,6 +53,10 @@ class CommandHandler:
       handler = None
     elif ci_command == "statusrequest":
       handler = commands.StatusRequest.StatusRequest()
+    elif ci_command == "currentime":
+      handler = None
+    elif ci_command == "settime":
+      handler = None
     else:
       handler = None
       

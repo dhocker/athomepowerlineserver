@@ -15,7 +15,7 @@ class LoadTimers(ServerCommand.ServerCommand):
     # to the HH:MM format. We are never going to store these in an X10 controller.
     # In this implementation the server IS the X10 controller. The hardware X10 controller
     # is just a down-stream component used to transmit immediate X10 signals.
-    for timer_program in request["args"]:
+    for timer_program in request["args"]["programs"]:
       t = datetime.datetime.strptime(timer_program["ontime"], "%H:%M")
       #print "ontime:", timer_program["ontime"]
       print "ontime:", t, "minutes:", (t.hour * 60) + t.minute
