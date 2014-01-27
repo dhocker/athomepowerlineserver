@@ -19,7 +19,9 @@ if __name__ == "__main__":
   #HOST, PORT = "localhost", 9999
   #HOST, PORT = "hedwig", 9999
   # We'll use the current host name
-  HOST, PORT = socket.gethostname(), Configuration.Configuration.Port()
+  # TODO Work on this to use 0.0.0.0 as the host (accept from any interface)
+  #HOST, PORT = socket.gethostbyname(socket.gethostname()), Configuration.Configuration.Port()
+  HOST, PORT = "0.0.0.0", Configuration.Configuration.Port()
 
   # Create the server, binding to localhost on port 9999
   #server = SocketServer.TCPServer((HOST, PORT), MyTCPHandlerStream)

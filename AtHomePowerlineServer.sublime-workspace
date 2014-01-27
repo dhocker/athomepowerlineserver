@@ -71,7 +71,7 @@
 			"file": "AtHomePowerlineServer.py",
 			"settings":
 			{
-				"buffer_size": 1653,
+				"buffer_size": 1752,
 				"line_ending": "Windows"
 			}
 		},
@@ -87,7 +87,7 @@
 			"file": "testclient/tcplcient_json.py",
 			"settings":
 			{
-				"buffer_size": 5561,
+				"buffer_size": 5857,
 				"line_ending": "Windows"
 			}
 		},
@@ -103,7 +103,7 @@
 			"file": "drivers/XTB232.py",
 			"settings":
 			{
-				"buffer_size": 8090,
+				"buffer_size": 8145,
 				"line_ending": "Windows"
 			}
 		},
@@ -180,7 +180,7 @@
 	},
 	"find_in_files":
 	{
-		"height": 90.0,
+		"height": 0.0,
 		"where_history":
 		[
 			""
@@ -191,6 +191,8 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"PORT",
+			"HOST",
 			"side bar",
 			"folders",
 			"CreateResponse",
@@ -203,6 +205,8 @@
 		"regex": false,
 		"replace_history":
 		[
+			"Port",
+			"Host"
 		],
 		"reverse": false,
 		"show_context": true,
@@ -221,15 +225,15 @@
 					"file": "AtHomePowerlineServer.py",
 					"settings":
 					{
-						"buffer_size": 1653,
+						"buffer_size": 1752,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1653,
-								1653
+								749,
+								749
 							]
 						],
 						"settings":
@@ -277,15 +281,15 @@
 					"file": "testclient/tcplcient_json.py",
 					"settings":
 					{
-						"buffer_size": 5561,
+						"buffer_size": 5857,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								5122,
-								5122
+								5361,
+								5361
 							]
 						],
 						"settings":
@@ -295,7 +299,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 3079.0,
+						"translation.y": 3313.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -333,15 +337,15 @@
 					"file": "drivers/XTB232.py",
 					"settings":
 					{
-						"buffer_size": 8090,
+						"buffer_size": 8145,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								7131,
-								7131
+								1345,
+								1345
 							]
 						],
 						"settings":
@@ -351,7 +355,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 3223.0,
+						"translation.y": 909.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -480,7 +484,7 @@
 	},
 	"replace":
 	{
-		"height": 0.0
+		"height": 62.0
 	},
 	"save_all_on_build": true,
 	"select_file":

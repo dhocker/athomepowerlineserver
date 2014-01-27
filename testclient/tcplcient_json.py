@@ -221,11 +221,14 @@ if __name__ == "__main__":
 
   parser = OptionParser()
   parser.add_option("-s")
+  parser.add_option("-p")
   (options, args) = parser.parse_args()
   #print options
 
   if options.s is not None:
     Host = options.s
+  if options.p is not None:
+    Port = int(options.p)
 
   # Try a status request command
   StatusRequest()
