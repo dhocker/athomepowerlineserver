@@ -61,3 +61,11 @@ class X10ControllerAdapter:
   @classmethod
   def DeviceOn(cls, house_device_code, dim_amount):
     return cls.Driver.DeviceOn(house_device_code, dim_amount)
+
+  #************************************************************************
+  # Turn a device off
+  # house_device_code = Ex. 'A1'
+  # dim_amount 0 <= v <= 22
+  @classmethod
+  def DeviceOff(cls, house_device_code, dim_amount):
+    return cls.Driver.DeviceOff(house_device_code, dim_amount)

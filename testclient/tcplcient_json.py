@@ -75,6 +75,39 @@ def DisplayResponse(response):
     for k, v in jr.iteritems():
       if k != "command":
         print " ", k, ":", v
+    print        
+
+#######################################################################
+# Send a command to the server
+def SendCommand(data):
+  # Convert the payload structure into json text.
+  # Effectively this serializes the payload.
+  #print "raw json:", data
+  json_data = json.JSONEncoder().encode(data)
+
+  # Create a socket connection to the server
+  sock = ConnectToServer(Host)
+  if sock is None:
+    return None
+
+  # send status request to server
+  try:
+    print "Sending request:", json_data
+    sock.sendall(json_data)
+
+    # Receive data from the server and shut down
+    json_data = ReadJson(sock)
+    
+    #print "Sent:     {}".format(data)
+    #print "Received: {}".format(json_data)
+    DisplayResponse(json_data)
+  except Exception as ex:
+    print str(ex)
+    json_data = None
+  finally:
+    sock.close()
+
+  return json_data
         
 #######################################################################
 # Test the Device On command        
@@ -84,32 +117,17 @@ def DeviceOn():
   data["args"]["housedevicecode"] = "A1"
   data["args"]["dimamount"] = 0
 
-  # Convert the payload structure into json text.
-  # Effectively this serializes the payload.
-  #print "raw json:", data
-  json_data = json.JSONEncoder().encode(data)
+  SendCommand(data)
+        
+#######################################################################
+# Test the Device Off command        
+def DeviceOff():
+  # 
+  data = CreateRequest("DeviceOff")
+  data["args"]["housedevicecode"] = "A1"
+  data["args"]["dimamount"] = 0
 
-  # Create a socket connection to the server
-  sock = ConnectToServer(Host)
-  if sock is None:
-    return
-
-  # send status request to server
-  try:
-    print "Sending status request:", json_data
-    sock.sendall(json_data)
-
-    # Receive data from the server and shut down
-    #received = sock.recv(1024)
-    json_data = ReadJson(sock)
-    
-    #print "Sent:     {}".format(data)
-    #print "Received: {}".format(json_data)
-    DisplayResponse(json_data)
-  except Exception as ex:
-    print str(ex)
-  finally:
-    sock.close()
+  SendCommand(data)
         
 #######################################################################
 # Test the status request command        
@@ -120,40 +138,10 @@ def StatusRequest():
   # This DOES work. Why?
   data = CreateRequest("StatusRequest")
 
-  # Convert the payload structure into json text.
-  # Effectively this serializes the payload.
-  #print "raw json:", data
-  json_data = json.JSONEncoder().encode(data)
-
-  # Create a socket connection to the server
-  sock = ConnectToServer(Host)
-  if sock is None:
-    return
-
-  # send status request to server
-  try:
-    print "Sending status request:", json_data
-    sock.sendall(json_data)
-
-    # Receive data from the server and shut down
-    #received = sock.recv(1024)
-    json_data = ReadJson(sock)
-    
-    #print "Sent:     {}".format(data)
-    #print "Received: {}".format(json_data)
-    DisplayResponse(json_data)
-  except Exception as ex:
-    print str(ex)
-  finally:
-    sock.close()
+  SendCommand(data)
 
 #######################################################################
-def LoadTimers():
-  # New socket. 
-  sock = ConnectToServer(Host)
-  if sock is None:
-    return
-  
+def LoadTimers(): 
   # JSON formatted payload to be sent to the tcpserver
   # data = \
     # '{ \
@@ -174,6 +162,7 @@ def LoadTimers():
   data["args"]["programs"] = []
   
   program = {\
+    "name": "program-a1", \
     "housedevicecode": "a1", \
     "ontime": "18:00", \
     "offtime": "22:00", \
@@ -181,6 +170,7 @@ def LoadTimers():
     "actionmacro": "macroname" }\
 
   program2 = {\
+  "name": "program-a2", \
   "housedevicecode": "a2", \
   "ontime": "18:00", \
   "offtime": "22:00", \
@@ -188,6 +178,7 @@ def LoadTimers():
   "actionmacro": "macroname" }\
   
   program3 = {}
+  program3["name"] = "program-a3"
   program3["housedevicecode"] = "a3"
   program3["ontime"] = "15:30"
   program3["offtime"] = "23:30"
@@ -200,24 +191,8 @@ def LoadTimers():
   
   # for i in range(0, 98):
     # data["args"].append(program)
-  
-  # Convert the payload structure into json text.
-  # Effectively this serializes the payload.
-  json_request = json.JSONEncoder().encode(data)
 
-  try:
-    # send data
-    sock.sendall(json_request)
-
-    # Receive data from the server and shut down
-    #received = sock.recv(1024)
-    response = ReadJson(sock)
-  finally:
-    sock.close()
-
-  print "Sent:     {}".format(json_request)
-  #print "Received: {}".format(json_data)
-  DisplayResponse(response)
+  SendCommand(data)    
   
 #######################################################################
 #
@@ -244,3 +219,5 @@ if __name__ == "__main__":
   LoadTimers()
   
   DeviceOn()
+
+  DeviceOff()

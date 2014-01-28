@@ -67,12 +67,12 @@ class Configuration():
   # Get the driver instance called out by the configuration
   @classmethod
   def GetX10ControllerDriver(cls):
-    dev = cls.X10ControllerDevice()
+    dev = cls.X10ControllerDevice().upper()
     if (dev == "XTB232") or (dev == "XTB-232"):
       return drivers.XTB232.XTB232()
-    elif dev == "CM11A":
+    elif (dev == "CM11A") or (dev == "CM11"):
       return drivers.XTB232.XTB232()
-    elif dev == "Dummy":
+    elif dev == "DUMMY":
       return drivers.Dummy.Dummy()
     return None
     

@@ -66,6 +66,14 @@ class XTB232(X10ControllerInterface.X10ControllerInterface):
   def DeviceOn(self, house_device_code, dim_amount):
     self.ClearLastError()
     return self.ExecuteFunction(house_device_code, dim_amount, XTB232.On)
+
+  #************************************************************************
+  # Turn a device off
+  # house_device_code = Ex. 'A1'
+  # dim_amount 0 <= v <= 22
+  def DeviceOff(self, house_device_code, dim_amount):
+    self.ClearLastError()
+    return self.ExecuteFunction(house_device_code, dim_amount, XTB232.Off)
     
   #************************************************************************
   def SelectAddress(self, house_device_code):

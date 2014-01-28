@@ -5,11 +5,16 @@ import commands.LoadTimers
 import commands.ServerCommand
 import commands.StatusRequest
 import commands.DeviceOn
+import commands.DeviceOff
 
 class CommandHandler:
   
   call_sequence = 1
+
+  # Error codes
+  NotImplemented = 404
   
+  #######################################################################
   # Return an instance of the handler for a given command
   #
   # Complete list of CM11A functions from protocol spec
@@ -30,6 +35,9 @@ class CommandHandler:
 	# Status On			            1101	
 	# Status Off			          1110
 	# Status Request		        1111
+  #
+  # Most of these functions are supported as commands
+  #
   def GetHandler(self, command):
     print "GetHandler for command:", command
     
@@ -40,7 +48,7 @@ class CommandHandler:
     elif ci_command == "deviceon":
       handler = commands.DeviceOn.DeviceOn()
     elif ci_command == "deviceoff":
-      handler = None
+      handler = commands.DeviceOff.DeviceOff()
     elif ci_command == "allunitsoff":
       handler = None
     elif ci_command == "alllightson":
@@ -62,6 +70,7 @@ class CommandHandler:
       
     return handler  
 
+  #######################################################################
   # Execute the command specified by the incoming request
   def Execute(self, request):
     handler = self.GetHandler(request["command"])
@@ -72,7 +81,7 @@ class CommandHandler:
       print "No handler for command:", request["command"]
       response = commands.ServerCommand.ServerCommand.CreateResponse(request["command"])
       r = response['X10Response']
-      r['resultcode'] = 404
+      r['resultcode'] = CommandHandler.NotImplemented
       r['error'] = "Command is not recognized or implemented"
       r['callsequence'] = CommandHandler.call_sequence
       r['data'] = ""
