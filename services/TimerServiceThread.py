@@ -21,14 +21,16 @@ class TimerServiceThread(threading.Thread):
   def run(self):
     # print "Timer service running"
 
+    # Line up timing to the minute
+    time_count = datetime.datetime.now().second
     # Check the terminate signal every second
-    time_count = 0
     while not self.terminate_signal:
       time.sleep(1.0)
       time_count += 1
       # Every minute run the program checks
       if time_count >= 60:
-        time_count = 0
+        # Maintain top of the minute alignment
+        time_count = datetime.datetime.now().second
         # run checks
         print datetime.datetime.now()
 
