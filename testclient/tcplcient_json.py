@@ -1,4 +1,15 @@
 #
+# AtHomPowerlineServer - networked server for CM11/CM11A/XTB-232 X10 controllers
+# Copyright (C) 2014  Dave Hocker
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# See the LICENSE file for more details.
+#
+
+#
 # Test client for AtHomeServer
 #
 
@@ -150,7 +161,7 @@ def LoadTimers():
         # "housedevicecode": "a1", \
         # "ontime": "18:00", \
         # "offtime": "22:00", \
-        # "daymask": "smtwtfs" \
+        # "daymask": "mtwtfss" \
         # } \
       # }'
       
@@ -166,7 +177,7 @@ def LoadTimers():
     "housedevicecode": "a1", \
     "ontime": "18:00", \
     "offtime": "22:00", \
-    "daymask": "smtwtfs", \
+    "daymask": "mtwtfss", \
     "actionmacro": "macroname" }\
 
   program2 = {\
@@ -174,7 +185,7 @@ def LoadTimers():
   "housedevicecode": "a2", \
   "ontime": "18:00", \
   "offtime": "22:00", \
-  "daymask": "smtwtfs",
+  "daymask": "mtwtfss",
   "actionmacro": "macroname" }\
   
   program3 = {}
@@ -182,12 +193,21 @@ def LoadTimers():
   program3["housedevicecode"] = "a3"
   program3["ontime"] = "15:30"
   program3["offtime"] = "23:30"
-  program3["daymask"] = "smtwtfs"
+  program3["daymask"] = "mtwtfss"
   program3["actionmacro"] = "macroname"
+  
+  program4 = {\
+    "name": "program-a4", \
+    "housedevicecode": "a4", \
+    "ontime": "18:00", \
+    "offtime": "22:00", \
+    "daymask": "mtwtf--", \
+    "actionmacro": "macroname" }\
     
   data["args"]["programs"].append(program)
   data["args"]["programs"].append(program2)
   data["args"]["programs"].append(program3)
+  data["args"]["programs"].append(program4)
   
   # for i in range(0, 98):
     # data["args"].append(program)

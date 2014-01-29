@@ -1,3 +1,20 @@
+#
+# AtHomPowerlineServer - networked server for CM11/CM11A/XTB-232 X10 controllers
+# Copyright (C) 2014  Dave Hocker
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+# See the LICENSE file for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program (the LICENSE file).  If not, see <http://www.gnu.org/licenses/>.
+#
+
 import ThreadedTCPServer
 import MyTCPHandlerJson
 import Configuration
@@ -7,7 +24,24 @@ import database.AtHomePowerlineServerDb
 import timers.TimerStore
 import services.TimerService
 
+# Show the disclaimer as recommended by the GPL v3 license
+def DisplayDisclaimer():
+  print "\n"
+  print "AtHomePowerlineServer Copyright (C) 2014 Dave Hocker"
+  print "This program comes with ABSOLUTELY NO WARRANTY; for details see the LICENSE file."
+  print "This is free software, and you are welcome to redistribute it"
+  print "under certain conditions; see the LICENSE file for details."
+  print "\n"
+
+#
+# main
+#
 if __name__ == "__main__":
+  # First things, First
+  DisplayDisclaimer()
+
+  print "Starting up..."
+
   # Load the configuration file
   #Configuration.Configuration()
   Configuration.Configuration.LoadConfiguration()
