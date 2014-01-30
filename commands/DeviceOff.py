@@ -30,7 +30,7 @@ class DeviceOff(ServerCommand.ServerCommand):
     response = DeviceOff.CreateResponse("DeviceOff")
     r = response["X10Response"]    
     
-    r['resultcode'] = drivers.X10ControllerAdapter.X10ControllerAdapter.GetLastErrorCode()
+    r['result-code'] = drivers.X10ControllerAdapter.X10ControllerAdapter.GetLastErrorCode()
     if result:
       #r['error'] = "Command not fully implemented"
       r['message'] = "Success"

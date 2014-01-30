@@ -63,7 +63,7 @@ class LoadTimers(ServerCommand.ServerCommand):
     response = LoadTimers.CreateResponse("LoadTimers")
     r = response["X10Response"]
     
-    r['resultcode'] = 0
+    r['result-code'] = 0
     #r['error'] = "Command not implemented"
     r['message'] = "Success"
 

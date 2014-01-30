@@ -25,11 +25,11 @@ class StatusRequest(ServerCommand.ServerCommand):
       
       tod = datetime.datetime.now()
       
-      r['resultcode'] = 0
+      r['result-code'] = 0
       #r['error'] = "Command not implemented"
       # day of week: 0=Monday, 6=Sunday. This is different from the CM11a spec.
-      r['dayofweek'] = str(tod.weekday())
-      r['firmwarerevision'] = '0.0.0.0'
+      r['day-of-week'] = str(tod.weekday())
+      r['firmware-revision'] = '0.0.0.0'
       r['message'] = "Success"
 
       return response

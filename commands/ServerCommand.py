@@ -21,9 +21,9 @@ class ServerCommand:
   def Execute(self, request):
     response = CreateResponse()
     r = response["X10Response"]
-    r['resultcode'] = 404
+    r['result-code'] = 404
     r['error'] = "Command not recognized"
-    r['datetime'] = str(datetime.datetime.now())
+    r['date-time'] = str(datetime.datetime.now())
     r['message'] = "none"
 
     return response
@@ -34,7 +34,7 @@ class ServerCommand:
     response = {"X10Response": {}}
     r = response["X10Response"]    
     r['command'] = command
-    r['datetime'] = str(datetime.datetime.now())
+    r['date-time'] = str(datetime.datetime.now())
     r['server'] = "AtHomePowerlineServer"
-    r['serverversion'] = "1.0.0.0"
+    r['server-version'] = "1.0.0.0"
     return response
