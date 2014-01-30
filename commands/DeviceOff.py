@@ -24,7 +24,7 @@ class DeviceOff(ServerCommand.ServerCommand):
   #######################################################################
   # Execute the "of" command.
   def Execute(self, request):     
-    result = drivers.X10ControllerAdapter.X10ControllerAdapter.DeviceOff(request["args"]["housedevicecode"], int(request["args"]["dimamount"]))
+    result = drivers.X10ControllerAdapter.X10ControllerAdapter.DeviceOff(request["args"]["house-device-code"], int(request["args"]["dim-amount"]))
     
     # Generate a successful response
     response = DeviceOff.CreateResponse("DeviceOff")

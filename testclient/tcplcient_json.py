@@ -125,8 +125,8 @@ def SendCommand(data):
 def DeviceOn():
   # 
   data = CreateRequest("DeviceOn")
-  data["args"]["housedevicecode"] = "A1"
-  data["args"]["dimamount"] = 0
+  data["args"]["house-device-code"] = "A1"
+  data["args"]["dim-amount"] = 0
 
   SendCommand(data)
         
@@ -135,8 +135,8 @@ def DeviceOn():
 def DeviceOff():
   # 
   data = CreateRequest("DeviceOff")
-  data["args"]["housedevicecode"] = "A1"
-  data["args"]["dimamount"] = 0
+  data["args"]["house-device-code"] = "A1"
+  data["args"]["dim-amount"] = 0
 
   SendCommand(data)
         
@@ -158,10 +158,10 @@ def LoadTimers():
     # '{ \
       # "command": "LoadTimers",  \
       # "args": { \
-        # "housedevicecode": "a1", \
-        # "ontime": "18:00", \
-        # "offtime": "22:00", \
-        # "daymask": "mtwtfss" \
+        # "house-device-code": "a1", \
+        # "start-time": "18:00", \
+        # "stop-time": "22:00", \
+        # "day-mask": "mtwtfss" \
         # } \
       # }'
       
@@ -174,35 +174,39 @@ def LoadTimers():
   
   program = {\
     "name": "program-a1", \
-    "housedevicecode": "a1", \
-    "ontime": "18:00", \
-    "offtime": "22:00", \
-    "daymask": "mtwtfss", \
-    "actionmacro": "macroname" }\
+    "house-device-code": "a1", \
+    "start-time": "18:00", \
+    "stop-time": "22:00", \
+    "day-mask": "mtwtfss", \
+    "start-action": "macroname", \
+    "stop-action": "macroname" }
 
   program2 = {\
   "name": "program-a2", \
-  "housedevicecode": "a2", \
-  "ontime": "18:00", \
-  "offtime": "22:00", \
-  "daymask": "mtwtfss",
-  "actionmacro": "macroname" }\
+  "house-device-code": "a2", \
+  "start-time": "18:00", \
+  "stop-time": "22:00", \
+  "day-mask": "mtwtfss",
+  "start-action": "macroname", \
+  "stop-action": "macroname" }
   
   program3 = {}
   program3["name"] = "program-a3"
-  program3["housedevicecode"] = "a3"
-  program3["ontime"] = "15:30"
-  program3["offtime"] = "23:30"
-  program3["daymask"] = "mtwtfss"
-  program3["actionmacro"] = "macroname"
+  program3["house-device-code"] = "a3"
+  program3["start-time"] = "15:30"
+  program3["stop-time"] = "23:30"
+  program3["day-mask"] = "mtwtfss"
+  program3["start-action"] = "macroname"
+  program3["stop-action"] = "macroname"
   
   program4 = {\
     "name": "program-a4", \
-    "housedevicecode": "a4", \
-    "ontime": "18:00", \
-    "offtime": "22:00", \
-    "daymask": "mtwtf--", \
-    "actionmacro": "macroname" }\
+    "house-device-code": "a4", \
+    "start-time": "18:00", \
+    "stop-time": "22:00", \
+    "day-mask": "mtwtf--", \
+    "start-action": "macroname", \
+    "stop-action": "macroname" }
     
   data["args"]["programs"].append(program)
   data["args"]["programs"].append(program2)

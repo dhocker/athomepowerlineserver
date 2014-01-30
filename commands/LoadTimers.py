@@ -33,16 +33,18 @@ class LoadTimers(ServerCommand.ServerCommand):
     # In this implementation the server IS the X10 controller. The hardware X10 controller
     # is just a down-stream component used to transmit immediate X10 signals.
     for timer_program in request["args"]["programs"]:
-      t = datetime.datetime.strptime(timer_program["ontime"], "%H:%M")
-      #print "ontime:", timer_program["ontime"]
-      print "ontime:", t, "minutes:", (t.hour * 60) + t.minute
+      t = datetime.datetime.strptime(timer_program["start-time"], "%H:%M")
+      #print "start-time:", timer_program["start-time"]
+      print "start-time:", t, "minutes:", (t.hour * 60) + t.minute
 
       # Pull all of the timer program values out of the dict entry
       name = timer_program["name"]
-      house_device_code = timer_program["housedevicecode"]
-      day_mask = timer_program["daymask"]
-      on_time = datetime.datetime.strptime(timer_program["ontime"], "%H:%M")
-      off_time = datetime.datetime.strptime(timer_program["offtime"], "%H:%M")
+      house_device_code = timer_program["house-device-code"]
+      day_mask = timer_program["day-mask"]
+      on_time = datetime.datetime.strptime(timer_program["start-time"], "%H:%M")
+      off_time = datetime.datetime.strptime(timer_program["stop-time"], "%H:%M")
+      start_action = timer_program["start-action"]
+      stop_action = timer_program["stop-action"]
       # Unclear what security is used for, but it is not part of the program
       security = False
 
