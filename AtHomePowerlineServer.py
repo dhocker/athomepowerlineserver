@@ -1,6 +1,6 @@
 #
 # AtHomPowerlineServer - networked server for CM11/CM11A/XTB-232 X10 controllers
-# Copyright (C) 2014  Dave Hocker
+# Copyright (C) 2014  Dave Hocker (email: AtHomeX10@gmail.com)
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -27,7 +27,8 @@ import services.TimerService
 # Show the disclaimer as recommended by the GPL v3 license
 def DisplayDisclaimer():
   print "\n"
-  print "AtHomePowerlineServer Copyright (C) 2014 Dave Hocker"
+  print "AtHomePowerlineServer Copyright (C) 2014 Dave Hocker (AtHomeX10@gmail.com)"
+  print ""
   print "This program comes with ABSOLUTELY NO WARRANTY; for details see the LICENSE file."
   print "This is free software, and you are welcome to redistribute it"
   print "under certain conditions; see the LICENSE file for details."
