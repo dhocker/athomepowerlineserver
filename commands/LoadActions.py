@@ -23,24 +23,32 @@ class LoadActions(ServerCommand.ServerCommand):
   # whatever is in the request payload.
   def Execute(self, request):  
     # Reset the actions list to empty
-    database.Actions.Actions.ClearActions()
+    database.Actions.Actions.DeleteAll()
+
+    # Generate a starting response
+    response = LoadActions.CreateResponse("LoadAction")
+    r = response["X10Response"]
 
     for action in request["args"]["actions"]:
       # Pull all of the timer program values out of the dict entry
       name = action["name"]
       command = action["command"]
-      dim_amount = action["day-mask"]
+      dim_amount = action["dim-amount"]
 
-      # Add the action to the current list
-      database.Actions.Actions.AddAction(name, command, dim_amount)
+      try:
+        # Add the action to the current list
+        database.Actions.Actions.Insert(name, command, dim_amount, "")
+      except Exception as ex:
+        print ex
+        r['result-code'] = 1
+        r['error'] = "Actions insert failed. Is the name unique?"
+        r['message'] = "Failure"
+        return response
 
     # Debugging...
     database.Actions.Actions.DumpActions()
 
-    # Generate a successful response
-    response = LoadActions.CreateResponse("LoadAction")
-    r = response["X10Response"]
-    
+    # Success
     r['result-code'] = 0
     #r['error'] = "Command not implemented"
     r['message'] = "Success"

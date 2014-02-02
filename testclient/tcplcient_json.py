@@ -153,7 +153,7 @@ def StatusRequest():
 
 #######################################################################
 def LoadTimers(): 
-  # JSON formatted payload to be sent to the tcpserver
+  # JSON formatted payload to be sent to the AtHomePowerlineServer
   # data = \
     # '{ \
       # "command": "LoadTimers",  \
@@ -178,8 +178,8 @@ def LoadTimers():
     "start-time": "18:00", \
     "stop-time": "19:00", \
     "day-mask": "mtwtfss", \
-    "start-action": "macroname", \
-    "stop-action": "macroname" }
+    "start-action": "action-1", \
+    "stop-action": "action-2" }
 
   program2 = {\
   "name": "program-a2", \
@@ -187,8 +187,8 @@ def LoadTimers():
   "start-time": "18:00", \
   "stop-time": "19:00", \
   "day-mask": "mtwtfss",
-  "start-action": "macroname", \
-  "stop-action": "macroname" }
+  "start-action": "action-1", \
+  "stop-action": "action-2" }
   
   program3 = {}
   program3["name"] = "program-a3"
@@ -196,8 +196,8 @@ def LoadTimers():
   program3["start-time"] = "15:30"
   program3["stop-time"] = "19:30"
   program3["day-mask"] = "mtwtfss"
-  program3["start-action"] = "macroname"
-  program3["stop-action"] = "macroname"
+  program3["start-action"] = "action-1"
+  program3["stop-action"] = "action-2"
   
   program4 = {\
     "name": "program-a4", \
@@ -205,8 +205,8 @@ def LoadTimers():
     "start-time": "15:48", \
     "stop-time": "19:00", \
     "day-mask": "mtwtf--", \
-    "start-action": "macroname", \
-    "stop-action": "macroname" }
+    "start-action": "action-1", \
+    "stop-action": "action-2" }
     
   data["args"]["programs"].append(program)
   data["args"]["programs"].append(program2)
@@ -217,7 +217,31 @@ def LoadTimers():
     # data["args"].append(program)
 
   SendCommand(data)    
-  
+
+#######################################################################
+def LoadActions():
+  data = CreateRequest("LoadActions")
+
+  # For the LoadActionss command, the args dictionary contains a single
+  # "actions" key/value pair. The value is a simple sequence/list of dict's where each dict
+  # defines an action.
+  data["args"]["actions"] = []
+
+  action1 = {\
+    "name": "action-1", \
+    "command": "device-on", \
+    "dim-amount": 0 }
+
+  action2 = {\
+    "name": "action-2", \
+    "command": "device-off", \
+    "dim-amount": 0 }
+
+  data["args"]["actions"].append(action1)
+  data["args"]["actions"].append(action2)
+
+  SendCommand(data)
+
 #######################################################################
 #
 # Main
@@ -246,6 +270,8 @@ if __name__ == "__main__":
 
   # Try some timer programs
   LoadTimers()
+
+  LoadActions()
   
   DeviceOn()
 

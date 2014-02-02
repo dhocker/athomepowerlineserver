@@ -50,7 +50,7 @@ class AtHomePowerlineServerDb:
     c.execute("INSERT INTO SchemaVersion values (?, ?)", ("1.0.0.0", datetime.datetime.now()))
     # Timers
     c.execute("CREATE TABLE Timers (name text, housedevicecode text, daymask text, starttime timestamp, stoptime timestamp, \
-      security integer, updatetime timestamp)")
+      startaction text, stopaction text, security integer, updatetime timestamp)")
     # Actions
     c.execute("CREATE TABLE Actions (name text, command text, dimamount integer, args text, updatetime timestamp)")
 

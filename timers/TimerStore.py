@@ -84,15 +84,15 @@ class TimerStore:
         # print tp.name, tp.HouseDeviceCode, tp.DayMask, tp.StartTime, tp.StopTime, tp.Security    
         # print "Saving timer program:", tp.name
         # It may be necessary to format on/off time to be certain that the format is held across save/load
-        database.Timers.Timers.Insert(tp.Name, tp.HouseDeviceCode, tp.DayMask, tp.StartTime, tp.StopTime, tp.Security )
+        database.Timers.Timers.Insert(tp.Name, tp.HouseDeviceCode, tp.DayMask, tp.StartTime, tp.StopTime, tp.StartAction, tp.StopAction, tp.Security )
     finally:
       cls.ReleaseTimerProgramList()
 
   #######################################################################
   # Append a timer program to the end of the current list
   @classmethod
-  def AppendTimer(cls, name, house_device_code, day_mask, start_time, stop_time, security = False):
-    tp = TimerProgram.TimerProgram(name, house_device_code, day_mask, start_time, stop_time, security)
+  def AppendTimer(cls, name, house_device_code, day_mask, start_time, stop_time, start_action, stop_action, security = False):
+    tp = TimerProgram.TimerProgram(name, house_device_code, day_mask, start_time, stop_time, start_action, stop_action, security)
     cls.TimerProgramList.append(tp)
 
   #######################################################################
@@ -119,4 +119,4 @@ class TimerStore:
   def DumpTimerProgramList(cls):
     print "Timer Program List Dump"
     for tp in cls.TimerProgramList:
-      print tp.Name, tp.HouseDeviceCode, tp.DayMask, tp.StartTime, tp.StopTime, tp.Security
+      print tp.Name, tp.HouseDeviceCode, tp.DayMask, tp.StartTime, tp.StopTime, tp.StartAction, tp.StopAction, tp.Security

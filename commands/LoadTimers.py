@@ -49,7 +49,7 @@ class LoadTimers(ServerCommand.ServerCommand):
       security = False
 
       # Add the timer program to the current list
-      timers.TimerStore.TimerStore.AppendTimer(name, house_device_code, day_mask, start_time, stop_time, security)
+      timers.TimerStore.TimerStore.AppendTimer(name, house_device_code, day_mask, start_time, stop_time, start_action, stop_action, security)
 
     # Debugging...
     timers.TimerStore.TimerStore.DumpTimerProgramList()

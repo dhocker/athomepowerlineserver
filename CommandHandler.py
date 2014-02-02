@@ -13,6 +13,7 @@ import json
 import datetime
 import commands.ServerCommand
 import commands.LoadTimers
+import commands.LoadActions
 import commands.ServerCommand
 import commands.StatusRequest
 import commands.DeviceOn
@@ -57,7 +58,7 @@ class CommandHandler:
     if ci_command == "loadtimers":
       handler = commands.LoadTimers.LoadTimers()
     elif ci_command == "loadactions":
-      handler = None
+      handler = commands.LoadActions.LoadActions()
     elif ci_command == "deviceon":
       handler = commands.DeviceOn.DeviceOn()
     elif ci_command == "deviceoff":

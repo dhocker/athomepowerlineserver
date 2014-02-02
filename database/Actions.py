@@ -10,50 +10,67 @@
 #
 
 #
-# Timers table model
+# Actions table model
 #
 
 import AtHomePowerlineServerDb
 import datetime
 
 #######################################################################
-class Timers:
+class Actions:
   
   #######################################################################
   def __init__(self):
     pass
 
   #######################################################################
-  # Empty all records from the Timers table
+  # Empty all records from the Actions table
   @classmethod
   def DeleteAll(cls):
     conn = AtHomePowerlineServerDb.AtHomePowerlineServerDb.GetConnection()
     c = AtHomePowerlineServerDb.AtHomePowerlineServerDb.GetCursor(conn)
-    c.execute("DELETE FROM Timers")
+    c.execute("DELETE FROM Actions")
     conn.commit()
     conn.close()    
 
   #######################################################################
-  # Return the set of all records in the Timers table
+  # Return the set of all records in the Actions table
   @classmethod
   def GetAll(cls):
     conn = AtHomePowerlineServerDb.AtHomePowerlineServerDb.GetConnection()
     c = AtHomePowerlineServerDb.AtHomePowerlineServerDb.GetCursor(conn)
-    rset = c.execute("SELECT * from Timers")
+    rset = c.execute("SELECT * from Actions")
     return rset
 
   #######################################################################
-  # Insert a record into the Timers table.
-  # This is not exactly optimized, but we don't expect to be saving that many timer programs.
+  # Return the record for a given action name
   @classmethod
-  def Insert(cls, name, house_device_code, day_mask, start_time, stop_time, start_action, stop_action, security):
+  def GetByName(cls, name):
+    conn = AtHomePowerlineServerDb.AtHomePowerlineServerDb.GetConnection()
+    c = AtHomePowerlineServerDb.AtHomePowerlineServerDb.GetCursor(conn)
+    rset = c.execute("SELECT * from Actions where name = ?", (name))
+    return rset
+
+  #######################################################################
+  # Insert a record into the Actions table.
+  # This is not exactly optimized, but we don't expect to be saving that many actions.
+  @classmethod
+  def Insert(cls, name, command, dim_amount, args):
     conn = AtHomePowerlineServerDb.AtHomePowerlineServerDb.GetConnection()
     c = AtHomePowerlineServerDb.AtHomePowerlineServerDb.GetCursor(conn)
     # SQL insertion safe...
     # Note that the current time is inserted as the update time. This is added to the 
     # row as a convenient way to know when the timer was stored. It isn't used for
     # any other purpose.
-    c.execute("INSERT INTO Timers values (?, ?, ?, ?, ?, ?, ?, ? ,?)", (name, house_device_code, day_mask, \
-      start_time, stop_time, start_action, stop_action, security, datetime.datetime.now()))
+    c.execute("INSERT INTO Actions values (?, ?, ?, ?, ?)", (name, command, dim_amount, args, datetime.datetime.now()))
     conn.commit()
     conn.close()
+
+  #######################################################################
+  # Debug: Dump all actions
+  @classmethod
+  def DumpActions(cls):
+    print "Actions Dump"
+    rset = cls.GetAll()
+    for r in rset:
+      print "Actions:", r["name"], r["command"], r["dimamount"], r["updatetime"]

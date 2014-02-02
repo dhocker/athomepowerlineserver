@@ -20,14 +20,14 @@ class TimerProgram:
 
   #######################################################################
   # Instance constructor
-  def __init__(self, name, house_device_code, day_mask, start_time, stop_time, security):
+  def __init__(self, name, house_device_code, day_mask, start_time, stop_time, start_action, stop_action, security):
     self.Name = name
     self.HouseDeviceCode = house_device_code
     self.DayMask = day_mask
     self.StartTime = start_time
     self.StopTime = stop_time
-    self.StartAction = "start-action"
-    self.StopAction = "stop-action"
+    self.StartAction = start_action
+    self.StopAction = stop_action
     self.Security = security
 
     # These are used to monitor the timer events
