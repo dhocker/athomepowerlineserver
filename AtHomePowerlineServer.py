@@ -1,5 +1,5 @@
 #
-# AtHomPowerlineServer - networked server for CM11/CM11A/XTB-232 X10 controllers
+# AtHomePowerlineServer - networked server for CM11/CM11A/XTB-232 X10 controllers
 # Copyright (C) 2014  Dave Hocker (email: AtHomeX10@gmail.com)
 #
 # This program is free software: you can redistribute it and/or modify

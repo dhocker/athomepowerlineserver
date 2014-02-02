@@ -1,5 +1,5 @@
 #
-# AtHomPowerlineServer - networked server for CM11/CM11A/XTB-232 X10 controllers
+# AtHomePowerlineServer - networked server for CM11/CM11A/XTB-232 X10 controllers
 # Copyright (C) 2014  Dave Hocker
 #
 # This program is free software: you can redistribute it and/or modify
@@ -51,14 +51,11 @@ class LoadTimers(ServerCommand.ServerCommand):
       # Add the timer program to the current list
       timers.TimerStore.TimerStore.AppendTimer(name, house_device_code, day_mask, start_time, stop_time, security)
 
-    # Persist the new set of timer programs
-    timers.TimerStore.TimerStore.SaveTimerProgramList()
-
     # Debugging...
     timers.TimerStore.TimerStore.DumpTimerProgramList()
 
-    # TODO Update database with new programs.
-    # TODO Put new timer programs into effect.
+    # Update database with new programs.
+    # Put new timer programs into effect.
     timers.TimerStore.TimerStore.SaveTimerProgramList()
     
     # Generate a successful response
