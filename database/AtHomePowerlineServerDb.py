@@ -44,7 +44,7 @@ class AtHomePowerlineServerDb:
     c = cls.GetConnection()
 
     # Create tables
-    c.execute("CREATE TABLE Timers (name text, housedevicecode text, daymask text, ontime timestamp, offtime timestamp, \
+    c.execute("CREATE TABLE Timers (name text, housedevicecode text, daymask text, starttime timestamp, stoptime timestamp, \
       security integer, updatetime timestamp)")
 
     # Done

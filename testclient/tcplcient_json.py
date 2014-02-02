@@ -1,6 +1,6 @@
 #
 # AtHomPowerlineServer - networked server for CM11/CM11A/XTB-232 X10 controllers
-# Copyright (C) 2014  Dave Hocker
+# Copyright (C) 2014  Dave Hocker (email: AtHomeX10@gmail.com)
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -10,7 +10,7 @@
 #
 
 #
-# Test client for AtHomeServer
+# Test client for AtHomePowerlineServer
 #
 
 import socket
@@ -176,7 +176,7 @@ def LoadTimers():
     "name": "program-a1", \
     "house-device-code": "a1", \
     "start-time": "18:00", \
-    "stop-time": "22:00", \
+    "stop-time": "19:00", \
     "day-mask": "mtwtfss", \
     "start-action": "macroname", \
     "stop-action": "macroname" }
@@ -185,7 +185,7 @@ def LoadTimers():
   "name": "program-a2", \
   "house-device-code": "a2", \
   "start-time": "18:00", \
-  "stop-time": "22:00", \
+  "stop-time": "19:00", \
   "day-mask": "mtwtfss",
   "start-action": "macroname", \
   "stop-action": "macroname" }
@@ -194,7 +194,7 @@ def LoadTimers():
   program3["name"] = "program-a3"
   program3["house-device-code"] = "a3"
   program3["start-time"] = "15:30"
-  program3["stop-time"] = "23:30"
+  program3["stop-time"] = "19:30"
   program3["day-mask"] = "mtwtfss"
   program3["start-action"] = "macroname"
   program3["stop-action"] = "macroname"
@@ -202,8 +202,8 @@ def LoadTimers():
   program4 = {\
     "name": "program-a4", \
     "house-device-code": "a4", \
-    "start-time": "18:00", \
-    "stop-time": "22:00", \
+    "start-time": "15:48", \
+    "stop-time": "19:00", \
     "day-mask": "mtwtf--", \
     "start-action": "macroname", \
     "stop-action": "macroname" }
@@ -223,7 +223,12 @@ def LoadTimers():
 # Main
 #
 if __name__ == "__main__":
-  #imPort pdb; pdb.set_trace()
+  # Show license advertisement
+  sys.path.append("../")
+  import disclaimer.Disclaimer
+  disclaimer.Disclaimer.DisplayDisclaimer()
+
+  #import pdb; pdb.set_trace()
 
   parser = OptionParser()
   parser.add_option("-s")

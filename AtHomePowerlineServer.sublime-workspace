@@ -4,6 +4,14 @@
 		"selected_items":
 		[
 			[
+				"Dis",
+				"Disclaimer"
+			],
+			[
+				"timer",
+				"timer_program"
+			],
+			[
 				"D",
 				"DisplayDisclaimer"
 			],
@@ -66,10 +74,6 @@
 			[
 				"thre",
 				"thread_id"
-			],
-			[
-				"timer",
-				"timer_service"
 			],
 			[
 				"ser",
@@ -204,10 +208,82 @@
 	"buffers":
 	[
 		{
+			"file": "commands/StatusRequest.py",
+			"settings":
+			{
+				"buffer_size": 1162,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "commands/DeviceOff.py",
+			"settings":
+			{
+				"buffer_size": 1371,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "commands/DeviceOn.py",
+			"settings":
+			{
+				"buffer_size": 1365,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "commands/LoadTimers.py",
+			"settings":
+			{
+				"buffer_size": 3033,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "testclient/tcplcient_json.py",
+			"settings":
+			{
+				"buffer_size": 6690,
+				"line_ending": "Windows"
+			}
+		},
+		{
 			"file": "AtHomePowerlineServer.py",
 			"settings":
 			{
-				"buffer_size": 3461,
+				"buffer_size": 3133,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "timers/TimerStore.py",
+			"settings":
+			{
+				"buffer_size": 4350,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "database/AtHomePowerlineServerDb.py",
+			"settings":
+			{
+				"buffer_size": 2005,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "timers/TimerProgram.py",
+			"settings":
+			{
+				"buffer_size": 1567,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "services/TimerServiceThread.py",
+			"settings":
+			{
+				"buffer_size": 2689,
 				"line_ending": "Windows"
 			}
 		}
@@ -236,16 +312,20 @@
 	},
 	"file_history":
 	[
+		"/C/Users/dhocker/ElfstoneGit/elfstone_athomeserver/disclaimer/__init__.py",
+		"/C/Users/dhocker/ElfstoneGit/elfstone_athomeserver/Disclaimer.py",
 		"/C/Users/dhocker/ElfstoneGit/elfstone_athomeserver/AtHomePowerlineServer.py",
+		"/C/Users/dhocker/ElfstoneGit/elfstone_athomeserver/commands/ServerCommand.py",
+		"/C/Users/dhocker/ElfstoneGit/elfstone_athomeserver/commands/StatusRequest.py",
+		"/C/Users/dhocker/ElfstoneGit/elfstone_athomeserver/commands/LoadTimers.py",
+		"/C/Users/dhocker/ElfstoneGit/elfstone_athomeserver/commands/DeviceOn.py",
 		"/C/Users/dhocker/ElfstoneGit/elfstone_athomeserver/commands/DeviceOff.py",
+		"/C/Users/dhocker/ElfstoneGit/elfstone_athomeserver/CommandHandler.py",
 		"/C/Users/dhocker/ElfstoneGit/elfstone_athomeserver/testclient/tcplcient_json.py",
 		"/C/Users/dhocker/ElfstoneGit/elfstone_athomeserver/drivers/X10ControllerInterface.py",
 		"/C/Users/dhocker/ElfstoneGit/elfstone_athomeserver/drivers/XTB232.py",
 		"/C/Users/dhocker/ElfstoneGit/elfstone_athomeserver/LICENSE",
 		"/C/Users/dhocker/ElfstoneGit/elfstone_athomeserver/drivers/X10ControllerAdapter.py",
-		"/C/Users/dhocker/ElfstoneGit/elfstone_athomeserver/commands/DeviceOn.py",
-		"/C/Users/dhocker/ElfstoneGit/elfstone_athomeserver/CommandHandler.py",
-		"/C/Users/dhocker/ElfstoneGit/elfstone_athomeserver/commands/LoadTimers.py",
 		"/C/Users/dhocker/ElfstoneGit/elfstone_athomeserver/database/AtHomePowerlineServerDb.py",
 		"/C/Users/dhocker/ElfstoneGit/elfstone_athomeserver/database/Timers.py",
 		"/C/Users/dhocker/ElfstoneGit/elfstone_athomeserver/timers/TimerStore.py",
@@ -258,8 +338,6 @@
 		"/C/Users/dhocker/ElfstoneGit/elfstone_athomeserver/drivers/Dummy.py",
 		"/C/Users/dhocker/ElfstoneGit/elfstone_athomeserver/drivers/__init__.py",
 		"/C/Users/dhocker/ElfstoneGit/elfstone_athomeserver/database/__init__.py",
-		"/C/Users/dhocker/ElfstoneGit/elfstone_athomeserver/commands/StatusRequest.py",
-		"/C/Users/dhocker/ElfstoneGit/elfstone_athomeserver/commands/ServerCommand.py",
 		"/C/Users/dhocker/ElfstoneGit/elfstone_athomeserver/commands/__init__.py",
 		"/C/Users/dhocker/ElfstoneGit/elfstone_athomeserver/MyTCPHandlerJson.py",
 		"/C/Users/dhocker/ElfstoneGit/elfstone_athomeserver/ThreadedTCPServer.py",
@@ -296,6 +374,7 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"ontime",
 			"checksumerror",
 			"smtwtfs",
 			"deviceon",
@@ -331,23 +410,23 @@
 	"groups":
 	[
 		{
-			"selected": 0,
+			"selected": 6,
 			"sheets":
 			[
 				{
 					"buffer": 0,
-					"file": "AtHomePowerlineServer.py",
+					"file": "commands/StatusRequest.py",
 					"settings":
 					{
-						"buffer_size": 3461,
+						"buffer_size": 1162,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1421,
-								1421
+								0,
+								0
 							]
 						],
 						"settings":
@@ -358,6 +437,258 @@
 						},
 						"translation.x": 0.0,
 						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "commands/DeviceOff.py",
+					"settings":
+					{
+						"buffer_size": 1371,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								382
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "commands/DeviceOn.py",
+					"settings":
+					{
+						"buffer_size": 1365,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								438,
+								438
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "commands/LoadTimers.py",
+					"settings":
+					{
+						"buffer_size": 3033,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2437,
+								2437
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "testclient/tcplcient_json.py",
+					"settings":
+					{
+						"buffer_size": 6690,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								6190,
+								6190
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 3565.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "AtHomePowerlineServer.py",
+					"settings":
+					{
+						"buffer_size": 3133,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1062,
+								1062
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 6,
+					"file": "timers/TimerStore.py",
+					"settings":
+					{
+						"buffer_size": 4350,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1075,
+								1075
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 7,
+					"file": "database/AtHomePowerlineServerDb.py",
+					"settings":
+					{
+						"buffer_size": 2005,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								72,
+								75
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 8,
+					"file": "timers/TimerProgram.py",
+					"settings":
+					{
+						"buffer_size": 1567,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								915,
+								915
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 9,
+					"file": "services/TimerServiceThread.py",
+					"settings":
+					{
+						"buffer_size": 2689,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1958,
+								1958
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 654.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"

@@ -60,10 +60,11 @@ class TimerServiceThread(threading.Thread):
   def RunTimerPrograms(self):
     tp_list = timers.TimerStore.TimerStore.AcquireTimerProgramList()
 
-    for tp in tp_list:
-      self.RunTimerProgram(tp)
-
-    timers.TimerStore.TimerStore.ReleaseTimerProgramList()
+    try:
+      for tp in tp_list:
+        self.RunTimerProgram(tp)
+    finally:
+      timers.TimerStore.TimerStore.ReleaseTimerProgramList()
   
   # Run a single timer program
   def RunTimerProgram(self, tp):
@@ -71,10 +72,29 @@ class TimerServiceThread(threading.Thread):
     # We use the time part of the datetime to mean the time TODAY.
     now = datetime.datetime.now()
     # On/Off times for TODAY
-    today_ontime = datetime.datetime(now.year, now.month, now.day, tp.OnTime.hour, tp.OnTime.minute, tp.OnTime.second)
-    today_offtime = datetime.datetime(now.year, now.month, now.day, tp.OffTime.hour, tp.OffTime.minute, tp.OffTime.second)
+    today_starttime = datetime.datetime(now.year, now.month, now.day, tp.StartTime.hour, tp.StartTime.minute, tp.StartTime.second)
+    today_stoptime = datetime.datetime(now.year, now.month, now.day, tp.StopTime.hour, tp.StopTime.minute, tp.StopTime.second)
 
     print tp.HouseDeviceCode, tp.DecodeDayMask(tp.DayMask)
 
     # TODO Develop algorithm for reasonable triggering of on/start and off/stop events
-    pass
+
+    # TODO Answer question about persisting event status in database (and resetting status at well defined times)
+
+    # time without seconds
+    now_dt = datetime.datetime(1900, 1, 1, now.hour, now.minute, 0)
+
+    # we consider the event triggered if the current date/time in hours and minutes matches the event time
+    print "Start:", tp.StartTime, now_dt
+    print "Stop:", tp.StopTime, now_dt
+
+    if (not tp.StartEventRun) and (tp.StartTime == now_dt):
+      # Start event triggered
+      tp.StartEventRun = True
+      print "Start event triggered: ", tp.Name, tp.StartTime, tp.StartAction
+      pass
+    if (not tp.StopEventRun) and (tp.StopTime == now_dt):
+      # Stop event triggered
+      tp.StopEventRun = True
+      print "Start event triggered: ", tp.Name, tp.StopTime, tp.StopAction
+      pass

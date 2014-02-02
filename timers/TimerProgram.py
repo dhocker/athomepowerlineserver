@@ -20,22 +20,24 @@ class TimerProgram:
 
   #######################################################################
   # Instance constructor
-  def __init__(self, name, house_device_code, day_mask, on_time, off_time, security):
-    self.name = name
+  def __init__(self, name, house_device_code, day_mask, start_time, stop_time, security):
+    self.Name = name
     self.HouseDeviceCode = house_device_code
     self.DayMask = day_mask
-    self.OnTime = on_time
-    self.OffTime = off_time
+    self.StartTime = start_time
+    self.StopTime = stop_time
+    self.StartAction = "start-action"
+    self.StopAction = "stop-action"
     self.Security = security
 
     # These are used to monitor the timer events
-    self.OnEventRun = False
-    self.OffEventRun = False
+    self.StartEventRun = False
+    self.StopEventRun = False
   
   # Decode day mask format into an array where [0] is Monday
   # and [6] is Sunday.
   # Day mask format: MTWTFSS (Monday through Sunday)
-  # Event days have the letter while non-event days have a '-'
+  # Event days have the letter while non-event days have a '-' or '.'
   def DecodeDayMask(self, day_mask):
     # Sunday through to Saturday
     effective_days = [False, False, False, False, False, False, False]

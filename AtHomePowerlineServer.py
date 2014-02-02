@@ -23,23 +23,14 @@ import drivers.X10ControllerAdapter
 import database.AtHomePowerlineServerDb
 import timers.TimerStore
 import services.TimerService
-
-# Show the disclaimer as recommended by the GPL v3 license
-def DisplayDisclaimer():
-  print "\n"
-  print "AtHomePowerlineServer Copyright (C) 2014 Dave Hocker (AtHomeX10@gmail.com)"
-  print ""
-  print "This program comes with ABSOLUTELY NO WARRANTY; for details see the LICENSE file."
-  print "This is free software, and you are welcome to redistribute it"
-  print "under certain conditions; see the LICENSE file for details."
-  print "\n"
+import disclaimer.Disclaimer
 
 #
 # main
 #
 if __name__ == "__main__":
   # First things, First
-  DisplayDisclaimer()
+  disclaimer.Disclaimer.DisplayDisclaimer()
 
   print "Starting up..."
 
