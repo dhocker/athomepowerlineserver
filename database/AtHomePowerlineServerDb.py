@@ -15,6 +15,7 @@
 
 import sqlite3
 import os.path
+import datetime
 
 #######################################################################
 class AtHomePowerlineServerDb:
@@ -44,8 +45,14 @@ class AtHomePowerlineServerDb:
     c = cls.GetConnection()
 
     # Create tables
+    # SchemaVersion
+    c.execute("CREATE TABLE SchemaVersion (Version text, updatetime timestamp)")
+    c.execute("INSERT INTO SchemaVersion values (?, ?)", ("1.0.0.0", datetime.datetime.now()))
+    # Timers
     c.execute("CREATE TABLE Timers (name text, housedevicecode text, daymask text, starttime timestamp, stoptime timestamp, \
       security integer, updatetime timestamp)")
+    # Actions
+    c.execute("CREATE TABLE Actions (name text, command text, dimamount integer, args text, updatetime timestamp)")
 
     # Done
     c.close()
