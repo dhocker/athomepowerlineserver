@@ -33,14 +33,17 @@ import json
 import drivers.XTB232
 import drivers.Dummy
 
+########################################################################
 class Configuration():
 
   ActiveConfig = None
   
+  ######################################################################
   def __init__(self):
     Configuration.LoadConfiguration()
     pass
     
+  ######################################################################
   # Load the configuration file
   @classmethod
   def LoadConfiguration(cls):
@@ -52,7 +55,7 @@ class Configuration():
       print str(ex)
       return
       
-    # Read the entire contents of the conf file           
+    # Read the entire contents of the conf file
     cfg_json = cfg.read()
     cfg.close()
     #print cfg_json
@@ -70,11 +73,13 @@ class Configuration():
     #print str(Configuration.ActiveConfig)
     return
     
+  ######################################################################
   # Get the X10 controller device. Used to determine what driver should be used.
   @classmethod
   def X10ControllerDevice(cls):
     return cls.ActiveConfig["X10ControllerDevice"]
     
+  ######################################################################
   # Get the driver instance called out by the configuration
   @classmethod
   def GetX10ControllerDriver(cls):
@@ -87,10 +92,17 @@ class Configuration():
       return drivers.Dummy.Dummy()
     return None
     
+  ######################################################################
   @classmethod
   def ComPort(cls):
     return cls.ActiveConfig["ComPort"]
     
+  ######################################################################
   @classmethod
   def Port(cls):
-    return cls.ActiveConfig["Port"]    
+    return cls.ActiveConfig["Port"]
+
+  ######################################################################
+  @classmethod
+  def Logfile(cls):
+    return cls.ActiveConfig["LogFile"]
