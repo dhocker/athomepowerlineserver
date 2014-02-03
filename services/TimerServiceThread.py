@@ -16,6 +16,7 @@
 import threading
 import time
 import datetime
+import logging
 import timers.TimerStore
 import timers.TimerProgram
 import database.Actions
@@ -36,7 +37,7 @@ class TimerServiceThread(threading.Thread):
   ########################################################################
   # Called by threading on the new thread
   def run(self):
-    # print "Timer service running"
+    # logging.info("Timer service running")
 
     # Line up timing to the minute
     time_count = datetime.datetime.now().second
@@ -49,7 +50,7 @@ class TimerServiceThread(threading.Thread):
         # Maintain top of the minute alignment
         time_count = datetime.datetime.now().second
         # run checks
-        print datetime.datetime.now()
+        logging.info("Timer checks")
         self.RunTimerPrograms()
 
   ########################################################################
@@ -57,9 +58,9 @@ class TimerServiceThread(threading.Thread):
   def Terminate(self):
     self.terminate_signal = True
     # wait for service thread to exit - could be a while
-    print "Waiting for timer service to stop...this could take a few seconds"
+    logging.info("Waiting for timer service to stop...this could take a few seconds")
     self.join()
-    print "Timer service stopped"
+    logging.info("Timer service stopped")
 
   ########################################################################
   # Run timer programs that have reached their trigger time
@@ -82,7 +83,7 @@ class TimerServiceThread(threading.Thread):
     today_starttime = datetime.datetime(now.year, now.month, now.day, tp.StartTime.hour, tp.StartTime.minute, tp.StartTime.second)
     today_stoptime = datetime.datetime(now.year, now.month, now.day, tp.StopTime.hour, tp.StopTime.minute, tp.StopTime.second)
 
-    # print tp.HouseDeviceCode, tp.DecodeDayMask(tp.DayMask)
+    # logging.debug("%s %s", tp.HouseDeviceCode, tp.DecodeDayMask(tp.DayMask))
 
     # TODO Answer question about persisting event status in database (and resetting status at well defined times)
 
@@ -92,24 +93,24 @@ class TimerServiceThread(threading.Thread):
     # Only if the current day is enabled...
     if TimerServiceThread.IsDayOfWeekEnabled(now, tp.DayMask):
       # we consider the event triggered if the current date/time in hours and minutes matches the event time
-      print "\tStart:", tp.StartTime, now_dt
-      print "\tStop:", tp.StopTime, now_dt
+      logging.info("Start: %s %s", tp.StartTime, now_dt)
+      logging.info("Stop: %s %s", tp.StopTime, now_dt)
 
       # Start event check
       if (not tp.StartEventRun) and (today_starttime == now_dt):
         # Start event triggered
         tp.StartEventRun = True
-        print "\tStart event triggered: ", tp.Name, tp.DayMask, tp.StartTime, tp.StartAction
+        logging.info("Start event triggered: %s %s %s %s", tp.Name, tp.DayMask, tp.StartTime, tp.StartAction)
         self.RunTimerAction(tp.StartAction, tp.HouseDeviceCode)
 
       # Stop event check
       if (not tp.StopEventRun) and (today_stoptime == now_dt):
         # Stop event triggered
         tp.StopEventRun = True
-        print "\tStop event triggered: ", tp.Name, tp.DayMask, tp.StopTime, tp.StopAction
+        logging.info("Stop event triggered: %s %s %s %s", tp.Name, tp.DayMask, tp.StopTime, tp.StopAction)
         self.RunTimerAction(tp.StopAction, tp.HouseDeviceCode)
     else:
-      print "\tProgram is not enabled for the current weekday:", tp.Name
+      logging.info("Program is not enabled for the current weekday: %s", tp.Name)
 
   ########################################################################
   # Run an action
@@ -119,9 +120,9 @@ class TimerServiceThread(threading.Thread):
       #print type(rset)
       #print rset
       # TODO We want a factory here, one that looks up the action and returns an action handler
-      print "\tExecuting action:", rset["command"], house_device_code
+      logging.info("Executing action: %s %s", rset["command"], house_device_code)
     else:
-      print "\tNo Actions table record was found for:", name
+      logging.info("No Actions table record was found for: %s", name)
 
   ########################################################################
   # Test a date to see if its weekday is enabled

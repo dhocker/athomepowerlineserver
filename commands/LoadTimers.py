@@ -12,6 +12,7 @@
 import ServerCommand
 import timers.TimerStore
 import datetime
+import logging
 
 #######################################################################
 # Command handler for loading timer initiators
@@ -35,7 +36,7 @@ class LoadTimers(ServerCommand.ServerCommand):
     for timer_program in request["args"]["programs"]:
       t = datetime.datetime.strptime(timer_program["start-time"], "%H:%M")
       #print "start-time:", timer_program["start-time"]
-      print "start-time:", t, "minutes:", (t.hour * 60) + t.minute
+      #logging("start-time: %s minutes: %s", t, (t.hour * 60) + t.minute
 
       # Pull all of the timer program values out of the dict entry
       name = timer_program["name"]

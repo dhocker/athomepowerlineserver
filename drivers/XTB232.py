@@ -22,6 +22,7 @@ import Configuration
 import serial
 import datetime
 import array
+import logging
 
 class XTB232(X10ControllerInterface.X10ControllerInterface):
   
@@ -104,7 +105,7 @@ class XTB232(X10ControllerInterface.X10ControllerInterface):
   def ExecuteFunction(self, house_device_code, dim_amount, device_function):
     # First part of two step sequence. Select the specific device that is the command target.
     if not self.SelectAddress(house_device_code):
-      print "SelectAddress failed"
+      logging.error("SelectAddress failed")
       return False
     
     # Second part, send the command for all devices selected for the house code.
@@ -137,26 +138,26 @@ class XTB232(X10ControllerInterface.X10ControllerInterface):
 
   #************************************************************************
   def InitializeController(self):
-    print "Initializing XTB232 controller..."
+    logging.info("Initializing XTB232 controller...")
     # Open the COM port
     self.com_port = Configuration.Configuration.ComPort()
     try:
       self.port = serial.Serial(self.com_port, baudrate=4800, bytesize=serial.EIGHTBITS, parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE, timeout=2)
-      print "XTB232 controller on COM port:", self.com_port
+      logging.info("XTB232 controller on COM port: %s", self.com_port)
     except Exception as ex:
       self.port = None
-      print "Unable to open COM port:", self.com_port
-      print str(ex)
+      logging.error("Unable to open COM port: %s", self.com_port)
+      logging.error(str(ex))
       return
       
     # Handshake with controller. Usually the controller wants
     # the current time.
     response = self.port.read(1)
     if response == XTB232.InterfaceTimeRequest:
-      print "Setting interface time"
+      logging.info("Setting interface time")
       self.SendTime(datetime.datetime.now())
     else:
-      print "During initialization, no interface time request was received from controller"
+      logging.warn("During initialization, no interface time request was received from controller")
       
   #************************************************************************
   # Send a time value to the controller. Usually the time is the current time.
@@ -206,7 +207,7 @@ class XTB232(X10ControllerInterface.X10ControllerInterface):
     good_checksum = False
     retry_count = 0
     
-    print "Sending command:", cmd
+    logging.info("Sending command: %s", cmd)
     
     while (not good_checksum) and (retry_count < 3):
       # Send the command bytes
@@ -230,12 +231,12 @@ class XTB232(X10ControllerInterface.X10ControllerInterface):
         else:
           self.LastErrorCode = XTB232.InterfaceReadyTimeout
           self.LastError = "Expected interface ready signal, but none received"
-          #print self.LastError
+          #logging.error(self.LastError)
           return False
       elif response == '':
         self.LastErrorCode = XTB232.ChecksumTimeout
         self.LastError = "Timeout waiting for checksum from controller"
-        #print self.LastError
+        #logging.error(self.LastError)
         return False
       else:
         retry_count += 1

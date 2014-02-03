@@ -15,6 +15,7 @@
 
 import AtHomePowerlineServerDb
 import datetime
+import logging
 
 #######################################################################
 class Actions:
@@ -71,7 +72,7 @@ class Actions:
   # Debug: Dump all actions
   @classmethod
   def DumpActions(cls):
-    print "Actions Dump"
+    logging.info("Actions Dump")
     rset = cls.GetAll()
     for r in rset:
-      print "Actions:", r["name"], r["command"], r["dimamount"], r["updatetime"]
+      logging.info("Action: %s %s %s %s", r["name"], r["command"], r["dimamount"], r["updatetime"])

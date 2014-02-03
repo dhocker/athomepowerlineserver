@@ -11,6 +11,7 @@
 
 import json
 import datetime
+import logging
 import commands.ServerCommand
 import commands.LoadTimers
 import commands.LoadActions
@@ -51,7 +52,7 @@ class CommandHandler:
   # Most of these functions are supported as commands
   #
   def GetHandler(self, command):
-    print "GetHandler for command:", command
+    logging.info("GetHandler for command: %s", command)
     
     ci_command = command.lower()
     
@@ -92,7 +93,7 @@ class CommandHandler:
       response = handler.Execute(request)
       response['X10Response']['call-sequence'] = CommandHandler.call_sequence
     else:
-      print "No handler for command:", request["request"]
+      info.error("No handler for command: %s", request["request"])
       response = commands.ServerCommand.ServerCommand.CreateResponse(request["request"])
       r = response['X10Response']
       r['resultcode'] = CommandHandler.NotImplemented

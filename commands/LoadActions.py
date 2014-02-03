@@ -12,6 +12,7 @@
 import ServerCommand
 import database.Actions
 import datetime
+import logging
 
 #######################################################################
 # Command handler for loading actions used by timer programs
@@ -39,7 +40,7 @@ class LoadActions(ServerCommand.ServerCommand):
         # Add the action to the current list
         database.Actions.Actions.Insert(name, command, dim_amount, "")
       except Exception as ex:
-        print ex
+        logging.error(str(ex))
         r['result-code'] = 1
         r['error'] = "Actions insert failed. Is the name unique?"
         r['message'] = "Failure"

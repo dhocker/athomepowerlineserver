@@ -16,6 +16,7 @@
 import sqlite3
 import os.path
 import datetime
+import logging
 
 #######################################################################
 class AtHomePowerlineServerDb:
@@ -35,7 +36,7 @@ class AtHomePowerlineServerDb:
     else:
       # Database needs to be created
       cls.CreateDatabase()
-      print "Created database file:", cls.DatabaseFileName
+      logging.info("Created database file: %s", cls.DatabaseFileName)
 
   #######################################################################
   # Create a new database

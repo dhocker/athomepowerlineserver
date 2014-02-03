@@ -22,6 +22,8 @@
 # of what methods are needed.
 #
 
+import logging
+
 class X10ControllerAdapter:
   # Injection point for driver to be used to access X10 controller
   # This is a singleton instance of the driver to be used for all access
@@ -39,14 +41,14 @@ class X10ControllerAdapter:
   @classmethod
   def InjectDriver(cls, driver):
     cls.Driver = driver
-    print "X10ControllerAdapter has been injected with driver:", str(driver)
+    logging.info("X10ControllerAdapter has been injected with driver: %s", str(driver))
 
   #************************************************************************
   # Open the injected driver    
   @classmethod
   def Open(cls, driver):
     cls.Driver = driver
-    print "X10ControllerAdapter has been injected with driver:", str(driver)
+    logging.info("X10ControllerAdapter has been injected with driver: %s", str(driver))
     return cls.Driver.Open()
     
   #************************************************************************
@@ -54,7 +56,7 @@ class X10ControllerAdapter:
   @classmethod
   def Close(cls):
     result = cls.Driver.Close()
-    print "X10ControllerAdapter has been closed"
+    logging.info("X10ControllerAdapter has been closed")
     return result
 
   @classmethod

@@ -14,12 +14,13 @@
 #
 
 import X10ControllerInterface
+import logging
 
 class Dummy(X10ControllerInterface.X10ControllerInterface):
   
   def __init__(self):
     X10ControllerInterface.X10ControllerInterface.__init__(self)
-    print "X10 Dummy class initialized"
+    logging.info("X10 Dummy class initialized")
     #print "House code for P:", Dummy.GetHouseCode("P")
     #print "Device code for 16:", Dummy.GetDeviceCode(16)
     pass

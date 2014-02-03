@@ -15,6 +15,7 @@
 #
 
 import abc
+import logging
 
 #######################################################################
 class X10ControllerInterface:
@@ -27,7 +28,7 @@ class X10ControllerInterface:
   def __init__(self):
     self.LastErrorCode = 0
     self.LastError = None
-    print "X10 controller base class initialized"
+    logging.info("X10 controller base class initialized")
     pass
     
   #######################################################################
