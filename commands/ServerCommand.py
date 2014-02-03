@@ -33,7 +33,7 @@ class ServerCommand:
   def CreateResponse(cls, command):
     response = {"X10Response": {}}
     r = response["X10Response"]    
-    r['command'] = command
+    r['request'] = command
     r['date-time'] = str(datetime.datetime.now())
     r['server'] = "AtHomePowerlineServer"
     r['server-version'] = "1.0.0.0"

@@ -37,7 +37,7 @@ class MyTCPHandlerJson(SocketServer.BaseRequestHandler):
     try:
       self.json = json.loads(self.raw_json)
       #print "Request: " + json.dumps(self.json)
-      print "Command: " + self.json["command"]
+      print "Request: " + self.json["request"]
       #print "Args: " + json.dumps(self.json["args"])
 
       # The command handler generates the response

@@ -16,6 +16,7 @@
 import socket
 import sys
 import json
+import datetime
 from optparse import OptionParser
 
 #Host, Port = "localHost", 9999
@@ -33,7 +34,7 @@ Host, Port = "hedwig", 9999
 # format of strings that it converts.
 def CreateRequest(command):
   request = {}
-  request["command"] = command
+  request["request"] = command
   # The args parameter is an dictionary.
   request["args"] = {}
   return request
@@ -80,11 +81,11 @@ def ReadJson(sock):
 def DisplayResponse(response):
     jr = json.loads(response)["X10Response"]
     
-    print "Response for command:", jr["command"]
+    print "Response for request:", jr["request"]
    
     # Loop through all of the entries in the response dict
     for k, v in jr.iteritems():
-      if k != "command":
+      if k != "request":
         print " ", k, ":", v
     print        
 
@@ -124,7 +125,7 @@ def SendCommand(data):
 # Test the Device On command        
 def DeviceOn():
   # 
-  data = CreateRequest("DeviceOn")
+  data = CreateRequest("On")
   data["args"]["house-device-code"] = "A1"
   data["args"]["dim-amount"] = 0
 
@@ -134,7 +135,7 @@ def DeviceOn():
 # Test the Device Off command        
 def DeviceOff():
   # 
-  data = CreateRequest("DeviceOff")
+  data = CreateRequest("Off")
   data["args"]["house-device-code"] = "A1"
   data["args"]["dim-amount"] = 0
 
@@ -171,21 +172,32 @@ def LoadTimers():
   # "programs" key/value pair. The value is a simple sequence/list of dict's where each dict
   # defines a timer initiator program.
   data["args"]["programs"] = []
-  
+
+  # To facilitate testing, we make the start and stop times a short distance from now
+  now = datetime.datetime.now()
+  # 2 minutes from now
+  td2 = datetime.timedelta(0, 0, 0, 0, 2)
+  # 4 minutes from now
+  td4 = datetime.timedelta(0, 0, 0, 0, 4)
+  on_time = now + td2
+  off_time = now + td4
+  on_time_str = on_time.strftime("%H:%M")
+  off_time_str = off_time.strftime("%H:%M")
+
   program = {\
     "name": "program-a1", \
     "house-device-code": "a1", \
-    "start-time": "18:00", \
-    "stop-time": "19:00", \
-    "day-mask": "mtwtfss", \
+    "start-time": on_time_str, \
+    "stop-time": off_time_str, \
+    "day-mask": ".......", \
     "start-action": "action-1", \
     "stop-action": "action-2" }
 
   program2 = {\
   "name": "program-a2", \
   "house-device-code": "a2", \
-  "start-time": "18:00", \
-  "stop-time": "19:00", \
+  "start-time": on_time_str, \
+  "stop-time": off_time_str, \
   "day-mask": "mtwtfss",
   "start-action": "action-1", \
   "stop-action": "action-2" }
@@ -193,8 +205,8 @@ def LoadTimers():
   program3 = {}
   program3["name"] = "program-a3"
   program3["house-device-code"] = "a3"
-  program3["start-time"] = "15:30"
-  program3["stop-time"] = "19:30"
+  program3["start-time"] = on_time_str
+  program3["stop-time"] = off_time_str
   program3["day-mask"] = "mtwtfss"
   program3["start-action"] = "action-1"
   program3["stop-action"] = "action-2"
@@ -202,11 +214,11 @@ def LoadTimers():
   program4 = {\
     "name": "program-a4", \
     "house-device-code": "a4", \
-    "start-time": "15:48", \
-    "stop-time": "19:00", \
+    "start-time": on_time_str, \
+    "stop-time": off_time_str, \
     "day-mask": "mtwtf--", \
-    "start-action": "action-1", \
-    "stop-action": "action-2" }
+    "start-action": "action-undefined", \
+    "stop-action": "action-undefined" }
     
   data["args"]["programs"].append(program)
   data["args"]["programs"].append(program2)
@@ -222,19 +234,19 @@ def LoadTimers():
 def LoadActions():
   data = CreateRequest("LoadActions")
 
-  # For the LoadActionss command, the args dictionary contains a single
+  # For the LoadActions command, the args dictionary contains a single
   # "actions" key/value pair. The value is a simple sequence/list of dict's where each dict
   # defines an action.
   data["args"]["actions"] = []
 
   action1 = {\
     "name": "action-1", \
-    "command": "device-on", \
+    "command": "on", \
     "dim-amount": 0 }
 
   action2 = {\
     "name": "action-2", \
-    "command": "device-off", \
+    "command": "off", \
     "dim-amount": 0 }
 
   data["args"]["actions"].append(action1)

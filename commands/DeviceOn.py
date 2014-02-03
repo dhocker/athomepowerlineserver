@@ -27,7 +27,7 @@ class DeviceOn(ServerCommand.ServerCommand):
     result = drivers.X10ControllerAdapter.X10ControllerAdapter.DeviceOn(request["args"]["house-device-code"], int(request["args"]["dim-amount"]))
     
     # Generate a successful response
-    response = DeviceOn.CreateResponse("DeviceOn")
+    response = DeviceOn.CreateResponse(request["request"])
     r = response["X10Response"]    
     
     r['result-code'] = drivers.X10ControllerAdapter.X10ControllerAdapter.GetLastErrorCode()

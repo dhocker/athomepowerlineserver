@@ -24,6 +24,10 @@ import threading
 # Note that to manipulate the timer program list, you must first
 # acquire the list lock. When you are finished with the list you must
 # release the list lock.
+#
+# The timer list is kept in memory because it is referenced frequently.
+# Effectively, the in-memory list is a cache of the Timers table.
+#
 class TimerStore:
 
   # List of all timer programs
@@ -37,7 +41,7 @@ class TimerStore:
     pass
 
   #######################################################################
-  # Recover all of the timer programs from the database. Typcially, this
+  # Recover all of the timer programs from the database. Typically, this
   # is done at server start up.
   @classmethod
   def LoadTimerProgramList(cls):
@@ -55,6 +59,8 @@ class TimerStore:
         # We really want the on/off times to be in datetime format, not string format
         start_time = datetime.datetime.strptime(r["starttime"], "%Y-%m-%d %H:%M:%S")
         stop_time = datetime.datetime.strptime(r["stoptime"], "%Y-%m-%d %H:%M:%S")
+        start_action = r["startaction"]
+        stop_action = r["stopaction"]
         security = r["security"]
         # Note that we don't do anything with the lastupdate column
 
@@ -62,7 +68,7 @@ class TimerStore:
         print name #, type(on_time), on_time, type(off_time), off_time
 
         # Add each timer program to the current list of programs
-        cls.AppendTimer(name, house_device_code, day_mask, start_time, stop_time, security)
+        cls.AppendTimer(name, house_device_code, day_mask, start_time, stop_time, start_action, stop_action, security)
 
       rset.close()
     finally:

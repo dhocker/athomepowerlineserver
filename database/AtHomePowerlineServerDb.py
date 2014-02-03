@@ -38,24 +38,31 @@ class AtHomePowerlineServerDb:
       print "Created database file:", cls.DatabaseFileName
 
   #######################################################################
+  # Create a new database
+  # There is no way to migrate a database. When schema changes are
+  # required, it is expected that the old database will be deleted
+  # and a new database created. Then, the timers and actions can
+  # be reloaded. This choice was made just to keep things simple.
+  # In the future, if something more sophisticated is warranted,
+  # it can be implemented at that time.
   @classmethod
   def CreateDatabase(cls):
     # This actually creates the database if it does not exist
     # Note that the return value is a cursor object
-    c = cls.GetConnection()
+    csr = cls.GetConnection()
 
-    # Create tables
-    # SchemaVersion
-    c.execute("CREATE TABLE SchemaVersion (Version text, updatetime timestamp)")
-    c.execute("INSERT INTO SchemaVersion values (?, ?)", ("1.0.0.0", datetime.datetime.now()))
+    # Create tables (Sqlite3 specific)
+    # SchemaVersion (sort of the migration version)
+    csr.execute("CREATE TABLE SchemaVersion (Version text, updatetime timestamp)")
+    csr.execute("INSERT INTO SchemaVersion values (?, ?)", ("1.0.0.0", datetime.datetime.now()))
     # Timers
-    c.execute("CREATE TABLE Timers (name text, housedevicecode text, daymask text, starttime timestamp, stoptime timestamp, \
+    csr.execute("CREATE TABLE Timers (name text PRIMARY KEY, housedevicecode text, daymask text, starttime timestamp, stoptime timestamp, \
       startaction text, stopaction text, security integer, updatetime timestamp)")
     # Actions
-    c.execute("CREATE TABLE Actions (name text, command text, dimamount integer, args text, updatetime timestamp)")
+    csr.execute("CREATE TABLE Actions (name text PRIMARY KEY, command text, dimamount integer, args text, updatetime timestamp)")
 
     # Done
-    c.close()
+    csr.close()
 
   #######################################################################
   # Returns a database connection

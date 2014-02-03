@@ -18,11 +18,14 @@ import time
 import datetime
 import timers.TimerStore
 import timers.TimerProgram
+import database.Actions
 
+########################################################################
 # The timer service thread periodically examines the list of timer programs.
 # When a timer event expires, it transmits the appropriate X10 function.
 class TimerServiceThread(threading.Thread):
 
+  ########################################################################
   # Constructor
   def __init__(self, thread_id, name):
     threading.Thread.__init__(self)
@@ -30,6 +33,7 @@ class TimerServiceThread(threading.Thread):
     self.name = name
     self.terminate_signal = False
 
+  ########################################################################
   # Called by threading on the new thread
   def run(self):
     # print "Timer service running"
@@ -48,6 +52,7 @@ class TimerServiceThread(threading.Thread):
         print datetime.datetime.now()
         self.RunTimerPrograms()
 
+  ########################################################################
   # Terminate the timer service thread
   def Terminate(self):
     self.terminate_signal = True
@@ -56,6 +61,7 @@ class TimerServiceThread(threading.Thread):
     self.join()
     print "Timer service stopped"
 
+  ########################################################################
   # Run timer programs that have reached their trigger time
   def RunTimerPrograms(self):
     tp_list = timers.TimerStore.TimerStore.AcquireTimerProgramList()
@@ -66,6 +72,7 @@ class TimerServiceThread(threading.Thread):
     finally:
       timers.TimerStore.TimerStore.ReleaseTimerProgramList()
   
+  ########################################################################
   # Run a single timer program
   def RunTimerProgram(self, tp):
     # The date in a timer program's on/off time has no meaning.
@@ -75,26 +82,52 @@ class TimerServiceThread(threading.Thread):
     today_starttime = datetime.datetime(now.year, now.month, now.day, tp.StartTime.hour, tp.StartTime.minute, tp.StartTime.second)
     today_stoptime = datetime.datetime(now.year, now.month, now.day, tp.StopTime.hour, tp.StopTime.minute, tp.StopTime.second)
 
-    print tp.HouseDeviceCode, tp.DecodeDayMask(tp.DayMask)
-
-    # TODO Develop algorithm for reasonable triggering of on/start and off/stop events
+    # print tp.HouseDeviceCode, tp.DecodeDayMask(tp.DayMask)
 
     # TODO Answer question about persisting event status in database (and resetting status at well defined times)
 
     # time without seconds
-    now_dt = datetime.datetime(1900, 1, 1, now.hour, now.minute, 0)
+    now_dt = datetime.datetime(now.year, now.month, now.day, now.hour, now.minute, 0)
 
-    # we consider the event triggered if the current date/time in hours and minutes matches the event time
-    print "Start:", tp.StartTime, now_dt
-    print "Stop:", tp.StopTime, now_dt
+    # Only if the current day is enabled...
+    if TimerServiceThread.IsDayOfWeekEnabled(now, tp.DayMask):
+      # we consider the event triggered if the current date/time in hours and minutes matches the event time
+      print "\tStart:", tp.StartTime, now_dt
+      print "\tStop:", tp.StopTime, now_dt
 
-    if (not tp.StartEventRun) and (tp.StartTime == now_dt):
-      # Start event triggered
-      tp.StartEventRun = True
-      print "Start event triggered: ", tp.Name, tp.StartTime, tp.StartAction
-      pass
-    if (not tp.StopEventRun) and (tp.StopTime == now_dt):
-      # Stop event triggered
-      tp.StopEventRun = True
-      print "Start event triggered: ", tp.Name, tp.StopTime, tp.StopAction
-      pass
+      # Start event check
+      if (not tp.StartEventRun) and (today_starttime == now_dt):
+        # Start event triggered
+        tp.StartEventRun = True
+        print "\tStart event triggered: ", tp.Name, tp.DayMask, tp.StartTime, tp.StartAction
+        self.RunTimerAction(tp.StartAction, tp.HouseDeviceCode)
+
+      # Stop event check
+      if (not tp.StopEventRun) and (today_stoptime == now_dt):
+        # Stop event triggered
+        tp.StopEventRun = True
+        print "\tStop event triggered: ", tp.Name, tp.DayMask, tp.StopTime, tp.StopAction
+        self.RunTimerAction(tp.StopAction, tp.HouseDeviceCode)
+    else:
+      print "\tProgram is not enabled for the current weekday:", tp.Name
+
+  ########################################################################
+  # Run an action
+  def RunTimerAction(self, name, house_device_code):
+    rset = database.Actions.Actions.GetByName(name)
+    if rset is not None:
+      #print type(rset)
+      #print rset
+      # TODO We want a factory here, one that looks up the action and returns an action handler
+      print "\tExecuting action:", rset["command"], house_device_code
+    else:
+      print "\tNo Actions table record was found for:", name
+
+  ########################################################################
+  # Test a date to see if its weekday is enabled
+  @classmethod
+  def IsDayOfWeekEnabled(cls, date_to_test, day_mask):
+    d = day_mask[date_to_test.weekday()]
+    if (d != '-') and (d != '.'):
+      return True
+    return False

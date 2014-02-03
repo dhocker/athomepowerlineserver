@@ -59,9 +59,9 @@ class CommandHandler:
       handler = commands.LoadTimers.LoadTimers()
     elif ci_command == "loadactions":
       handler = commands.LoadActions.LoadActions()
-    elif ci_command == "deviceon":
+    elif (ci_command == "deviceon") or (ci_command == "on"):
       handler = commands.DeviceOn.DeviceOn()
-    elif ci_command == "deviceoff":
+    elif (ci_command == "deviceoff") or (ci_command == "off"):
       handler = commands.DeviceOff.DeviceOff()
     elif ci_command == "allunitsoff":
       handler = None
@@ -87,13 +87,13 @@ class CommandHandler:
   #######################################################################
   # Execute the command specified by the incoming request
   def Execute(self, request):
-    handler = self.GetHandler(request["command"])
+    handler = self.GetHandler(request["request"])
     if handler is not None:
       response = handler.Execute(request)
       response['X10Response']['call-sequence'] = CommandHandler.call_sequence
     else:
-      print "No handler for command:", request["command"]
-      response = commands.ServerCommand.ServerCommand.CreateResponse(request["command"])
+      print "No handler for command:", request["request"]
+      response = commands.ServerCommand.ServerCommand.CreateResponse(request["request"])
       r = response['X10Response']
       r['resultcode'] = CommandHandler.NotImplemented
       r['error'] = "Command is not recognized or implemented"

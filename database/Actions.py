@@ -44,12 +44,13 @@ class Actions:
 
   #######################################################################
   # Return the record for a given action name
+  # The return value is an Sqlite3 Row type
   @classmethod
   def GetByName(cls, name):
     conn = AtHomePowerlineServerDb.AtHomePowerlineServerDb.GetConnection()
     c = AtHomePowerlineServerDb.AtHomePowerlineServerDb.GetCursor(conn)
-    rset = c.execute("SELECT * from Actions where name = ?", (name))
-    return rset
+    rset = c.execute("SELECT * from Actions where name=:name", {"name": name})
+    return rset.fetchone()
 
   #######################################################################
   # Insert a record into the Actions table.
