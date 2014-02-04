@@ -38,4 +38,4 @@ class DeviceOff(ServerCommand.ServerCommand):
       r['error'] = drivers.X10ControllerAdapter.X10ControllerAdapter.GetLastError()
       r['message'] = "Failure"
 
-      return response
+    return response

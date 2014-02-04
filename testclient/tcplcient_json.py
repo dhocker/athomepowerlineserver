@@ -17,6 +17,7 @@ import socket
 import sys
 import json
 import datetime
+import time
 from optparse import OptionParser
 
 #Host, Port = "localHost", 9999
@@ -126,7 +127,7 @@ def SendCommand(data):
 def DeviceOn():
   # 
   data = CreateRequest("On")
-  data["args"]["house-device-code"] = "A1"
+  data["args"]["house-device-code"] = "C16"
   data["args"]["dim-amount"] = 0
 
   SendCommand(data)
@@ -136,7 +137,7 @@ def DeviceOn():
 def DeviceOff():
   # 
   data = CreateRequest("Off")
-  data["args"]["house-device-code"] = "A1"
+  data["args"]["house-device-code"] = "C16"
   data["args"]["dim-amount"] = 0
 
   SendCommand(data)
@@ -194,8 +195,8 @@ def LoadTimers():
     "stop-action": "action-2" }
 
   program2 = {\
-  "name": "program-a2", \
-  "house-device-code": "a2", \
+  "name": "program-c16", \
+  "house-device-code": "c16", \
   "start-time": on_time_str, \
   "stop-time": off_time_str, \
   "day-mask": "mtwtfss",
@@ -281,10 +282,12 @@ if __name__ == "__main__":
   StatusRequest()
 
   # Try some timer programs
-  LoadTimers()
+  # LoadTimers()
 
-  LoadActions()
+  #LoadActions()
   
   DeviceOn()
+
+  time.sleep(10)
 
   DeviceOff()

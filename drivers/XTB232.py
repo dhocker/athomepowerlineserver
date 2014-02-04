@@ -121,12 +121,14 @@ class XTB232(X10ControllerInterface.X10ControllerInterface):
   # Return a datetime type
   def GetTime(self):
     self.ClearLastError()
-    pass        
+    # TODO implement
+    pass
     
   #************************************************************************
   # Return controller status
   def GetStatus(self):
     self.ClearLastError()
+    # TODO implement
     pass        
     
   #************************************************************************
@@ -134,6 +136,7 @@ class XTB232(X10ControllerInterface.X10ControllerInterface):
   # Set the controller time to the current, local time.
   def SetTime(self, time_value):
     self.ClearLastError()
+    # TODO implement
     pass  
 
   #************************************************************************
@@ -142,7 +145,8 @@ class XTB232(X10ControllerInterface.X10ControllerInterface):
     # Open the COM port
     self.com_port = Configuration.Configuration.ComPort()
     try:
-      self.port = serial.Serial(self.com_port, baudrate=4800, bytesize=serial.EIGHTBITS, parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE, timeout=2)
+      # self.port = serial.Serial(self.com_port, baudrate=4800, bytesize=serial.EIGHTBITS, parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE, timeout=2)
+      self.port = serial.Serial(self.com_port, 4800, timeout=2)
       logging.info("XTB232 controller on COM port: %s", self.com_port)
     except Exception as ex:
       self.port = None
@@ -152,7 +156,9 @@ class XTB232(X10ControllerInterface.X10ControllerInterface):
       
     # Handshake with controller. Usually the controller wants
     # the current time.
-    response = self.port.read(1)
+    response = self.ReadSerialByte()
+    if response is not None:
+      logging.info("First byte received: %x", response)
     if response == XTB232.InterfaceTimeRequest:
       logging.info("Setting interface time")
       self.SendTime(datetime.datetime.now())
@@ -174,7 +180,7 @@ class XTB232(X10ControllerInterface.X10ControllerInterface):
     # Seconds
     TimeData[1] = (time_value.second & 0xFF);
     # Minutes 0-119
-    TimeData[2] = (((time_value.hour * 60) + time_value.Minute) % 120);
+    TimeData[2] = (((time_value.hour * 60) + time_value.minute) % 120);
     # Hours / 2
     TimeData[3] = (time_value.hour / 2);
     # Day of year bits 0-7
@@ -213,14 +219,14 @@ class XTB232(X10ControllerInterface.X10ControllerInterface):
       # Send the command bytes
       self.port.write(cmd)
       # Read the response - it should be the actual checksum from the controller
-      response = self.port.read(1)
+      response = self.ReadSerialByte()
       # Does the expected checksum match the actual checksum?
       if expected_checksum == response:
         # Send commit byte
         self.port.write([XTB232.InterfaceAck])
         # Wait for interface ready signal. The retry count is purely arbitrary.
         for i in range(0,10):
-          response = self.port.read()
+          response = self.ReadSerialByte()
           if response == XTB232.InterfaceReady:
             break
         # If we got an interface ready signal, the command was successfully transmitted.
@@ -254,3 +260,13 @@ class XTB232(X10ControllerInterface.X10ControllerInterface):
     for b in data:
       checksum += b
     return checksum & 0xFF
+
+  #************************************************************************
+  # Read a byte from the serial port
+  # Returns an integer
+  def ReadSerialByte(self):
+    b = self.port.read(1)
+    logging.debug("ReadSerialByte: %s %s %x", type(b), len(b), ord(b) if len(b) > 0 else 0)
+    if len(b) == 1:
+      return ord(b)
+    return None

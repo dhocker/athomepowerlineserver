@@ -105,5 +105,5 @@ class X10ControllerInterface:
   def GetDayOfWeek(dt):
     # day of week where Monday = 0 and Sunday = 7
     dow = dt.weekday()
-    return DayOfWeekLookup[dow]
+    return X10ControllerInterface.DayOfWeekLookup[dow]
     

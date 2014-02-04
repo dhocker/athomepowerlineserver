@@ -23,10 +23,10 @@ def EnableLogging():
   logfile = Configuration.Configuration.Logfile()
   if logfile != "":
     # To file
-    logging.basicConfig(filename=logfile, level=logging.INFO, format=logformat, datefmt=logdateformat)
+    logging.basicConfig(filename=logfile, level=logging.DEBUG, format=logformat, datefmt=logdateformat)
     logging.info("Logging to file: %s", logfile)
   else:
     # To console
-    logging.basicConfig(level=logging.INFO, format=logformat, datefmt=logdateformat)
+    logging.basicConfig(level=logging.DEBUG, format=logformat, datefmt=logdateformat)
     logging.info("Logging to console")
 
