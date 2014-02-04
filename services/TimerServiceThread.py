@@ -20,6 +20,7 @@ import logging
 import timers.TimerStore
 import timers.TimerProgram
 import database.Actions
+import TimerActions
 
 ########################################################################
 # The timer service thread periodically examines the list of timer programs.
@@ -121,6 +122,8 @@ class TimerServiceThread(threading.Thread):
       #print rset
       # TODO We want a factory here, one that looks up the action and returns an action handler
       logging.info("Executing action: %s %s", rset["command"], house_device_code)
+      action = TimerActions.GetAction(rset["command"])
+      action(house_device_code, rset["dimamount"], rset["args"])
     else:
       logging.info("No Actions table record was found for: %s", name)
 

@@ -282,9 +282,9 @@ if __name__ == "__main__":
   StatusRequest()
 
   # Try some timer programs
-  # LoadTimers()
+  LoadTimers()
 
-  #LoadActions()
+  LoadActions()
   
   DeviceOn()
 
