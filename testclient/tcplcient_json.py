@@ -121,7 +121,23 @@ def SendCommand(data):
     sock.close()
 
   return json_data
-        
+
+#######################################################################
+# Test the Get Time command
+def GetTime():
+  #
+  data = CreateRequest("GetTime")
+
+  SendCommand(data)
+
+#######################################################################
+# Test the Set Time command
+def SetTime():
+  #
+  data = CreateRequest("SetTime")
+
+  SendCommand(data)
+
 #######################################################################
 # Test the Device On command        
 def DeviceOn():
@@ -280,6 +296,10 @@ if __name__ == "__main__":
 
   # Try a status request command
   StatusRequest()
+
+  # Test the time requests
+  SetTime()
+  GetTime()
 
   # Try some timer programs
   # LoadTimers()
