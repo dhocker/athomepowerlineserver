@@ -19,6 +19,8 @@ import commands.ServerCommand
 import commands.StatusRequest
 import commands.DeviceOn
 import commands.DeviceOff
+import commands.GetTime
+import commands.SetTime
 
 class CommandHandler:
   
@@ -76,10 +78,10 @@ class CommandHandler:
       handler = None
     elif ci_command == "statusrequest":
       handler = commands.StatusRequest.StatusRequest()
-    elif ci_command == "currentime":
-      handler = None
+    elif ci_command == "gettime":
+      handler = commands.GetTime.GetTime()
     elif ci_command == "settime":
-      handler = None
+      handler = commands.SetTime.SetTime()
     else:
       handler = None
       
