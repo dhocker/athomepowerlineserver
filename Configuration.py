@@ -106,3 +106,8 @@ class Configuration():
   @classmethod
   def Logfile(cls):
     return cls.ActiveConfig["LogFile"]
+
+  ######################################################################
+  @classmethod
+  def LogLevel(cls):
+    return cls.ActiveConfig["LogLevel"]
