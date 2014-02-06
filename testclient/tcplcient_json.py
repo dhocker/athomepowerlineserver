@@ -298,8 +298,8 @@ if __name__ == "__main__":
   StatusRequest()
 
   # Test the time requests
-  SetTime()
-  GetTime()
+  #SetTime()
+  #GetTime()
 
   # Try some timer programs
   LoadTimers()
