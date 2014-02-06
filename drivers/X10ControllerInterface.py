@@ -17,6 +17,8 @@
 import abc
 import logging
 
+logger = logging.getLogger("server")
+
 #######################################################################
 class X10ControllerInterface:
   __metaclass__ = abc.ABCMeta
@@ -28,7 +30,7 @@ class X10ControllerInterface:
   def __init__(self):
     self.LastErrorCode = 0
     self.LastError = None
-    logging.info("X10 controller base class initialized")
+    logger.info("X10 controller base class initialized")
     pass
     
   #######################################################################

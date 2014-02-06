@@ -14,6 +14,8 @@ import json
 import logging
 import CommandHandler
 
+logger = logging.getLogger("server")
+
 class MyTCPHandlerJson(SocketServer.BaseRequestHandler):
   """
   The RequestHandler class for our server.
@@ -29,28 +31,28 @@ class MyTCPHandlerJson(SocketServer.BaseRequestHandler):
   This handler uses raw data from the SocketServer.TCPServer class.
   """
   def handle(self):
-    logging.info("Request from %s", self.client_address[0])
+    logger.info("Request from %s", self.client_address[0])
     # self.request is the TCP socket connected to the client
     self.raw_json = self.ReadJson()
-    #logging.info("raw json: %s", self.raw_json)
-    #logging.info("Request length: %s", len(self.raw_json))
+    #logger.info("raw json: %s", self.raw_json)
+    #logger.info("Request length: %s", len(self.raw_json))
     
     try:
       self.json = json.loads(self.raw_json)
-      logging.info("Request: %s", self.json["request"])
-      #logging.info("Args: %s", json.dumps(self.json["args"]))
+      logger.info("Request: %s", self.json["request"])
+      #logger.info("Args: %s", json.dumps(self.json["args"]))
 
       # The command handler generates the response
       response = CommandHandler.CommandHandler().Execute(self.json)
 
-      logging.info("Request completed")
+      logger.info("Request completed")
       
       # Return the response to the client
       self.request.sendall(json.JSONEncoder().encode(response))
     # except Exception as ex:
-      # logging.error("Exception occurred while parsing json request")
+      # logger.error("Exception occurred while parsing json request")
       # logginf.error(str(ex))
-      # logging.error(self.raw_json)
+      # logger.error(self.raw_json)
       # # Send an error response???
       # raise ex
     finally:

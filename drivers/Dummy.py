@@ -16,11 +16,13 @@
 import X10ControllerInterface
 import logging
 
+logger = logging.getLogger("server")
+
 class Dummy(X10ControllerInterface.X10ControllerInterface):
   
   def __init__(self):
     X10ControllerInterface.X10ControllerInterface.__init__(self)
-    logging.info("X10 Dummy class initialized")
+    logger.info("X10 Dummy class initialized")
     #print "House code for P:", Dummy.GetHouseCode("P")
     #print "Device code for 16:", Dummy.GetDeviceCode(16)
     pass

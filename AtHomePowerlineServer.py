@@ -30,6 +30,8 @@ import logging
 # main
 #
 if __name__ == "__main__":
+  logger = logging.getLogger("server")
+
   # First things, First
   disclaimer.Disclaimer.DisplayDisclaimer()
   print "Use ctrl-c to shutdown server\n"
@@ -39,21 +41,23 @@ if __name__ == "__main__":
   Configuration.Configuration.LoadConfiguration()
 
   # Activate logging to console or file
-  Logging.EnableLogging()
+  # Logging.EnableLogging()
+  Logging.EnableServerLogging()
 
-  logging.info("Starting up...")
+  logger.info("################################################################################")
+  logger.info("Starting up...")
 
-  logging.info("X10 controller: %s", Configuration.Configuration.X10ControllerDevice())
-  logging.info("ComPort: %s", Configuration.Configuration.ComPort())
+  logger.info("X10 controller: %s", Configuration.Configuration.X10ControllerDevice())
+  logger.info("ComPort: %s", Configuration.Configuration.ComPort())
   
   # Inject the X10 controller driver
   driver = Configuration.Configuration.GetX10ControllerDriver()
   drivers.X10ControllerAdapter.X10ControllerAdapter.Open(driver)
 
   # Initialize the database
-  logging.info("Initializing database")
+  logger.info("Initializing database")
   database.AtHomePowerlineServerDb.AtHomePowerlineServerDb.Initialize()
-  logging.info("Loading timer programs")
+  logger.info("Loading timer programs")
   timers.TimerStore.TimerStore.LoadTimerProgramList()
   
   #HOST, PORT = "localhost", 9999
@@ -65,7 +69,7 @@ if __name__ == "__main__":
   # Fire up the timer service - watches for timer events to occur
   timer_service = services.TimerService.TimerService()
   timer_service.Start()
-  logging.info("Timer service started")
+  logger.info("Timer service started")
 
   # Create the server, binding to localhost on port 9999
   #server = SocketServer.TCPServer((HOST, PORT), MyTCPHandlerStream)
@@ -74,18 +78,20 @@ if __name__ == "__main__":
 
   # Activate the server; this will keep running until you
   # interrupt the program with Ctrl-C
-  logging.info("AtHomePowerlineServer now serving sockets at %s:%s", HOST, PORT)
+  logger.info("AtHomePowerlineServer now serving sockets at %s:%s", HOST, PORT)
   
   try:
     server.serve_forever()
   except KeyboardInterrupt:
-    logging.info("AtHomePowerlineServer shutting down...")
+    logger.info("AtHomePowerlineServer shutting down...")
   except Exception as e: 
-    logging.error("Unhandled exception occurred")
-    logging.error(e.strerror)
-    logging.error(sys.exc_info()[0])
+    logger.error("Unhandled exception occurred")
+    logger.error(e.strerror)
+    logger.error(sys.exc_info()[0])
   finally:
     timer_service.Stop()
     server.shutdown()
     drivers.X10ControllerAdapter.X10ControllerAdapter.Close()
-    logging.info("AtHomePowerlineServer shutdown complete")
+    logger.info("AtHomePowerlineServer shutdown complete")
+    logger.info("################################################################################")
+    Logging.Shutdown()

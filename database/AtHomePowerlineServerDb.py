@@ -18,6 +18,8 @@ import os.path
 import datetime
 import logging
 
+logger = logging.getLogger("server")
+
 #######################################################################
 class AtHomePowerlineServerDb:
 
@@ -36,7 +38,7 @@ class AtHomePowerlineServerDb:
     else:
       # Database needs to be created
       cls.CreateDatabase()
-      logging.info("Created database file: %s", cls.DatabaseFileName)
+      logger.info("Created database file: %s", cls.DatabaseFileName)
 
   #######################################################################
   # Create a new database

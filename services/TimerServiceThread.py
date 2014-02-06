@@ -22,6 +22,8 @@ import timers.TimerProgram
 import database.Actions
 import commands.ActionFactory
 
+logger = logging.getLogger("server")
+
 ########################################################################
 # The timer service thread periodically examines the list of timer programs.
 # When a timer event expires, it transmits the appropriate X10 function.
@@ -38,7 +40,7 @@ class TimerServiceThread(threading.Thread):
   ########################################################################
   # Called by threading on the new thread
   def run(self):
-    # logging.info("Timer service running")
+    # logger.info("Timer service running")
 
     # Line up timing to the minute
     time_count = datetime.datetime.now().second
@@ -51,7 +53,7 @@ class TimerServiceThread(threading.Thread):
         # Maintain top of the minute alignment
         time_count = datetime.datetime.now().second
         # run checks
-        logging.info("Timer checks")
+        logger.info("Timer checks")
         self.RunTimerPrograms()
 
   ########################################################################
@@ -59,9 +61,9 @@ class TimerServiceThread(threading.Thread):
   def Terminate(self):
     self.terminate_signal = True
     # wait for service thread to exit - could be a while
-    logging.info("Waiting for timer service to stop...this could take a few seconds")
+    logger.info("Waiting for timer service to stop...this could take a few seconds")
     self.join()
-    logging.info("Timer service stopped")
+    logger.info("Timer service stopped")
 
   ########################################################################
   # Run timer programs that have reached their trigger time
@@ -84,9 +86,9 @@ class TimerServiceThread(threading.Thread):
     today_starttime = datetime.datetime(now.year, now.month, now.day, tp.StartTime.hour, tp.StartTime.minute, tp.StartTime.second)
     today_stoptime = datetime.datetime(now.year, now.month, now.day, tp.StopTime.hour, tp.StopTime.minute, tp.StopTime.second)
 
-    # logging.debug("%s %s", tp.HouseDeviceCode, tp.DecodeDayMask(tp.DayMask))
-
     # TODO Answer question about persisting event status in database (and resetting status at well defined times)
+    # This will only be interesting if we want to manage events that may have occurred BEFORE
+    # the server was started. That will be a complicated task.
 
     # time without seconds
     now_dt = datetime.datetime(now.year, now.month, now.day, now.hour, now.minute, 0)
@@ -94,24 +96,25 @@ class TimerServiceThread(threading.Thread):
     # Only if the current day is enabled...
     if TimerServiceThread.IsDayOfWeekEnabled(now, tp.DayMask):
       # we consider the event triggered if the current date/time in hours and minutes matches the event time
-      logging.info("Start: %s %s", tp.StartTime, now_dt)
-      logging.info("Stop: %s %s", tp.StopTime, now_dt)
+      logger.debug("%s Start: %s Stop: %s", tp.Name, tp.StartTime, tp.StopTime)
 
       # Start event check
       if (not tp.StartEventRun) and (today_starttime == now_dt):
         # Start event triggered
         tp.StartEventRun = True
-        logging.info("Start event triggered: %s %s %s %s", tp.Name, tp.DayMask, tp.StartTime, tp.StartAction)
+        logger.info("RunProgramTimers start event triggered: %s %s", tp.Name, tp.StartAction)
+        # Fire the action
         self.RunTimerAction(tp.StartAction, tp.HouseDeviceCode)
 
       # Stop event check
       if (not tp.StopEventRun) and (today_stoptime == now_dt):
         # Stop event triggered
         tp.StopEventRun = True
-        logging.info("Stop event triggered: %s %s %s %s", tp.Name, tp.DayMask, tp.StopTime, tp.StopAction)
+        logger.info("RunProgramTimers stop event triggered: %s %s", tp.Name, tp.StopAction)
+        # Fire the action
         self.RunTimerAction(tp.StopAction, tp.HouseDeviceCode)
     else:
-      logging.info("Program is not enabled for the current weekday: %s", tp.Name)
+      logger.debug("%s is not enabled for the current weekday", tp.Name)
 
   ########################################################################
   # Run an action
@@ -121,10 +124,10 @@ class TimerServiceThread(threading.Thread):
       #print type(rset)
       #print rset
       # TODO We want a factory here, one that looks up the action and returns an action handler
-      logging.info("Executing action: %s %s", rset["command"], house_device_code)
+      logger.info("Executing action: %s %s", rset["command"], house_device_code)
       commands.ActionFactory.RunAction(rset["command"], house_device_code, int(rset["dimamount"]))
     else:
-      logging.info("No Actions table record was found for: %s", name)
+      logger.info("No Actions table record was found for: %s", name)
 
   ########################################################################
   # Test a date to see if its weekday is enabled

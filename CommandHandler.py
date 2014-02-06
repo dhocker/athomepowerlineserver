@@ -22,6 +22,9 @@ import commands.DeviceOff
 import commands.GetTime
 import commands.SetTime
 
+logger = logging.getLogger("server")
+
+
 class CommandHandler:
   
   call_sequence = 1
@@ -54,7 +57,7 @@ class CommandHandler:
   # Most of these functions are supported as commands
   #
   def GetHandler(self, command):
-    logging.info("GetHandler for command: %s", command)
+    logger.info("GetHandler for command: %s", command)
     
     ci_command = command.lower()
     

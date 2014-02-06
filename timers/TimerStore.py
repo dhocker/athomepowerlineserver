@@ -19,6 +19,8 @@ import datetime
 import threading
 import logging
 
+logger = logging.getLogger("server")
+
 #######################################################################
 # Singleton class for storing the set of timer programs (aka initiators)
 #
@@ -66,7 +68,7 @@ class TimerStore:
         # Note that we don't do anything with the lastupdate column
 
         # Some debugging/tracing output
-        logging.debug(name) #, type(on_time), on_time, type(off_time), off_time
+        logger.info("%s Start: %s/%s Stop: %s/%s", name, start_time, start_action, stop_time, stop_action)
 
         # Add each timer program to the current list of programs
         cls.AppendTimer(name, house_device_code, day_mask, start_time, stop_time, start_action, stop_action, security)
@@ -86,7 +88,7 @@ class TimerStore:
       # Clear the existing timer programs
       database.Timers.Timers.DeleteAll()
 
-      logging.info("Saving all timer programs to database")
+      logger.info("Saving all timer programs to database")
       for tp in cls.TimerProgramList:
         # print tp.name, tp.HouseDeviceCode, tp.DayMask, tp.StartTime, tp.StopTime, tp.Security    
         # print "Saving timer program:", tp.name
@@ -124,6 +126,6 @@ class TimerStore:
   # Debugging aid
   @classmethod
   def DumpTimerProgramList(cls):
-    logging.info("Timer Program List Dump")
+    logger.info("Timer Program List Dump")
     for tp in cls.TimerProgramList:
-      logging.info("%s %s %s %s %s %s %s %s", tp.Name, tp.HouseDeviceCode, tp.DayMask, tp.StartTime, tp.StopTime, tp.StartAction, tp.StopAction, tp.Security)
+      logger.info("%s %s %s %s %s %s %s %s", tp.Name, tp.HouseDeviceCode, tp.DayMask, tp.StartTime, tp.StopTime, tp.StartAction, tp.StopAction, tp.Security)
