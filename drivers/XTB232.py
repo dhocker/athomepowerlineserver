@@ -103,6 +103,7 @@ class XTB232(X10ControllerInterface.X10ControllerInterface):
   # Common function for sending a complete function to the controller.
   # The device function code is treated as a data value.
   def ExecuteFunction(self, house_device_code, dim_amount, device_function):
+    logging.debug("Executing function: %x", device_function)
     # First part of two step sequence. Select the specific device that is the command target.
     if not self.SelectAddress(house_device_code):
       logging.error("SelectAddress failed")
@@ -157,14 +158,35 @@ class XTB232(X10ControllerInterface.X10ControllerInterface):
     # Handshake with controller. Usually the controller wants
     # the current time.
     response = self.ReadSerialByte()
-    if response is not None:
-      logging.info("First byte received: %x", response)
-    if response == XTB232.InterfaceTimeRequest:
-      logging.info("Setting interface time")
-      self.SendTime(datetime.datetime.now())
+    if (response is not None) and (response != 0):
+      logging.info("InitializeController byte received: %x", response)
+      # Does the controller want the time?
+      if response == XTB232.InterfaceTimeRequest:
+        logging.info("InitializeController received InterfaceTimeRequest. Setting interface time.")
+        if self.SendTime(datetime.datetime.now()):
+          logging.info("InitializeController sent time")
+        else:
+          logging.error("InitializeController SendTime failed")
+      else:
+        logging.info("InitializeController expected time request, received byte %x", response)
     else:
-      logging.warn("During initialization, no interface time request was received from controller")
-      
+        logging.info("InitializeController received None or 0")
+
+    # Let's clear out the port by reading to a known state
+    # When the XTB232 is power-on-reset, it sends a time request (0xA5).
+    # However, when we send the time, the XTB232 does not return the
+    # correct checksum. Typically, it will return a bad checksum byte
+    # followed by an interface ready (0x55). No matter how many times
+    # you retry the set time request, the XTB232 never returns the correct
+    # checksum.
+    logging.debug("Clearing serial port to get to a known state")
+    cleared = False
+    while not cleared:
+      response = self.ReadSerialByte()
+      if (response is None) or (response == 0):
+        logging.debug("InitializeController cleared serial port")
+        cleared = True
+
   #************************************************************************
   # Send a time value to the controller. Usually the time is the current time.
   # time_value should be a datetime.
@@ -212,16 +234,21 @@ class XTB232(X10ControllerInterface.X10ControllerInterface):
     
     good_checksum = False
     retry_count = 0
-    
-    logging.info("Sending command: %s", cmd)
-    
+
+    # There are only three ways out of this loop
+    # 1. We successfully send time
+    # 2. We fail to read any more data from the serial port
+    # 3. We exhaust the retry count
     while (not good_checksum) and (retry_count < 3):
+      logging.info("Sending command: %s", cmd)
       # Send the command bytes
       self.port.write(cmd)
       # Read the response - it should be the actual checksum from the controller
       response = self.ReadSerialByte()
       # Does the expected checksum match the actual checksum?
       if expected_checksum == response:
+        good_checksum = True
+        logging.debug("Good checksum received")
         # Send commit byte
         self.port.write([XTB232.InterfaceAck])
         # Wait for interface ready signal. The retry count is purely arbitrary.
@@ -239,18 +266,24 @@ class XTB232(X10ControllerInterface.X10ControllerInterface):
           self.LastError = "Expected interface ready signal, but none received"
           #logging.error(self.LastError)
           return False
-      elif response == '':
+      elif response == XTB232.InterfaceReady:
+        # Here's a guess. We expected a checksum, but we receive 0x55 instead.
+        # Looks like we got an interface ready, so we'll move on.
+        logging.info("SendCommand expected a checksum, but appears to have received an interface ready")
+        return True
+      elif (response == '') or (response is None):
         self.LastErrorCode = XTB232.ChecksumTimeout
         self.LastError = "Timeout waiting for checksum from controller"
         #logging.error(self.LastError)
         return False
       else:
+        logging.error("Checksum error. Exp: %x Act: %x", expected_checksum, response)
         retry_count += 1
       
-      # If we have fallen to here, the command transmission failed.
-      self.LastErrorCode = XTB232.ChecksumError
-      self.LastError = "Checksum error attempting to transmit command"
-      return False
+    # If we have fallen to here, the command transmission failed.
+    self.LastErrorCode = XTB232.ChecksumError
+    self.LastError = "Checksum error attempting to transmit command"
+    return False
     
   #************************************************************************
   # Calculate the simple checksum of an iterable list of bytes  
@@ -259,7 +292,8 @@ class XTB232(X10ControllerInterface.X10ControllerInterface):
     checksum = 0
     for b in data:
       checksum += b
-    return checksum & 0xFF
+      checksum &= 0xFF
+    return checksum
 
   #************************************************************************
   # Read a byte from the serial port
