@@ -254,8 +254,10 @@ class XTB232(X10ControllerInterface.X10ControllerInterface):
       if expected_checksum == response:
         good_checksum = True
         logger.debug("Good checksum received")
-        # Send commit byte
-        self.port.write([XTB232.InterfaceAck])
+        # Send commit byte (must be an array type)
+        ack = bytearray(1)
+        ack[0] = XTB232.InterfaceAck
+        self.port.write(ack)
         # Wait for interface ready signal. The retry count is purely arbitrary.
         for i in range(0,10):
           response = self.ReadSerialByte()
