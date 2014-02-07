@@ -23,6 +23,7 @@ import serial
 import datetime
 import array
 import logging
+import binascii
 
 logger = logging.getLogger("server")
 
@@ -91,7 +92,7 @@ class XTB232(X10ControllerInterface.X10ControllerInterface):
     
   #************************************************************************
   def SelectAddress(self, house_device_code):
-    SelectCommand = array.array('B', [0x04, 0])
+    SelectCommand = bytearray(2) #array.array('B', [0x04, 0])
 
     HouseBinary = XTB232.GetHouseCode(house_device_code[0:1])
     DeviceBinary = XTB232.GetDeviceCode(house_device_code[1:])
@@ -112,7 +113,7 @@ class XTB232(X10ControllerInterface.X10ControllerInterface):
       return False
     
     # Second part, send the command for all devices selected for the house code.
-    Xfunction = array.array('B', [0, 0])
+    Xfunction = bytearray(2) #array.array('B', [0, 0])
 
     Xfunction[0] = ((dim_amount << 3) + XTB232.HdrAlwaysOne + XTB232.HdrFunction)
     HouseBinary = XTB232.GetHouseCode(house_device_code[0:1])
@@ -198,7 +199,7 @@ class XTB232(X10ControllerInterface.X10ControllerInterface):
     self.ClearLastError()
 
     #The set time command is 7 bytes long
-    TimeData = array.array('B', [0,0,0,0,0,0,0])
+    TimeData = bytearray(7) #array.array('B', [0,0,0,0,0,0,0])
     
     TimeData[0] = 0x9B;
     # Seconds
@@ -242,7 +243,9 @@ class XTB232(X10ControllerInterface.X10ControllerInterface):
     # 2. We fail to read any more data from the serial port
     # 3. We exhaust the retry count
     while (not good_checksum) and (retry_count < 3):
-      logger.info("Sending command: %s", cmd)
+      # TODO This is OK for now, but it would be better if we had
+      # decent formatting on the cmd string.
+      logger.info("Sending command: %s", binascii.hexlify(cmd))
       # Send the command bytes
       self.port.write(cmd)
       # Read the response - it should be the actual checksum from the controller
