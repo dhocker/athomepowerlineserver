@@ -104,6 +104,11 @@ class Configuration():
 
   ######################################################################
   @classmethod
+  def Logconsole(cls):
+    return cls.ActiveConfig["LogConsole"].lower() == "true"
+
+  ######################################################################
+  @classmethod
   def Logfile(cls):
     return cls.ActiveConfig["LogFile"]
 
