@@ -68,7 +68,7 @@ class TimerStore:
         # Note that we don't do anything with the lastupdate column
 
         # Some debugging/tracing output
-        logger.info("%s Start: %s/%s Stop: %s/%s", name, start_time, start_action, stop_time, stop_action)
+        logger.info("%s %s Start: %s/%s Stop: %s/%s", name, house_device_code, start_time, start_action, stop_time, stop_action)
 
         # Add each timer program to the current list of programs
         cls.AppendTimer(name, house_device_code, day_mask, start_time, stop_time, start_action, stop_action, security)
