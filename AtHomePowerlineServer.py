@@ -1,3 +1,4 @@
+#!/usr/bin/python
 #
 # AtHomePowerlineServer - networked server for CM11/CM11A/XTB-232 X10 controllers
 # Copyright (C) 2014  Dave Hocker (email: AtHomeX10@gmail.com)
@@ -25,19 +26,39 @@ import timers.TimerStore
 import services.TimerService
 import disclaimer.Disclaimer
 import logging
+import signal
+import os
 
 #
 # main
 #
-if __name__ == "__main__":
+def main():
   logger = logging.getLogger("server")
+
+  # Clean up when killed
+  def term_handler(signum, frame):
+    logger.info("AtHomePowerlineServer received kill signal")
+    CleanUp()
+
+  # Order clean up of the server
+  def CleanUp():
+    timer_service.Stop()
+    server.shutdown()
+    drivers.X10ControllerAdapter.X10ControllerAdapter.Close()
+    logger.info("AtHomePowerlineServer shutdown complete")
+    logger.info("################################################################################")
+    Logging.Shutdown()
 
   # First things, First
   disclaimer.Disclaimer.DisplayDisclaimer()
   print "Use ctrl-c to shutdown server\n"
 
+  # Change the current directory so we can find the configuration file.
+  # For Linux we should probably put the configuration file in the /etc directory.
+  just_the_path = os.path.dirname(os.path.realpath(__file__))
+  os.chdir(just_the_path)
+
   # Load the configuration file
-  #Configuration.Configuration()
   Configuration.Configuration.LoadConfiguration()
 
   # Activate logging to console or file
@@ -49,7 +70,7 @@ if __name__ == "__main__":
 
   logger.info("X10 controller: %s", Configuration.Configuration.X10ControllerDevice())
   logger.info("ComPort: %s", Configuration.Configuration.ComPort())
-  
+
   # Inject the X10 controller driver
   driver = Configuration.Configuration.GetX10ControllerDriver()
   drivers.X10ControllerAdapter.X10ControllerAdapter.Open(driver)
@@ -59,7 +80,7 @@ if __name__ == "__main__":
   database.AtHomePowerlineServerDb.AtHomePowerlineServerDb.Initialize()
   logger.info("Loading timer programs")
   timers.TimerStore.TimerStore.LoadTimerProgramList()
-  
+
   #HOST, PORT = "localhost", 9999
   #HOST, PORT = "hedwig", 9999
   # This accepts connections from any network interface. It was the only
@@ -79,19 +100,25 @@ if __name__ == "__main__":
   # Activate the server; this will keep running until you
   # interrupt the program with Ctrl-C
   logger.info("AtHomePowerlineServer now serving sockets at %s:%s", HOST, PORT)
-  
+
+  # Set up handle for the kill signal
+  signal.signal(signal.SIGTERM, term_handler)
+
+  # Launch the socket server
   try:
+    # This runs "forever", until ctrl-c or killed
     server.serve_forever()
   except KeyboardInterrupt:
     logger.info("AtHomePowerlineServer shutting down...")
-  except Exception as e: 
+  except Exception as e:
     logger.error("Unhandled exception occurred")
     logger.error(e.strerror)
     logger.error(sys.exc_info()[0])
   finally:
-    timer_service.Stop()
-    server.shutdown()
-    drivers.X10ControllerAdapter.X10ControllerAdapter.Close()
-    logger.info("AtHomePowerlineServer shutdown complete")
-    logger.info("################################################################################")
-    Logging.Shutdown()
+    CleanUp()
+
+#
+# Run as an application
+#
+if __name__ == "__main__":
+  main()
