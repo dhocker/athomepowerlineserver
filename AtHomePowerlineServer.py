@@ -42,8 +42,10 @@ def main():
 
   # Clean up when killed
   def term_handler(signum, frame):
-    logger.info("AtHomePowerlineServer received kill signal on thread id: {0}".format(threading.currentThread()))
-    CleanUp()
+    logger.info("AtHomePowerlineServer received kill signal...shutting down")
+    # This will break the forever loop at the foot of main()
+    terminate_service = True
+    sys.exit(0)
 
   # Orderly clean up of the server
   def CleanUp():
@@ -53,8 +55,6 @@ def main():
     logger.info("AtHomePowerlineServer shutdown complete")
     logger.info("################################################################################")
     Logging.Shutdown()
-    # It is unclear what happens if we just return. So, we'll exit instead.
-    sys.exit(0)
 
   # First things, First
   disclaimer.Disclaimer.DisplayDisclaimer()
@@ -97,7 +97,7 @@ def main():
   # Fire up the timer service - watches for timer events to occur
   timer_service = services.TimerService.TimerService()
   timer_service.Start()
-  logger.info("Timer service started on thread id: {0}".format(threading.currentThread()))
+  logger.info("Timer service started")
 
   # Create the TCP socket server on its own thread.
   # This is done so that we can handle the kill signal which
@@ -106,11 +106,11 @@ def main():
   # an orderly fashion.
   server = SocketServerThread.SocketServerThread(HOST, PORT)
 
-  # Set up handle for the kill signal
+  # Set up handler for the kill signal
   signal.signal(signal.SIGTERM, term_handler)
 
   # Activate the server; this will keep running until you
-  # interrupt the program with Ctrl-C
+  # interrupt the program with Ctrl-C or kill the daemon.
 
   # Launch the socket server
   try:
@@ -127,10 +127,11 @@ def main():
     logger.error(e.strerror)
     logger.error(sys.exc_info()[0])
   finally:
+    # We actually get here through ctrl-c or process kill (SIGTERM)
     CleanUp()
 
 #
-# Run as an application
+# Run as an application or daemon
 #
 if __name__ == "__main__":
   main()
