@@ -10,6 +10,7 @@
 #
 
 import logging
+import logging.handlers
 import Configuration
 
 ########################################################################
@@ -51,7 +52,7 @@ def EnableServerLogging():
   logfile = Configuration.Configuration.Logfile()
   if logfile != "":
     # To file
-    fh = logging.FileHandler(logfile)
+    fh = logging.handlers.TimedRotatingFileHandler(logfile, when='midnight', backupCount=3)
     fh.setLevel(loglevel)
     fh.setFormatter(formatter)
     logger.addHandler(fh)
