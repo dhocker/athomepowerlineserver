@@ -39,7 +39,7 @@ def main():
 
   # Clean up when killed
   def term_handler(signum, frame):
-    logger.info("AtHomePowerlineServer received kill signal on thread id: ".format(threading.currentThread()))
+    logger.info("AtHomePowerlineServer received kill signal on thread id: {0}".format(threading.currentThread()))
     CleanUp()
 
   # Order clean up of the server
