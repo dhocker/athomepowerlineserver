@@ -17,8 +17,9 @@
 # along with this program (the LICENSE file).  If not, see <http://www.gnu.org/licenses/>.
 #
 
-import ThreadedTCPServer
-import MyTCPHandlerJson
+#import ThreadedTCPServer
+#import MyTCPHandlerJson
+import SocketServerThread
 import Configuration
 import Logging
 import drivers.X10ControllerAdapter
@@ -30,6 +31,7 @@ import logging
 import signal
 import os
 import threading
+import time
 
 #
 # main
@@ -40,12 +42,14 @@ def main():
   # Clean up when killed
   def term_handler(signum, frame):
     logger.info("AtHomePowerlineServer received kill signal on thread id: {0}".format(threading.currentThread()))
-    CleanUp()
+    # This will terminate the forever loop at the bottom.
+    # Orderly clean up will follow
+    terminate_service = True
 
-  # Order clean up of the server
+  # Orderly clean up of the server
   def CleanUp():
     timer_service.Stop()
-    server.shutdown()
+    server.Stop()
     drivers.X10ControllerAdapter.X10ControllerAdapter.Close()
     logger.info("AtHomePowerlineServer shutdown complete")
     logger.info("################################################################################")
@@ -94,22 +98,27 @@ def main():
   timer_service.Start()
   logger.info("Timer service started on thread id: {0}".format(threading.currentThread()))
 
-  # Create the server, binding to localhost on port 9999
-  #server = SocketServer.TCPServer((HOST, PORT), MyTCPHandlerStream)
-  ThreadedTCPServer.ThreadedTCPServer.allow_reuse_address = True
-  server = ThreadedTCPServer.ThreadedTCPServer((HOST, PORT), MyTCPHandlerJson.MyTCPHandlerJson)
-
-  # Activate the server; this will keep running until you
-  # interrupt the program with Ctrl-C
-  logger.info("AtHomePowerlineServer now serving sockets at %s:%s", HOST, PORT)
+  # Create the TCP socket server on its own thread.
+  # This is done so that we can handle the kill signal which
+  # arrives on the main thread. If we didn't put the TCP server
+  # on its own thread we would not be able to shut it down in
+  # an orderly fashion.
+  server = SocketServerThread.SocketServerThread(HOST, PORT)
 
   # Set up handle for the kill signal
   signal.signal(signal.SIGTERM, term_handler)
 
+  # Activate the server; this will keep running until you
+  # interrupt the program with Ctrl-C
+
   # Launch the socket server
   try:
     # This runs "forever", until ctrl-c or killed
-    server.serve_forever()
+    server.Start()
+    terminate_service = False
+    while not terminate_service:
+      # We do a lot of sleeping to avoid using too much CPU :-)
+      time.sleep(1)
   except KeyboardInterrupt:
     logger.info("AtHomePowerlineServer shutting down...")
   except Exception as e:
