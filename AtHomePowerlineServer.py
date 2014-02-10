@@ -29,6 +29,7 @@ import disclaimer.Disclaimer
 import logging
 import signal
 import os
+import threading
 
 #
 # main
@@ -38,7 +39,7 @@ def main():
 
   # Clean up when killed
   def term_handler(signum, frame):
-    logger.info("AtHomePowerlineServer received kill signal")
+    logger.info("AtHomePowerlineServer received kill signal on thread id: ".format(threading.currentThread()))
     CleanUp()
 
   # Order clean up of the server
@@ -91,7 +92,7 @@ def main():
   # Fire up the timer service - watches for timer events to occur
   timer_service = services.TimerService.TimerService()
   timer_service.Start()
-  logger.info("Timer service started")
+  logger.info("Timer service started on thread id: {0}".format(threading.currentThread()))
 
   # Create the server, binding to localhost on port 9999
   #server = SocketServer.TCPServer((HOST, PORT), MyTCPHandlerStream)
