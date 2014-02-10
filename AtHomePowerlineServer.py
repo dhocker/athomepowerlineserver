@@ -32,6 +32,7 @@ import signal
 import os
 import threading
 import time
+import sys
 
 #
 # main
@@ -52,7 +53,8 @@ def main():
     logger.info("AtHomePowerlineServer shutdown complete")
     logger.info("################################################################################")
     Logging.Shutdown()
-    terminate_service = True
+    # It is unclear what happens if we just return. So, we'll exit instead.
+    sys.exit(0)
 
   # First things, First
   disclaimer.Disclaimer.DisplayDisclaimer()
