@@ -42,9 +42,7 @@ def main():
   # Clean up when killed
   def term_handler(signum, frame):
     logger.info("AtHomePowerlineServer received kill signal on thread id: {0}".format(threading.currentThread()))
-    # This will terminate the forever loop at the bottom.
-    # Orderly clean up will follow
-    terminate_service = True
+    CleanUp()
 
   # Orderly clean up of the server
   def CleanUp():
@@ -54,6 +52,7 @@ def main():
     logger.info("AtHomePowerlineServer shutdown complete")
     logger.info("################################################################################")
     Logging.Shutdown()
+    terminate_service = True
 
   # First things, First
   disclaimer.Disclaimer.DisplayDisclaimer()
