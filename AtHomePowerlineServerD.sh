@@ -31,7 +31,7 @@ do_start () {
 }
 do_stop () {
     log_daemon_msg "Stopping system $DAEMON_NAME daemon"
-    start-stop-daemon --stop --pidfile $PIDFILE --retry 10 --signal 15
+    start-stop-daemon --stop --pidfile $PIDFILE --retry 30 --signal 15
     log_end_msg $?
 }
 
