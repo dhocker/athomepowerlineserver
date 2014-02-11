@@ -100,16 +100,18 @@ class TimerServiceThread(threading.Thread):
 
       # Start event check
       if (not tp.StartEventRun) and (today_starttime == now_dt):
-        # Start event triggered
+        # Start event triggered. Reset Stop event.
         tp.StartEventRun = True
+        tp.StopEventRun = False
         logger.info("RunProgramTimers start event triggered: %s %s", tp.Name, tp.StartAction)
         # Fire the action
         self.RunTimerAction(tp.StartAction, tp.HouseDeviceCode)
 
       # Stop event check
       if (not tp.StopEventRun) and (today_stoptime == now_dt):
-        # Stop event triggered
+        # Stop event triggered. Reset Start event.
         tp.StopEventRun = True
+        tp.StartEventRun = False
         logger.info("RunProgramTimers stop event triggered: %s %s", tp.Name, tp.StopAction)
         # Fire the action
         self.RunTimerAction(tp.StopAction, tp.HouseDeviceCode)
