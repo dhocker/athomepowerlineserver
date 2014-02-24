@@ -17,6 +17,7 @@ import sqlite3
 import os.path
 import datetime
 import logging
+import sun_table
 
 logger = logging.getLogger("server")
 
@@ -51,21 +52,30 @@ class AtHomePowerlineServerDb:
   @classmethod
   def CreateDatabase(cls):
     # This actually creates the database if it does not exist
-    # Note that the return value is a cursor object
-    csr = cls.GetConnection()
+    # Note that the return value is a connection object
+    conn = cls.GetConnection()
 
     # Create tables (Sqlite3 specific)
     # SchemaVersion (sort of the migration version)
-    csr.execute("CREATE TABLE SchemaVersion (Version text, updatetime timestamp)")
-    csr.execute("INSERT INTO SchemaVersion values (?, ?)", ("1.0.0.0", datetime.datetime.now()))
+    conn.execute("CREATE TABLE SchemaVersion (Version text, updatetime timestamp)")
+    conn.execute("INSERT INTO SchemaVersion values (?, ?)", ("2.0.0.0", datetime.datetime.now()))
+
     # Timers
-    csr.execute("CREATE TABLE Timers (name text PRIMARY KEY, housedevicecode text, daymask text, starttime timestamp, stoptime timestamp, \
+    conn.execute("CREATE TABLE Timers (name text PRIMARY KEY, housedevicecode text, daymask text, \
+      starttriggermethod text, starttime timestamp, startoffset integer, \
+      stoptriggermethod text, stoptime timestamp, stopoffset integer, \
       startaction text, stopaction text, security integer, updatetime timestamp)")
+
     # Actions
-    csr.execute("CREATE TABLE Actions (name text PRIMARY KEY, command text, dimamount integer, args text, updatetime timestamp)")
+    conn.execute("CREATE TABLE Actions (name text PRIMARY KEY, command text, dimamount integer, args text, updatetime timestamp)")
+
+    # Sun times
+    conn.execute("CREATE TABLE sun_table (calendar_date date, sunrise time, sunset time)")
+    # Load all of the sun data files into the sun-table
+    sun_table.load_sun_table(conn)
 
     # Done
-    csr.close()
+    conn.close()
 
   #######################################################################
   # Returns a database connection

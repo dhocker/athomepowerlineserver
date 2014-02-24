@@ -96,10 +96,12 @@ class TimerServiceThread(threading.Thread):
     # Only if the current day is enabled...
     if TimerServiceThread.IsDayOfWeekEnabled(now, tp.DayMask):
       # we consider the event triggered if the current date/time in hours and minutes matches the event time
-      logger.debug("%s Start: %s Stop: %s", tp.Name, tp.StartTime, tp.StopTime)
+      logger.debug(str(tp))
+
+      # TODO We need a factory approach to determining if the start or stop event has occurred
 
       # Start event check
-      if (not tp.StartEventRun) and (today_starttime == now_dt):
+      if (not tp.StartEventRun) and (tp.IsStartEventTriggered(now_dt)):
         # Start event triggered. Reset Stop event.
         tp.StartEventRun = True
         tp.StopEventRun = False
@@ -108,7 +110,7 @@ class TimerServiceThread(threading.Thread):
         self.RunTimerAction(tp.StartAction, tp.HouseDeviceCode)
 
       # Stop event check
-      if (not tp.StopEventRun) and (today_stoptime == now_dt):
+      if (not tp.StopEventRun) and (tp.IsStopEventTriggered(now_dt)):
         # Stop event triggered. Reset Start event.
         tp.StopEventRun = True
         tp.StartEventRun = False

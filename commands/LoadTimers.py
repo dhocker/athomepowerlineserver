@@ -42,15 +42,22 @@ class LoadTimers(ServerCommand.ServerCommand):
       name = timer_program["name"]
       house_device_code = timer_program["house-device-code"]
       day_mask = timer_program["day-mask"]
+      start_trigger_method = timer_program["start-trigger-method"]
       start_time = datetime.datetime.strptime(timer_program["start-time"], "%H:%M")
+      start_offset = int(timer_program["start-time-offset"])
+      stop_trigger_method = timer_program["stop-trigger-method"]
       stop_time = datetime.datetime.strptime(timer_program["stop-time"], "%H:%M")
+      stop_offset = int(timer_program["stop-time-offset"])
       start_action = timer_program["start-action"]
       stop_action = timer_program["stop-action"]
       # Unclear what security is used for, but it is not part of the program
       security = False
 
       # Add the timer program to the current list
-      timers.TimerStore.TimerStore.AppendTimer(name, house_device_code, day_mask, start_time, stop_time, start_action, stop_action, security)
+      timers.TimerStore.TimerStore.AppendTimer(name, house_device_code, day_mask, \
+                                               start_trigger_method, start_time, start_offset, \
+                                               stop_trigger_method, stop_time, stop_offset, \
+                                               start_action, stop_action, security)
 
     # Debugging...
     timers.TimerStore.TimerStore.DumpTimerProgramList()
