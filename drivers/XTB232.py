@@ -77,18 +77,18 @@ class XTB232(X10ControllerInterface.X10ControllerInterface):
   #************************************************************************
   # Turn a device on
   # house_device_code = Ex. 'A1'
-  # dim_amount 0 <= v <= 22
+  # dim_amount 0 <= v <= 100
   def DeviceOn(self, house_device_code, dim_amount):
     self.ClearLastError()
-    return self.ExecuteFunction(house_device_code, dim_amount, XTB232.On)
+    return self.ExecuteFunction(house_device_code, self.ConvertDimPercent(dim_amount), XTB232.On)
 
   #************************************************************************
   # Turn a device off
   # house_device_code = Ex. 'A1'
-  # dim_amount 0 <= v <= 22
+  # dim_amount 0 <= v <= 100
   def DeviceOff(self, house_device_code, dim_amount):
     self.ClearLastError()
-    return self.ExecuteFunction(house_device_code, dim_amount, XTB232.Off)
+    return self.ExecuteFunction(house_device_code, self.ConvertDimPercent(dim_amount), XTB232.Off)
     
   #************************************************************************
   def SelectAddress(self, house_device_code):
@@ -141,7 +141,14 @@ class XTB232(X10ControllerInterface.X10ControllerInterface):
   def SetTime(self, time_value):
     self.ClearLastError()
     # TODO implement
-    pass  
+    pass
+
+  #************************************************************************
+  def ConvertDimPercent(self, dimPercent):
+    """
+    Convert a percent value in the range 0-100 into device dim units 0-22
+    """
+    return int(round(float(dimPercent)/100.0*22))
 
   #************************************************************************
   def InitializeController(self):
