@@ -99,6 +99,8 @@ class XTB232(X10ControllerInterface.X10ControllerInterface):
 
     SelectCommand[0] = XTB232.SelectFunction;
     SelectCommand[1] = ((HouseBinary << 4) + DeviceBinary)
+
+    logger.info(X10ControllerInterface.X10ControllerInterface.FormatStandardTransmission(SelectCommand))
     
     return self.SendCommand(SelectCommand)        
     
@@ -106,7 +108,7 @@ class XTB232(X10ControllerInterface.X10ControllerInterface):
   # Common function for sending a complete function to the controller.
   # The device function code is treated as a data value.
   def ExecuteFunction(self, house_device_code, dim_amount, device_function):
-    logger.debug("Executing function: %x", device_function)
+    logger.debug("Executing function: %s", X10ControllerInterface.X10ControllerInterface.GetFunctionName(device_function))
     # First part of two step sequence. Select the specific device that is the command target.
     if not self.SelectAddress(house_device_code):
       logger.error("SelectAddress failed")
@@ -118,7 +120,9 @@ class XTB232(X10ControllerInterface.X10ControllerInterface):
     Xfunction[0] = ((dim_amount << 3) + XTB232.HdrAlwaysOne + XTB232.HdrFunction)
     HouseBinary = XTB232.GetHouseCode(house_device_code[0:1])
     Xfunction[1] = (HouseBinary << 4) + device_function
-    
+
+    logger.info(X10ControllerInterface.X10ControllerInterface.FormatStandardTransmission(Xfunction))
+
     return self.SendCommand(Xfunction)        
     
   #************************************************************************
