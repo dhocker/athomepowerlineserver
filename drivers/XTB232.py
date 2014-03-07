@@ -308,10 +308,12 @@ class XTB232(X10ControllerInterface.X10ControllerInterface):
         # power line controller was reset and is now waiting for the current time.
         # We'll send the current time and retry the command.
         logger.info("Expected checksum, received InterfaceTimeRequest. Setting interface time.")
-        if self.SendTime(datetime.datetime.now()):
-          logger.info("InitializeController sent time")
-        else:
-          logger.error("InitializeController SendTime failed")
+        # TODO We can't call SendTime here. It becomes a recursive call and disaster ensues.
+        # TODO Need a better solution.
+        # if self.SendTime(datetime.datetime.now()):
+        #   logger.info("SendCommand sent time")
+        # else:
+        #   logger.error("InitializeController SendTime failed")
       elif (response == '') or (response is None):
         self.LastErrorCode = XTB232.ChecksumTimeout
         self.LastError = "Timeout waiting for checksum from controller"
