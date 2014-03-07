@@ -94,4 +94,4 @@ class X10ControllerAdapter:
   @classmethod
   def DeviceDim(cls, house_device_code, dim_amount):
     logger.info("Device dim: {0} {1}".format(house_device_code, dim_amount))
-    return cls.Driver.DeviceOn(house_device_code, dim_amount)
+    return cls.Driver.DeviceDim(house_device_code, dim_amount)
