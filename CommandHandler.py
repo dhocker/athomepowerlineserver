@@ -98,7 +98,7 @@ class CommandHandler:
       response = handler.Execute(request)
       response['X10Response']['call-sequence'] = CommandHandler.call_sequence
     else:
-      info.error("No handler for command: %s", request["request"])
+      logger.error("No handler for command: %s", request["request"])
       response = commands.ServerCommand.ServerCommand.CreateResponse(request["request"])
       r = response['X10Response']
       r['resultcode'] = CommandHandler.NotImplemented

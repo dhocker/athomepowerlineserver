@@ -86,3 +86,12 @@ class X10ControllerAdapter:
   def DeviceOff(cls, house_device_code, dim_amount):
     logger.info("Device off: {} {}".format(house_device_code, dim_amount))
     return cls.Driver.DeviceOff(house_device_code, dim_amount)
+
+  #************************************************************************
+  # Dim a lamp module
+  # house_device_code = Ex. 'A1'
+  # dim_amount 0 <= v <= 22
+  @classmethod
+  def DeviceDim(cls, house_device_code, dim_amount):
+    logger.info("Device dim: {0} {1}".format(house_device_code, dim_amount))
+    return cls.Driver.DeviceOn(house_device_code, dim_amount)

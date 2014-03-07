@@ -89,7 +89,15 @@ class XTB232(X10ControllerInterface.X10ControllerInterface):
   def DeviceOff(self, house_device_code, dim_amount):
     self.ClearLastError()
     return self.ExecuteFunction(house_device_code, self.ConvertDimPercent(dim_amount), XTB232.Off)
-    
+
+  #************************************************************************
+  # Dim a lamp module
+  # house_device_code = Ex. 'A1'
+  # dim_amount 0 <= v <= 100
+  def DeviceDim(self, house_device_code, dim_amount):
+    self.ClearLastError()
+    return self.ExecuteFunction(house_device_code, self.ConvertDimPercent(dim_amount), XTB232.Dim)
+
   #************************************************************************
   def SelectAddress(self, house_device_code):
     SelectCommand = bytearray(2) #array.array('B', [0x04, 0])
@@ -289,6 +297,15 @@ class XTB232(X10ControllerInterface.X10ControllerInterface):
         # Looks like we got an interface ready, so we'll move on.
         logger.info("SendCommand expected a checksum, but appears to have received an interface ready")
         return True
+      elif response == XTB232.InterfaceTimeRequest:
+        # We received an interface timer request. This likely means that the
+        # power line controller was reset and is now waiting for the current time.
+        # We'll send the current time and retry the command.
+        logger.info("Expected checksum, received InterfaceTimeRequest. Setting interface time.")
+        if self.SendTime(datetime.datetime.now()):
+          logger.info("InitializeController sent time")
+        else:
+          logger.error("InitializeController SendTime failed")
       elif (response == '') or (response is None):
         self.LastErrorCode = XTB232.ChecksumTimeout
         self.LastError = "Timeout waiting for checksum from controller"
