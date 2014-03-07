@@ -24,6 +24,8 @@ def GetAction(action_name):
     action = On
   elif ci_command == "off":
     action = Off
+  elif ci_command == "dim":
+    action = Dim
   else:
     action = None
 
@@ -38,3 +40,8 @@ def On(house_device_code, dim_amount, args):
 # Device/light off
 def Off(house_device_code, dim_amount, args):
   drivers.X10ControllerAdapter.X10ControllerAdapter.DeviceOff(house_device_code, dim_amount)
+
+########################################################################
+# Lamp module dim
+def Dim(house_device_code, dim_amount, args):
+  drivers.X10ControllerAdapter.X10ControllerAdapter.DeviceDim(house_device_code, dim_amount)

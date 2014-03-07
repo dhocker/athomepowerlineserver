@@ -19,18 +19,22 @@ import datetime
 
 #######################################################################
 # Command handler for on command
-class DeviceOn(ServerCommand.ServerCommand):
+class DeviceDim(ServerCommand.ServerCommand):
   
   #######################################################################
-  # Execute the "on" command.
+  # Execute the "dim" command.
   def Execute(self, request):
+    """
+    Executes an X10 DIM command.
+    Returns true for success, false for failure.
+    """
     house_device_code = request["args"]["house-device-code"]
     dim_amount = int(request["args"]["dim-amount"])
 
-    result = drivers.X10ControllerAdapter.X10ControllerAdapter.DeviceOn(house_device_code, dim_amount)
+    result = drivers.X10ControllerAdapter.X10ControllerAdapter.DeviceDim(house_device_code, dim_amount)
 
     # Generate a successful response
-    response = DeviceOn.CreateResponse(request["request"])
+    response = DeviceDim.CreateResponse(request["request"])
     r = response["X10Response"]    
     
     r['result-code'] = drivers.X10ControllerAdapter.X10ControllerAdapter.GetLastErrorCode()
