@@ -27,8 +27,8 @@ class DeviceOn(ServerCommand.ServerCommand):
     house_device_code = request["args"]["house-device-code"]
     dim_amount = int(request["args"]["dim-amount"])
     result = drivers.X10ControllerAdapter.X10ControllerAdapter.DeviceOn(house_device_code, dim_amount)
-    if result and (dim_amount > 0):
-      result = drivers.X10ControllerAdapter.X10ControllerAdapter.DeviceDim(house_device_code, dim_amount)
+    # if result and (dim_amount > 0):
+    #   result = drivers.X10ControllerAdapter.X10ControllerAdapter.DeviceDim(house_device_code, dim_amount)
     
     # Generate a successful response
     response = DeviceOn.CreateResponse(request["request"])
