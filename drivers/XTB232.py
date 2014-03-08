@@ -24,6 +24,7 @@ import datetime
 import array
 import logging
 import binascii
+import time
 
 logger = logging.getLogger("server")
 
@@ -47,8 +48,8 @@ class XTB232(X10ControllerInterface.X10ControllerInterface):
   StatusRequest = 15
   
   # Function header constants
-  HdrFunction = 0x02;
-  HdrAlwaysOne = 0x04;  
+  HdrFunction = 0x02
+  HdrAlwaysOne = 0x04
 
   # Error codes
   ChecksumTimeout = 1
@@ -111,7 +112,7 @@ class XTB232(X10ControllerInterface.X10ControllerInterface):
     HouseBinary = XTB232.GetHouseCode(house_device_code[0:1])
     DeviceBinary = XTB232.GetDeviceCode(house_device_code[1:])
 
-    SelectCommand[0] = XTB232.SelectFunction;
+    SelectCommand[0] = XTB232.SelectFunction
     SelectCommand[1] = ((HouseBinary << 4) + DeviceBinary)
 
     logger.info(X10ControllerInterface.X10ControllerInterface.FormatStandardTransmission(SelectCommand))
@@ -185,35 +186,101 @@ class XTB232(X10ControllerInterface.X10ControllerInterface):
       
     # Handshake with controller. Usually the controller wants
     # the current time.
-    response = self.ReadSerialByte()
-    if (response is not None) and (response != 0):
-      logger.info("InitializeController byte received: %x", response)
-      # Does the controller want the time?
-      if response == XTB232.InterfaceTimeRequest:
-        logger.info("InitializeController received InterfaceTimeRequest. Setting interface time.")
-        if self.SendTime(datetime.datetime.now()):
-          logger.info("InitializeController sent time")
-        else:
-          logger.error("InitializeController SendTime failed")
-      else:
-        logger.info("InitializeController expected time request, received byte %x", response)
-    else:
-        logger.info("InitializeController received None or 0")
+    self.ResetController()
 
-    # Let's clear out the port by reading to a known state
-    # When the XTB232 is power-on-reset, it sends a time request (0xA5).
-    # However, when we send the time, the XTB232 does not return the
-    # correct checksum. Typically, it will return a bad checksum byte
-    # followed by an interface ready (0x55). No matter how many times
-    # you retry the set time request, the XTB232 never returns the correct
-    # checksum.
-    logger.debug("Clearing serial port to get to a known state")
-    cleared = False
-    while not cleared:
+  #************************************************************************
+  def ResetController(self, interface_response=None):
+    logger.info("Resetting controller to a known state")
+    # Handshake with controller. Usually the controller wants
+    # the current time.
+    if interface_response is None:
       response = self.ReadSerialByte()
-      if (response is None) or (response == 0):
-        logger.debug("InitializeController cleared serial port")
-        cleared = True
+    else:
+      response = interface_response
+
+    reset_complete = False
+    while not reset_complete:
+      if (response is not None) and (response != 0):
+        logger.info("ResetController byte received: %x", response)
+        # Does the controller want the time?
+        if response == XTB232.InterfaceTimeRequest:
+          logger.info("ResetController received InterfaceTimeRequest. Setting interface time now.")
+          self.SetInterfaceTime(datetime.datetime.now())
+          time.sleep(0.2)
+          response = self.ReadSerialByte()
+          logger.info("ResetController response from SetInterfaceTime was %x", response)
+          # Regardless of the response, we'll send and ACK
+          self.SendAck()
+        # Is this an interface ready signal?
+        elif response == XTB232.InterfaceReady:
+          logger.info("ResetController received interface ready")
+          #response = self.ReadSerialByte()
+          reset_complete = True
+        else:
+          logger.info("ResetController unexpected byte %x", response)
+          # Read another byte from the controller and hope for something better
+          response = self.ReadSerialByte()
+      else:
+        # If the controller did not provide another byte, give up.
+        # Empirically, the XTB-232 seems to be in sync when this happens.
+        logger.info("ResetController received None or 0")
+        reset_complete = True
+
+    logger.info("ResetController arrived at a known state")
+
+  #************************************************************************
+  def SetInterfaceTime(self, time_value):
+    """
+    Send a time value to the controller. Usually the time is the current time.
+    time_value should be a datetime.
+    Note that the XTB232 ignores the time value. But, this is kept for CM11A compatibility.
+    See section 8 of the spec.
+    NOTE: This method CANNOT call another method that would result in recursion.
+    Specifically, that means it cannot call SendCommand.
+    """
+    self.ClearLastError()
+
+    #The set time command is 7 bytes long
+    TimeData = self.CreateSetTimeCommand(time_value)
+
+    # Send the time to the controller
+    self.port.write(TimeData)
+    logger.info("Sending empty set time command: %s", binascii.hexlify(TimeData))
+
+    # Ordinarily, the controller responds to a command with a checksum.
+    # However, by observation the XTB-232 never seems to return a valid checksum.
+    # Therefore, we don't bother to read the checksum. We let the caller
+    # handle the response from the controller.
+
+  #************************************************************************
+  def CreateSetTimeCommand(self, time_value):
+    #The set time command is 7 bytes long
+    #TimeData = bytearray(7)  # array.array('B', [0,0,0,0,0,0,0])
+    TimeData = bytearray(7)
+
+    TimeData[0] = 0x9B
+    for i in range(1, len(TimeData)):
+      TimeData[i] = 0
+
+    """
+    # Seconds
+    TimeData[1] = (time_value.second & 0xFF)
+    # Minutes 0-119
+    TimeData[2] = (((time_value.hour * 60) + time_value.minute) % 120)
+    # Hours / 2
+    TimeData[3] = (time_value.hour / 2)
+    # Day of year bits 0-7
+    TimeData[4] = (time_value.timetuple().tm_yday & 0xFF)
+    # Day of week
+    TimeData[5] = XTB232.GetDayOfWeek(time_value)
+    # Day of year bit 8
+    TimeData[5] |= ((time_value.timetuple().tm_yday >> 1) & 0x80)
+    # Monitored house code
+    TimeData[6] = ((XTB232.GetHouseCode("A") << 4) & 0xF0)
+    # bits 0-3 are left 0
+    """
+
+    return TimeData
 
   #************************************************************************
   # Send a time value to the controller. Usually the time is the current time.
@@ -224,26 +291,16 @@ class XTB232(X10ControllerInterface.X10ControllerInterface):
     self.ClearLastError()
 
     #The set time command is 7 bytes long
-    TimeData = bytearray(7) #array.array('B', [0,0,0,0,0,0,0])
-    
-    TimeData[0] = 0x9B;
-    # Seconds
-    TimeData[1] = (time_value.second & 0xFF);
-    # Minutes 0-119
-    TimeData[2] = (((time_value.hour * 60) + time_value.minute) % 120);
-    # Hours / 2
-    TimeData[3] = (time_value.hour / 2);
-    # Day of year bits 0-7
-    TimeData[4] = (time_value.timetuple().tm_yday & 0xFF);
-    # Day of week
-    TimeData[5] = XTB232.GetDayOfWeek(time_value);
-    # Day of year bit 8
-    TimeData[5] |= ((time_value.timetuple().tm_yday >> 1) & 0x80);
-    # Monitored house code
-    TimeData[6] = ((XTB232.GetHouseCode("A") << 4) & 0xF0);
-    # bits 0-3 are left 0
+    TimeData = self.CreateSetTimeCommand(time_value)
 
-    return self.SendCommand(TimeData);
+    return self.SendCommand(TimeData)
+
+  #************************************************************************
+  def SendAck(self):
+    ack = bytearray(1)
+    ack[0] = XTB232.InterfaceAck
+    self.port.write(ack)
+    logger.info("Sent ACK.")
 
   #************************************************************************
   #
@@ -280,9 +337,7 @@ class XTB232(X10ControllerInterface.X10ControllerInterface):
         good_checksum = True
         logger.debug("Good checksum received")
         # Send commit byte (must be an array type)
-        ack = bytearray(1)
-        ack[0] = XTB232.InterfaceAck
-        self.port.write(ack)
+        self.SendAck()
         # Wait for interface ready signal. The retry count is purely arbitrary.
         for i in range(0,10):
           response = self.ReadSerialByte()
@@ -302,18 +357,16 @@ class XTB232(X10ControllerInterface.X10ControllerInterface):
         # Here's a guess. We expected a checksum, but we receive 0x55 instead.
         # Looks like we got an interface ready, so we'll move on.
         logger.info("SendCommand expected a checksum, but appears to have received an interface ready")
+        # TODO Did the command that was sent work? Or, do we need to retry?
         return True
       elif response == XTB232.InterfaceTimeRequest:
         # We received an interface timer request. This likely means that the
         # power line controller was reset and is now waiting for the current time.
-        # We'll send the current time and retry the command.
+        # We'll reset the controller and retry the command.
         logger.info("Expected checksum, received InterfaceTimeRequest. Setting interface time.")
         # TODO We can't call SendTime here. It becomes a recursive call and disaster ensues.
         # TODO Need a better solution.
-        # if self.SendTime(datetime.datetime.now()):
-        #   logger.info("SendCommand sent time")
-        # else:
-        #   logger.error("InitializeController SendTime failed")
+        self.ResetController(response)
       elif (response == '') or (response is None):
         self.LastErrorCode = XTB232.ChecksumTimeout
         self.LastError = "Timeout waiting for checksum from controller"
@@ -339,11 +392,13 @@ class XTB232(X10ControllerInterface.X10ControllerInterface):
     return checksum
 
   #************************************************************************
-  # Read a byte from the serial port
-  # Returns an integer
   def ReadSerialByte(self):
+    """
+    Read a byte from the serial port
+    Returns an integer
+    """
     b = self.port.read(1)
-    logger.debug("ReadSerialByte: %s %s %x", type(b), len(b), ord(b) if len(b) > 0 else 0)
+    logger.debug("ReadSerialByte: 0x%X", ord(b) if len(b) > 0 else 0)
     if len(b) == 1:
       return ord(b)
     return None
