@@ -335,7 +335,7 @@ class XTB232(X10ControllerInterface.X10ControllerInterface):
       # Does the expected checksum match the actual checksum?
       if expected_checksum == response:
         good_checksum = True
-        logger.debug("Good checksum received")
+        logger.info("Good checksum received")
         # Send commit byte (must be an array type)
         self.SendAck()
         # Wait for interface ready signal. The retry count is purely arbitrary.
@@ -347,11 +347,12 @@ class XTB232(X10ControllerInterface.X10ControllerInterface):
         if response == XTB232.InterfaceReady:
           self.LastErrorCode = XTB232.Success
           self.LastError = ""
+          logger.info("Interface ready received")
           return True
         else:
           self.LastErrorCode = XTB232.InterfaceReadyTimeout
-          self.LastError = "Expected interface ready signal, but none received"
-          #logger.error(self.LastError)
+          self.LastError = "Expected interface ready signal, but retry count exhausted and none received"
+          logger.error(self.LastError)
           return False
       elif response == XTB232.InterfaceReady:
         # Here's a guess. We expected a checksum, but we receive 0x55 instead.
@@ -398,7 +399,7 @@ class XTB232(X10ControllerInterface.X10ControllerInterface):
     Returns an integer
     """
     b = self.port.read(1)
-    logger.debug("ReadSerialByte: 0x%X", ord(b) if len(b) > 0 else 0)
+    logger.info("ReadSerialByte: 0x%X", ord(b) if len(b) > 0 else 0)
     if len(b) == 1:
       return ord(b)
     return None
