@@ -56,10 +56,6 @@ def main():
     logger.info("################################################################################")
     Logging.Shutdown()
 
-  # First things, First
-  disclaimer.Disclaimer.DisplayDisclaimer()
-  print "Use ctrl-c to shutdown server\n"
-
   # Change the current directory so we can find the configuration file.
   # For Linux we should probably put the configuration file in the /etc directory.
   just_the_path = os.path.dirname(os.path.realpath(__file__))
@@ -68,11 +64,19 @@ def main():
   # Load the configuration file
   Configuration.Configuration.LoadConfiguration()
 
+  # Per GPL, show the disclaimer
+  disclaimer.Disclaimer.DisplayDisclaimer()
+  print("Use ctrl-c to shutdown server\n")
+
   # Activate logging to console or file
   # Logging.EnableLogging()
   Logging.EnableServerLogging()
 
   logger.info("################################################################################")
+
+  # For additional coverage, log the disclaimer
+  disclaimer.Disclaimer.LogDisclaimer()
+
   logger.info("Starting up...")
 
   logger.info("X10 controller: %s", Configuration.Configuration.X10ControllerDevice())

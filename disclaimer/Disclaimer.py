@@ -10,12 +10,34 @@
 #
 
 #######################################################################
-# Show the disclaimer as recommended by the GPL v3 license
+
+import logging
+import Version
+
+logger = logging.getLogger("server")
+
+_disclaimer = [
+  "",
+  "AtHomePowerlineServer Copyright (C) 2014 Dave Hocker (AtHomeX10@gmail.com)",
+  "Version {0}".format(Version.GetVersion()),
+  "",
+  "This program comes with ABSOLUTELY NO WARRANTY; for details see the LICENSE file.",
+  "This is free software, and you are welcome to redistribute it",
+  "under certain conditions; see the LICENSE file for details.",
+  ""
+]
+
 def DisplayDisclaimer():
-  print "\n"
-  print "AtHomePowerlineServer Copyright (C) 2014 Dave Hocker (AtHomeX10@gmail.com)"
-  print ""
-  print "This program comes with ABSOLUTELY NO WARRANTY; for details see the LICENSE file."
-  print "This is free software, and you are welcome to redistribute it"
-  print "under certain conditions; see the LICENSE file for details."
-  print "\n"
+  """
+  Show the disclaimer as recommended by the GPL v3 license
+  """
+  for line in _disclaimer:
+    print line
+
+
+def LogDisclaimer():
+  """
+  Show the disclaimer as recommended by the GPL v3 license
+  """
+  for line in _disclaimer:
+    logger.info( line)
