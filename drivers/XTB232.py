@@ -338,8 +338,11 @@ class XTB232(X10ControllerInterface.X10ControllerInterface):
         logger.info("Good checksum received")
         # Send commit byte (must be an array type)
         self.SendAck()
-        # Wait for interface ready signal. The retry count is purely arbitrary.
-        for i in range(0,10):
+        # Wait for interface ready signal. The retry time is arbitrary.
+        start_time = datetime.datetime.now()
+        elapsed_time = datetime.timedelta()
+        max_elapsed_time = datetime.timedelta(seconds=2)
+        while elapsed_time < max_elapsed_time:
           response = self.ReadSerialByte()
           if response == XTB232.InterfaceReady:
             break
@@ -348,33 +351,39 @@ class XTB232(X10ControllerInterface.X10ControllerInterface):
           self.LastErrorCode = XTB232.Success
           self.LastError = ""
           logger.info("Interface ready received")
+          # Command successful
           return True
         else:
           self.LastErrorCode = XTB232.InterfaceReadyTimeout
-          self.LastError = "Expected interface ready signal, but retry count exhausted and none received"
-          logger.error(self.LastError)
-          return False
+          self.LastError = "Expected interface ready signal, but received {0}".format(response if not None else "None")
+          logger.warn(self.LastError)
+          # At this point, we have received a good checksum and sent the ACK (committed the command).
+          # However, we did not receive an interface ready. It's 50-50 as to whether everything
+          # is OK. We'll assume it is.
+          return True
       elif response == XTB232.InterfaceReady:
         # Here's a guess. We expected a checksum, but we receive 0x55 instead.
         # Looks like we got an interface ready, so we'll move on.
-        logger.info("SendCommand expected a checksum, but appears to have received an interface ready")
-        # TODO Did the command that was sent work? Or, do we need to retry?
+        self.LastErrorCode = XTB232.Success
+        self.LastError = "SendCommand expected a checksum, but has received an interface ready"
+        logger.warn(self.LastError)
         return True
       elif response == XTB232.InterfaceTimeRequest:
         # We received an interface timer request. This likely means that the
         # power line controller was reset and is now waiting for the current time.
         # We'll reset the controller and retry the command.
-        logger.info("Expected checksum, received InterfaceTimeRequest. Setting interface time.")
-        # TODO We can't call SendTime here. It becomes a recursive call and disaster ensues.
-        # TODO Need a better solution.
+        logger.info("Expected checksum, but received an InterfaceTimeRequest. Resetting controller.")
         self.ResetController(response)
+        retry_count += 1
       elif (response == '') or (response is None):
         self.LastErrorCode = XTB232.ChecksumTimeout
         self.LastError = "Timeout waiting for checksum from controller"
-        #logger.error(self.LastError)
+        logger.error(self.LastError)
         return False
       else:
         logger.error("Checksum error. Exp: %x Act: %x", expected_checksum, response)
+        self.LastErrorCode = XTB232.ChecksumError
+        self.LastError = "Expected checksum {0}, but received {1}".format(expected_checksum, response if not None else "None")
         retry_count += 1
       
     # If we have fallen to here, the command transmission failed.
