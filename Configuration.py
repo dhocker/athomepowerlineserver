@@ -29,6 +29,7 @@
 # There is no need to create an instance of this class, as everything about it is static.
 #
 
+import os
 import json
 import drivers.XTB232
 import drivers.Dummy
@@ -49,9 +50,11 @@ class Configuration():
   def LoadConfiguration(cls):
     # Try to open the conf file. If there isn't one, we give up.
     try:
-      cfg = open('AtHomePowerlineServer.conf', 'r')
+      cfg_path = Configuration.GetConfigurationFilePath()
+      print "Opening configuration file {0}".format(cfg_path)
+      cfg = open(cfg_path, 'r')
     except Exception as ex:
-      print "Unable to open AtHomePowerlineServer.conf"
+      print "Unable to open {0}".format(cfg_path)
       print str(ex)
       return
       
@@ -72,7 +75,22 @@ class Configuration():
       
     #print str(Configuration.ActiveConfig)
     return
-    
+
+  ######################################################################
+  @classmethod
+  def IsLinux(cls):
+    """
+    Returns True if the OS is of Linux type (Debian, Ubuntu, etc.)
+    """
+    return os.name == "posix"
+
+  ######################################################################
+  @classmethod
+  def IsWindows(cls):
+    """
+    Returns True if the OS is a Windows type (Windows 7, etc.)
+    """
+    return os.name == "nt"
   ######################################################################
   # Get the X10 controller device. Used to determine what driver should be used.
   @classmethod
@@ -116,3 +134,24 @@ class Configuration():
   @classmethod
   def LogLevel(cls):
     return cls.ActiveConfig["LogLevel"]
+
+  ######################################################################
+  @classmethod
+  def GetConfigurationFilePath(cls):
+    """
+    Returns the full path to the configuration file
+    """
+    file_name = 'AtHomePowerlineServer.conf'
+    if Configuration.IsLinux():
+      return "/etc/{0}".format(file_name)
+    return file_name
+
+  ######################################################################
+  @classmethod
+  def GetDatabaseFilePath(cls, file_name):
+    """
+    Returns the full path to the SQLite database file
+    """
+    if Configuration.IsLinux():
+      return "/var/athomepowerlineserver/{0}".format(file_name)
+    return file_name

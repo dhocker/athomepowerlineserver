@@ -18,6 +18,7 @@ import os.path
 import datetime
 import logging
 import sun_table
+import Configuration
 
 logger = logging.getLogger("server")
 
@@ -32,14 +33,13 @@ class AtHomePowerlineServerDb:
   #######################################################################
   @classmethod
   def Initialize(cls):
-
-    if os.path.isfile(cls.DatabaseFileName):
+    if os.path.isfile(Configuration.Configuration.GetDatabaseFilePath(cls.DatabaseFileName)):
       # Database exists
-      pass
+      logger.info("Using database file: %s", Configuration.Configuration.GetDatabaseFilePath(cls.DatabaseFileName))
     else:
       # Database needs to be created
       cls.CreateDatabase()
-      logger.info("Created database file: %s", cls.DatabaseFileName)
+      logger.info("Created database file: %s", Configuration.Configuration.GetDatabaseFilePath(cls.DatabaseFileName))
 
   #######################################################################
   # Create a new database
@@ -81,7 +81,7 @@ class AtHomePowerlineServerDb:
   # Returns a database connection
   @classmethod
   def GetConnection(cls):
-    conn = sqlite3.connect(cls.DatabaseFileName)
+    conn = sqlite3.connect(Configuration.Configuration.GetDatabaseFilePath(cls.DatabaseFileName))
     # We use the row factory to get named row columns. Makes handling row sets easier.
     conn.row_factory = sqlite3.Row
     # The default string type is unicode. This changes it to UTF-8.
