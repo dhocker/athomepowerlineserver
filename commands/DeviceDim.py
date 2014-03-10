@@ -10,7 +10,7 @@
 #
 
 #
-# Device on
+# Device dim
 #
 
 import ServerCommand

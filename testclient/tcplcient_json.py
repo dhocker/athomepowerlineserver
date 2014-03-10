@@ -140,24 +140,34 @@ def SetTime():
 
 #######################################################################
 # Test the Device On command        
-def DeviceOn():
+def DeviceOn(house_device_code, dim_amount):
   # 
   data = CreateRequest("On")
-  data["args"]["house-device-code"] = "C16"
-  data["args"]["dim-amount"] = 0
+  data["args"]["house-device-code"] = house_device_code
+  data["args"]["dim-amount"] = dim_amount
 
   SendCommand(data)
         
 #######################################################################
 # Test the Device Off command        
-def DeviceOff():
+def DeviceOff(house_device_code, dim_amount):
   # 
   data = CreateRequest("Off")
-  data["args"]["house-device-code"] = "C16"
-  data["args"]["dim-amount"] = 0
+  data["args"]["house-device-code"] = house_device_code
+  data["args"]["dim-amount"] = dim_amount
 
   SendCommand(data)
-        
+
+#######################################################################
+# Test the Device Dim command
+def DeviceDim(house_device_code, dim_amount):
+  #
+  data = CreateRequest("Dim")
+  data["args"]["house-device-code"] = house_device_code
+  data["args"]["dim-amount"] = dim_amount
+
+  SendCommand(data)
+
 #######################################################################
 # Test the status request command        
 def StatusRequest():
@@ -302,12 +312,14 @@ if __name__ == "__main__":
   #GetTime()
 
   # Try some timer programs
-  LoadTimers()
+  #LoadTimers()
 
-  LoadActions()
+  #LoadActions()
   
-  DeviceOn()
+  DeviceOn("A7", 0)
 
   time.sleep(10)
 
-  DeviceOff()
+  #DeviceOff("A7", 0)
+
+  DeviceDim("A7", 50)

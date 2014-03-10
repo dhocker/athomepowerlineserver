@@ -21,5 +21,7 @@ def RunAction(command, house_device_code, dim_amount):
     drivers.X10ControllerAdapter.X10ControllerAdapter.DeviceOn(house_device_code, dim_amount)
   elif command == "off":
     drivers.X10ControllerAdapter.X10ControllerAdapter.DeviceOff(house_device_code, dim_amount)
+  elif command == "dim":
+    drivers.X10ControllerAdapter.X10ControllerAdapter.DeviceDim(house_device_code, dim_amount)
   else:
     pass

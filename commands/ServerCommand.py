@@ -15,6 +15,7 @@
 #
 
 import datetime
+import Version
 
 class ServerCommand:
 
@@ -36,5 +37,5 @@ class ServerCommand:
     r['request'] = command
     r['date-time'] = str(datetime.datetime.now())
     r['server'] = "AtHomePowerlineServer"
-    r['server-version'] = "1.0.0.0"
+    r['server-version'] = Version.GetVersion()
     return response

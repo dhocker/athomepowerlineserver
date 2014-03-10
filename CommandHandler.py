@@ -19,6 +19,7 @@ import commands.ServerCommand
 import commands.StatusRequest
 import commands.DeviceOn
 import commands.DeviceOff
+import commands.DeviceDim
 import commands.GetTime
 import commands.SetTime
 
@@ -74,7 +75,7 @@ class CommandHandler:
     elif ci_command == "alllightson":
       handler = None
     elif ci_command == "dim":
-      handler = None
+      handler = commands.DeviceDim.DeviceDim()
     elif ci_command == "bright":
       handler = None
     elif ci_command == "alllightsoff":
