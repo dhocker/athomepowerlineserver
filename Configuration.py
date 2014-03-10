@@ -153,5 +153,5 @@ class Configuration():
     Returns the full path to the SQLite database file
     """
     if Configuration.IsLinux():
-      return "/var/athomepowerlineserver/{0}".format(file_name)
+      return "/var/local/athomepowerlineserver/{0}".format(file_name)
     return file_name
