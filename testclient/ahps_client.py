@@ -12,6 +12,8 @@
 #
 # Test client for AtHomePowerlineServer
 #
+# ahps_client.py [-s hostname|hostaddress] [-p portnumber]
+#
 
 import socket
 import sys
@@ -20,12 +22,12 @@ import datetime
 import time
 from optparse import OptionParser
 
+# Host and Port can be overriden by the -s and -p command line options
 #Host, Port = "localHost", 9999
 Host, Port = "hedwig", 9999
 #Host, Port = "192.168.1.111", 9999
 
-
-# tcpclient
+# ahps_client
 # Sends and receives JSON formatted payloads
 
 #######################################################################
@@ -211,22 +213,22 @@ def LoadTimers():
   on_time_str = on_time.strftime("%H:%M")
   off_time_str = off_time.strftime("%H:%M")
 
-  program = {\
-    "name": "program-a1", \
-    "house-device-code": "a1", \
-    "start-time": on_time_str, \
-    "stop-time": off_time_str, \
-    "day-mask": ".......", \
-    "start-action": "action-1", \
-    "stop-action": "action-2" }
+  program = {
+    "name": "program-a1", 
+    "house-device-code": "a1", 
+    "start-time": on_time_str, 
+    "stop-time": off_time_str, 
+    "day-mask": ".......", 
+    "start-action": "action-1", 
+    "stop-action": "action-2"}
 
-  program2 = {\
-  "name": "program-c16", \
-  "house-device-code": "c16", \
-  "start-time": on_time_str, \
-  "stop-time": off_time_str, \
+  program2 = {
+  "name": "program-c16", 
+  "house-device-code": "c16", 
+  "start-time": on_time_str, 
+  "stop-time": off_time_str, 
   "day-mask": "mtwtfss",
-  "start-action": "action-1", \
+  "start-action": "action-1", 
   "stop-action": "action-2" }
   
   program3 = {}
@@ -238,14 +240,14 @@ def LoadTimers():
   program3["start-action"] = "action-1"
   program3["stop-action"] = "action-2"
   
-  program4 = {\
-    "name": "program-a4", \
-    "house-device-code": "a4", \
-    "start-time": on_time_str, \
-    "stop-time": off_time_str, \
-    "day-mask": "mtwtf--", \
-    "start-action": "action-undefined", \
-    "stop-action": "action-undefined" }
+  program4 = {
+    "name": "program-a4", 
+    "house-device-code": "a4", 
+    "start-time": on_time_str, 
+    "stop-time": off_time_str, 
+    "day-mask": "mtwtf--", 
+    "start-action": "action-undefined", 
+    "stop-action": "action-undefined"}
     
   data["args"]["programs"].append(program)
   data["args"]["programs"].append(program2)
@@ -266,14 +268,14 @@ def LoadActions():
   # defines an action.
   data["args"]["actions"] = []
 
-  action1 = {\
-    "name": "action-1", \
-    "command": "on", \
+  action1 = {
+    "name": "action-1", 
+    "command": "on", 
     "dim-amount": 0 }
 
-  action2 = {\
-    "name": "action-2", \
-    "command": "off", \
+  action2 = {
+    "name": "action-2", 
+    "command": "off", 
     "dim-amount": 0 }
 
   data["args"]["actions"].append(action1)
