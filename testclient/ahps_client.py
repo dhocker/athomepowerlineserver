@@ -315,11 +315,18 @@ if __name__ == "__main__":
   #LoadTimers()
 
   #LoadActions()
-  
+
+  print "A7 on"
   DeviceOn("A7", 0)
 
+  print "sleep 10"
   time.sleep(10)
 
-  #DeviceOff("A7", 0)
+  print "A7 dim 25"
+  DeviceDim("A7", 25)
 
-  DeviceDim("A7", 50)
+  print "sleep 5"
+  time.sleep(5)
+
+  print "A7 off"
+  DeviceOff("A7", 0)
