@@ -23,5 +23,12 @@ def RunAction(command, house_device_code, dim_amount):
     drivers.X10ControllerAdapter.X10ControllerAdapter.DeviceOff(house_device_code, dim_amount)
   elif command == "dim":
     drivers.X10ControllerAdapter.X10ControllerAdapter.DeviceDim(house_device_code, dim_amount)
+  elif command == "bright":
+    # The dim_amount is really a bright_amount
+    drivers.X10ControllerAdapter.X10ControllerAdapter.DeviceBright(house_device_code, dim_amount)
+  elif command == "allunitsoff":
+    drivers.X10ControllerAdapter.X10ControllerAdapter.DeviceAllUnitsOff(house_device_code[0:1])
+  elif command == "alllightsoff":
+    drivers.X10ControllerAdapter.X10ControllerAdapter.DeviceAllLightsOff()
   else:
     pass

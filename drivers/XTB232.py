@@ -106,6 +106,27 @@ class XTB232(X10ControllerInterface.X10ControllerInterface):
     return self.ExecuteFunction(house_device_code, self.ConvertDimPercent(dim_amount), XTB232.Dim)
 
   #************************************************************************
+  # Bright(en) a lamp module
+  # house_device_code = Ex. 'A1'
+  # bright_amount as a percent 0 <= v <= 100
+  def DeviceBright(self, house_device_code, bright_amount):
+    self.ClearLastError()
+    return self.ExecuteFunction(house_device_code, self.ConvertDimPercent(bright_amount), XTB232.Bright)
+
+  #************************************************************************
+  # Turn all units off (for a given house code)
+  # house_code = "A"..."P"
+  def DeviceAllUnitsOff(self, house_code):
+    self.ClearLastError()
+    return self.SendStandardCommand(house_code, 0, XTB232.AllUnitsOff)
+
+  #************************************************************************
+  # Turn all lights off
+  def DeviceAllLightsOff(self):
+    self.ClearLastError()
+    return self.SendStandardCommand("A", 0, XTB232.AllLightsOff)
+
+  #************************************************************************
   def SelectAddress(self, house_device_code):
     SelectCommand = bytearray(2) #array.array('B', [0x04, 0])
 
@@ -130,16 +151,21 @@ class XTB232(X10ControllerInterface.X10ControllerInterface):
       return False
     
     # Second part, send the command for all devices selected for the house code.
+    return self.SendStandardCommand(house_device_code[0:1], dim_amount, device_function)
+
+  #************************************************************************
+  def SendStandardCommand(self, house_code, dim_amount, device_function):
+    # Second part, send the command for all devices selected for the house code.
     Xfunction = bytearray(2) #array.array('B', [0, 0])
 
     Xfunction[0] = ((dim_amount << 3) + XTB232.HdrAlwaysOne + XTB232.HdrFunction)
-    HouseBinary = XTB232.GetHouseCode(house_device_code[0:1])
+    HouseBinary = XTB232.GetHouseCode(house_code)
     Xfunction[1] = (HouseBinary << 4) + device_function
 
     logger.info(X10ControllerInterface.X10ControllerInterface.FormatStandardTransmission(Xfunction))
 
-    return self.SendCommand(Xfunction)        
-    
+    return self.SendCommand(Xfunction)
+
   #************************************************************************
   # Return a datetime type
   def GetTime(self):

@@ -20,6 +20,9 @@ import commands.StatusRequest
 import commands.DeviceOn
 import commands.DeviceOff
 import commands.DeviceDim
+import commands.DeviceBright
+import commands.DeviceAllUnitsOff
+import commands.DeviceAllLightsOff
 import commands.GetTime
 import commands.SetTime
 
@@ -71,15 +74,15 @@ class CommandHandler:
     elif (ci_command == "deviceoff") or (ci_command == "off"):
       handler = commands.DeviceOff.DeviceOff()
     elif ci_command == "allunitsoff":
-      handler = None
+      handler = commands.DeviceAllUnitsOff.DeviceAllUnitsOff()
     elif ci_command == "alllightson":
       handler = None
     elif ci_command == "dim":
       handler = commands.DeviceDim.DeviceDim()
     elif ci_command == "bright":
-      handler = None
+      handler = commands.DeviceBright.DeviceBright()
     elif ci_command == "alllightsoff":
-      handler = None
+      handler = commands.DeviceAllLightsOff.DeviceAllLightsOff()
     elif ci_command == "statusrequest":
       handler = commands.StatusRequest.StatusRequest()
     elif ci_command == "gettime":

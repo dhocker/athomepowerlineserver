@@ -18,7 +18,7 @@
 # controller at a time and that controller is represented by this adapter.
 # As a result, most of the methods/properties are class or static level.
 #
-# TODO Add methods for X10 controller access. Use the AtHomeX10 app's driver as a model
+# Add methods for X10 controller access. Use the AtHomeX10 app's driver as a model
 # of what methods are needed.
 #
 
@@ -95,3 +95,26 @@ class X10ControllerAdapter:
   def DeviceDim(cls, house_device_code, dim_amount):
     logger.info("Device dim: {0} {1}".format(house_device_code, dim_amount))
     return cls.Driver.DeviceDim(house_device_code, dim_amount)
+
+  #************************************************************************
+  # Bright(en) a lamp module
+  # house_device_code = Ex. 'A1'
+  # dim_amount 0 <= v <= 22
+  @classmethod
+  def DeviceBright(cls, house_device_code, bright_amount):
+    logger.info("Device bright: {0} {1}".format(house_device_code, bright_amount))
+    return cls.Driver.DeviceBright(house_device_code, bright_amount)
+
+  #************************************************************************
+  # Turn all units off
+  @classmethod
+  def DeviceAllUnitsOff(cls, house_code):
+    logger.info("Device all units off for house code: {0}".format(house_code))
+    return cls.Driver.DeviceAllUnitsOff(house_code)
+
+  #************************************************************************
+  # Turn all lights off
+  @classmethod
+  def DeviceAllLightsOff(cls):
+    logger.info("Device all lights off")
+    return cls.Driver.DeviceAllLightsOff()
