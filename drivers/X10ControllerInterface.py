@@ -42,7 +42,53 @@ class X10ControllerInterface:
   @abc.abstractmethod
   def Close(self):
     pass    
-    
+
+  #######################################################################
+  # Turn a device on
+  # house_device_code = Ex. 'A1'
+  # dim_amount as a percent 0 <= v <= 100
+  @abc.abstractmethod
+  def DeviceOn(self, house_device_code, dim_amount):
+    pass
+
+  #######################################################################
+  # Turn a device off
+  # house_device_code = Ex. 'A1'
+  # dim_amount 0 <= v <= 100
+  @abc.abstractmethod
+  def DeviceOff(self, house_device_code, dim_amount):
+    pass
+
+  #######################################################################
+  # Dim a lamp module
+  # house_device_code = Ex. 'A1'
+  # dim_amount as a percent 0 <= v <= 100
+  @abc.abstractmethod
+  def DeviceDim(self, house_device_code, dim_amount):
+    pass
+
+  #######################################################################
+  # Bright(en) a lamp module
+  # house_device_code = Ex. 'A1'
+  # bright_amount as a percent 0 <= v <= 100
+  @abc.abstractmethod
+  def DeviceBright(self, house_device_code, dim_amount):
+    pass
+
+  #######################################################################
+  # Turn all units off (for a given house code)
+  # house_code = "A"..."P"
+  @abc.abstractmethod
+  def DeviceAllUnitsOff(self, house_code):
+    pass
+
+  #######################################################################
+  # Turn all lights off
+  # house_code = "A"..."P"
+  @abc.abstractmethod
+  def DeviceAllLightsOff(self, house_code):
+    pass
+
   #######################################################################
   # Return a datetime type
   @abc.abstractmethod

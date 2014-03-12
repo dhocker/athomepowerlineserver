@@ -24,7 +24,7 @@ class DeviceAllLightsOff(ServerCommand.ServerCommand):
   #######################################################################
   # Execute the "of" command.
   def Execute(self, request):
-    result = drivers.X10ControllerAdapter.X10ControllerAdapter.DeviceAllLightsOff()
+    result = drivers.X10ControllerAdapter.X10ControllerAdapter.DeviceAllLightsOff(request["args"]["house-code"])
 
     # Generate a successful response
     response = DeviceAllLightsOff.CreateResponse(request["request"])

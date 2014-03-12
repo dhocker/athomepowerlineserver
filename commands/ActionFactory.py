@@ -29,6 +29,6 @@ def RunAction(command, house_device_code, dim_amount):
   elif command == "allunitsoff":
     drivers.X10ControllerAdapter.X10ControllerAdapter.DeviceAllUnitsOff(house_device_code[0:1])
   elif command == "alllightsoff":
-    drivers.X10ControllerAdapter.X10ControllerAdapter.DeviceAllLightsOff()
+    drivers.X10ControllerAdapter.X10ControllerAdapter.DeviceAllLightsOff(house_device_code[0:1])
   else:
     pass

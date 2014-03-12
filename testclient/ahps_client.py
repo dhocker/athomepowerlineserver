@@ -191,9 +191,10 @@ def DeviceAllUnitsOff(house_code):
 
 #######################################################################
 # Test the Device All Light Off command
-def DeviceAllLightsOff():
+def DeviceAllLightsOff(house_code):
   #
   data = CreateRequest("AllLightsOff")
+  data["args"]["house-code"] = house_code
 
   SendCommand(data)
 
@@ -363,9 +364,9 @@ if __name__ == "__main__":
   # print "A7 off"
   # DeviceOff("A7", 0)
 
-  # print "All units off A and P"
-  # DeviceAllUnitsOff("A")
-  # DeviceAllUnitsOff("P")
+  print "All units off A and P"
+  DeviceAllUnitsOff("A")
+  #DeviceAllUnitsOff("P")
 
-  print "All lights off"
-  DeviceAllLightsOff()
+  #print "All lights off"
+  #DeviceAllLightsOff("A")
