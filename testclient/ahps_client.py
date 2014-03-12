@@ -346,17 +346,17 @@ if __name__ == "__main__":
 
   #LoadActions()
 
-  # print "A7 on 50"
-  # DeviceOn("A7", 50)
+  print "A7 on 50"
+  DeviceOn("A7", 50)
   #
-  # print "sleep 10"
-  # time.sleep(10)
+  print "sleep 10"
+  time.sleep(10)
   #
-  # print "A7 bright 50"
-  # DeviceBright("a7", 50)
+  print "A7 bright 50"
+  DeviceBright("a7", 50)
   #
-  # print "A7 dim 25"
-  # DeviceDim("A7", 25)
+  #print "A7 dim 50"
+  #DeviceDim("A7", 50)
   #
   # print "sleep 5"
   # time.sleep(5)
@@ -364,8 +364,12 @@ if __name__ == "__main__":
   # print "A7 off"
   # DeviceOff("A7", 0)
 
-  print "All units off A and P"
+  print "sleep 10"
+  time.sleep(10)
+
+  print "All units off A"
   DeviceAllUnitsOff("A")
+  #print "All units off P"
   #DeviceAllUnitsOff("P")
 
   #print "All lights off"

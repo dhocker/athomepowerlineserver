@@ -34,7 +34,63 @@ class Dummy(X10ControllerInterface.X10ControllerInterface):
   # Close the device
   def Close(self):
     pass    
-    
+
+  #######################################################################
+  # Turn a device on
+  # house_device_code = Ex. 'A1'
+  # dim_amount as a percent 0 <= v <= 100
+  def DeviceOn(self, house_device_code, dim_amount):
+    return True
+
+  #######################################################################
+  # Turn a device off
+  # house_device_code = Ex. 'A1'
+  # dim_amount 0 <= v <= 100
+  def DeviceOff(self, house_device_code, dim_amount):
+    return True
+
+  #######################################################################
+  # Dim a lamp module
+  # house_device_code = Ex. 'A1'
+  # dim_amount as a percent 0 <= v <= 100
+  def DeviceDim(self, house_device_code, dim_amount):
+    return True
+
+  #######################################################################
+  # Bright(en) a lamp module
+  # house_device_code = Ex. 'A1'
+  # bright_amount as a percent 0 <= v <= 100
+  def DeviceBright(self, house_device_code, dim_amount):
+    return True
+
+  #######################################################################
+  # Turn all units off (for a given house code)
+  # house_code = "A"..."P"
+  def DeviceAllUnitsOff(self, house_code):
+    return True
+
+  #######################################################################
+  # Turn all lights off
+  # house_code = "A"..."P"
+  def DeviceAllLightsOff(self, house_code):
+    return True
+
+  #######################################################################
+  # Return a datetime type
+  def GetTime(self):
+    pass
+
+  #######################################################################
+  # Return controller status
+  def GetStatus(self):
+    pass
+
+  #######################################################################
+  # TODO Consider defining this as SetCurrentTime taking no parameters.
+  # Set the controller time to the current, local time.
+  def SetTime(self, time_value):
+    pass
+
   def SelectAddress(self, house_device_code):
     pass        
     
