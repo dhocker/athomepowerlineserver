@@ -12,12 +12,11 @@
 #
 # Timer program - represents the equivalent of a timer initiator
 #
-# The program is limited to turning a device on then off
-#
 
 #######################################################################
 
 import datetime
+import random
 import database.sun_table
 import logging
 
@@ -27,8 +26,9 @@ class TimerProgram:
 
   #######################################################################
   # Instance constructor
-  def __init__(self, name, house_device_code, day_mask, start_trigger_method, start_time, start_offset, \
-               stop_trigger_method, stop_time, stop_offset, \
+  def __init__(self, name, house_device_code, day_mask,
+               start_trigger_method, start_time, start_offset, start_randomize, start_randomize_amount,
+               stop_trigger_method, stop_time, stop_offset, stop_randomize, stop_randomize_amount,
                start_action, stop_action, security):
     self.Name = name
     self.HouseDeviceCode = house_device_code
@@ -36,9 +36,13 @@ class TimerProgram:
     self.StartTriggerMethod = start_trigger_method
     self.StartTime = start_time
     self.StartOffset = start_offset
+    self.StartRandomize = start_randomize
+    self.StartRandomizeAmount = start_randomize_amount
     self.StopTriggerMethod = stop_trigger_method
     self.StopTime = stop_time
     self.StopOffset = stop_offset
+    self.StopRandomize = stop_randomize
+    self.StopRandomizeAmount = stop_randomize_amount
     self.StartAction = start_action
     self.StopAction = stop_action
     self.Security = security
@@ -57,11 +61,13 @@ class TimerProgram:
       s = s + "Start: {0} {1} ".format(self.StartTriggerMethod, self.StartTime)
     else:
       s = s + "Start: {0} {1} ".format(self.StartTriggerMethod, self.StartOffset)
+    s = s + "Randomize: {0} {1} ".format(self.StartRandomize, self.StartRandomizeAmount)
 
     if self.StopTriggerMethod == "clock-time":
-      s = s + "Stop: {0} {1}".format(self.StopTriggerMethod, self.StopTime)
+      s = s + "Stop: {0} {1} ".format(self.StopTriggerMethod, self.StopTime)
     else:
-      s = s + "Stop: {0} {1}".format(self.StopTriggerMethod, self.StopOffset)
+      s = s + "Stop: {0} {1} ".format(self.StopTriggerMethod, self.StopOffset)
+    s = s + "Randomize: {0} {1}".format(self.StopRandomize, self.StopRandomizeAmount)
 
     return s
 
@@ -84,7 +90,7 @@ class TimerProgram:
 
   # TODO There's probably some refactoring to be done here
 
-  def IsStartEventTriggered(self, time_to_test):
+  def IsStartEventTriggered(self):
     """
     Test the program against the given time to see if the start event has occurred.
     """
@@ -95,25 +101,34 @@ class TimerProgram:
     # time without seconds
     now_dt = datetime.datetime(now.year, now.month, now.day, now.hour, now.minute, 0)
 
+    # Randomized amount
+    randomized_amount = 0
+    if self.StartRandomize:
+      randomized_amount = self.GetRandomizedAmount(self.StartRandomizeAmount)
+    logger.debug("Start randomize amount: %s", randomized_amount)
+
     # Factory testing based on trigger method
     if self.StartTriggerMethod == "clock-time":
-      today_starttime = datetime.datetime(now.year, now.month, now.day, self.StartTime.hour, self.StartTime.minute, self.StartTime.second)
+      today_starttime = datetime.datetime(now.year, now.month, now.day, self.StartTime.hour,
+                                          self.StartTime.minute, self.StartTime.second)
+      today_starttime = today_starttime + datetime.timedelta(minutes=randomized_amount)
       return today_starttime == now_dt
     elif self.StartTriggerMethod == "sunset":
       #logger.debug("Testing start sunset trigger")
       sunset = database.sun_table.get_sunset(datetime.date(now_dt.year, now_dt.month, now_dt.day))
-      offset_sunset = sunset + datetime.timedelta(minutes=self.StartOffset)
+      offset_sunset = sunset + datetime.timedelta(minutes=(self.StartOffset + randomized_amount))
       return now_dt == offset_sunset
     elif self.StartTriggerMethod == "sunrise":
       #logger.debug("Testing start sunrise trigger")
       sunrise = database.sun_table.get_sunrise(datetime.date(now_dt.year, now_dt.month, now_dt.day))
-      offset_sunrise = sunrise + datetime.timedelta(minutes=self.StartOffset)
+      offset_sunrise = sunrise + datetime.timedelta(minutes=(self.StartOffset + randomized_amount))
       return now_dt == offset_sunrise
 
+    # "none" falls to here
     return False
 
 
-  def IsStopEventTriggered(self, time_to_test):
+  def IsStopEventTriggered(self):
     """
     Test the program against the given time to see if the stop event has occurred.
     """
@@ -121,23 +136,68 @@ class TimerProgram:
     # We use the time part of the datetime to mean the time TODAY.
     now = datetime.datetime.now()
 
+    # Randomized amount
+    randomized_amount = 0
+    if self.StopRandomize:
+      randomized_amount = self.GetRandomizedAmount(self.StopRandomizeAmount)
+    logger.debug("Stop randomize amount: %s", randomized_amount)
+
     # time without seconds
     now_dt = datetime.datetime(now.year, now.month, now.day, now.hour, now.minute, 0)
 
     # Factory testing based on trigger method
     if self.StopTriggerMethod == "clock-time":
       # Stop time using today's date
-      today_stoptime = datetime.datetime(now.year, now.month, now.day, self.StopTime.hour, self.StopTime.minute, self.StopTime.second)
+      today_stoptime = datetime.datetime(now.year, now.month, now.day, self.StopTime.hour,
+                                         self.StopTime.minute, self.StopTime.second)
+      today_stoptime = today_stoptime + datetime.timedelta(minutes=randomized_amount)
+      #logger.debug("Target stop time: %s", today_stoptime)
       return today_stoptime == now_dt
     elif self.StopTriggerMethod == "sunset":
       #logger.debug("Testing stop sunset trigger")
       sunset = database.sun_table.get_sunset(datetime.date(now_dt.year, now_dt.month, now_dt.day))
-      offset_sunset = sunset + datetime.timedelta(minutes=self.StopOffset)
+      offset_sunset = sunset + datetime.timedelta(minutes=(self.StopOffset + randomized_amount))
       return now_dt == offset_sunset
     elif self.StopTriggerMethod == "sunrise":
       #logger.debug("Testing stop sunrise trigger")
       sunrise = database.sun_table.get_sunrise(datetime.date(now_dt.year, now_dt.month, now_dt.day))
-      offset_sunrise = sunrise + datetime.timedelta(minutes=self.StopOffset)
+      offset_sunrise = sunrise + datetime.timedelta(minutes=(self.StopOffset + randomized_amount))
       return now_dt == offset_sunrise
 
+    # "none" falls to here
     return False
+
+
+  def GetRandomizedAmount(self, randomize_amount):
+    """
+    For today's date, calculate the integer randomized amount r where
+    -randomize_amount <= int(r) <= randomize_amount
+    """
+
+    # Today's randomization factor
+    rf = self.GetRandomFactor()
+
+    # Round randomized value to a whole integer
+    # Return the result as an integer
+    return int(round(rf * float(randomize_amount)))
+
+
+  def GetRandomFactor(self):
+    """
+    Returns a floating point randomization factor in the range -1.0 <= f <= 1.0
+    """
+
+    # We want to use today's date as the seed (just the date).
+    # This will allow us to reproduce a random factor for a given date, while
+    # allowing the factor to vary over a range of dates.
+    now = datetime.datetime.now()
+    now_date = datetime.date(now.year, now.month, now.day)
+    random.seed(now_date)
+
+    # We'll try to inject a little more controlled randomness by using today's
+    # day as an additional factor.
+    f = 1.0
+    for i in range(0, now_date.day):
+      f = random.uniform(-1.0, 1.0)
+
+    return f

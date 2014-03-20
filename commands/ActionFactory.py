@@ -14,8 +14,16 @@
 #
 
 import drivers.X10ControllerAdapter
+import logging
+
+logger = logging.getLogger("server")
 
 def RunAction(command, house_device_code, dim_amount):
+  # We don't support house events yet
+  if len(house_device_code) < 2:
+    logger.warn("House modules are not yet supported by AtHomePowerlineServer")
+    return
+
   # Cases for command
   if command == "on":
     drivers.X10ControllerAdapter.X10ControllerAdapter.DeviceOn(house_device_code, dim_amount)

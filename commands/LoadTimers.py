@@ -50,14 +50,18 @@ class LoadTimers(ServerCommand.ServerCommand):
       stop_offset = int(timer_program["stop-time-offset"])
       start_action = timer_program["start-action"]
       stop_action = timer_program["stop-action"]
+      start_randomize = True if int(timer_program["start-randomize"]) else False
+      start_randomize_amount = int(timer_program["start-randomize-amount"])
+      stop_randomize = True if int(timer_program["stop-randomize"]) else False
+      stop_randomize_amount = int(timer_program["stop-randomize-amount"])
       # Unclear what security is used for, but it is not part of the program
       security = False
 
       # Add the timer program to the current list
       timers.TimerStore.TimerStore.AppendTimer(name, house_device_code, day_mask, \
-                                               start_trigger_method, start_time, start_offset, \
-                                               stop_trigger_method, stop_time, stop_offset, \
-                                               start_action, stop_action, security)
+        start_trigger_method, start_time, start_offset, start_randomize, start_randomize_amount, \
+        stop_trigger_method, stop_time, stop_offset, stop_randomize, stop_randomize_amount, \
+        start_action, stop_action, security)
 
     # Debugging...
     timers.TimerStore.TimerStore.DumpTimerProgramList()

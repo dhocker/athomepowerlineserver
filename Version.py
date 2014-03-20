@@ -14,4 +14,4 @@ def GetVersion():
   """
   Returns the current server version
   """
-  return "1.0.0.12"
+  return "1.1.0.1"

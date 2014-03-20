@@ -90,9 +90,6 @@ class TimerServiceThread(threading.Thread):
     # This will only be interesting if we want to manage events that may have occurred BEFORE
     # the server was started. That will be a complicated task.
 
-    # time without seconds
-    now_dt = datetime.datetime(now.year, now.month, now.day, now.hour, now.minute, 0)
-
     # Only if the current day is enabled...
     if TimerServiceThread.IsDayOfWeekEnabled(now, tp.DayMask):
       # we consider the event triggered if the current date/time in hours and minutes matches the event time
@@ -101,7 +98,7 @@ class TimerServiceThread(threading.Thread):
       # TODO We need a factory approach to determining if the start or stop event has occurred
 
       # Start event check
-      if (not tp.StartEventRun) and (tp.IsStartEventTriggered(now_dt)):
+      if (not tp.StartEventRun) and (tp.IsStartEventTriggered()):
         # Start event triggered. Reset Stop event.
         tp.StartEventRun = True
         tp.StopEventRun = False
@@ -110,7 +107,7 @@ class TimerServiceThread(threading.Thread):
         self.RunTimerAction(tp.StartAction, tp.HouseDeviceCode)
 
       # Stop event check
-      if (not tp.StopEventRun) and (tp.IsStopEventTriggered(now_dt)):
+      if (not tp.StopEventRun) and (tp.IsStopEventTriggered()):
         # Stop event triggered. Reset Start event.
         tp.StopEventRun = True
         tp.StartEventRun = False

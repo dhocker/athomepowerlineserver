@@ -21,7 +21,8 @@ import io
 import glob
 import AtHomePowerlineServerDb
 
-SUN_DATA_FILE_NAME = "sunrise_sunset.sql"
+# Depends on the current directory being the server root directory
+SUN_DATA_FILE_NAME = "database/sunrise_sunset.sql"
 
 
 def load_sun_table(conn):
@@ -89,6 +90,8 @@ def get_sunset(for_date):
 
 #
 # Run application
+# TODO Consider removing this as the database is created automatically by AtHomePowerlineServerDb.Initialize().
+# TODO Or, move to server root directory and rework accordingly.
 #
 if __name__ == "__main__":
   # If the database already exists, we'll reload the sun_table.

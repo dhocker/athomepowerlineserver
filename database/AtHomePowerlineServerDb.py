@@ -58,12 +58,14 @@ class AtHomePowerlineServerDb:
     # Create tables (Sqlite3 specific)
     # SchemaVersion (sort of the migration version)
     conn.execute("CREATE TABLE SchemaVersion (Version text, updatetime timestamp)")
-    conn.execute("INSERT INTO SchemaVersion values (?, ?)", ("2.0.0.0", datetime.datetime.now()))
+    conn.execute("INSERT INTO SchemaVersion values (?, ?)", ("3.0.0.0", datetime.datetime.now()))
 
     # Timers
     conn.execute("CREATE TABLE Timers (name text PRIMARY KEY, housedevicecode text, daymask text, \
       starttriggermethod text, starttime timestamp, startoffset integer, \
+      startrandomize integer, startrandomizeamount integer, \
       stoptriggermethod text, stoptime timestamp, stopoffset integer, \
+      stoprandomize integer, stoprandomizeamount integer, \
       startaction text, stopaction text, security integer, updatetime timestamp)")
 
     # Actions
