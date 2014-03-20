@@ -19,11 +19,6 @@ import logging
 logger = logging.getLogger("server")
 
 def RunAction(command, house_device_code, dim_amount):
-  # We don't support house events yet
-  if len(house_device_code) < 2:
-    logger.warn("House modules are not yet supported by AtHomePowerlineServer")
-    return
-
   # Cases for command
   if command == "on":
     drivers.X10ControllerAdapter.X10ControllerAdapter.DeviceOn(house_device_code, dim_amount)
@@ -31,12 +26,14 @@ def RunAction(command, house_device_code, dim_amount):
     drivers.X10ControllerAdapter.X10ControllerAdapter.DeviceOff(house_device_code, dim_amount)
   elif command == "dim":
     drivers.X10ControllerAdapter.X10ControllerAdapter.DeviceDim(house_device_code, dim_amount)
-  elif command == "bright":
+  elif (command == "bright") or (command == "brighten"):
     # The dim_amount is really a bright_amount
     drivers.X10ControllerAdapter.X10ControllerAdapter.DeviceBright(house_device_code, dim_amount)
   elif command == "allunitsoff":
     drivers.X10ControllerAdapter.X10ControllerAdapter.DeviceAllUnitsOff(house_device_code[0:1])
   elif command == "alllightsoff":
     drivers.X10ControllerAdapter.X10ControllerAdapter.DeviceAllLightsOff(house_device_code[0:1])
+  elif command == "alllightson":
+    drivers.X10ControllerAdapter.X10ControllerAdapter.DeviceAllLightsOn(house_device_code[0:1])
   else:
     pass

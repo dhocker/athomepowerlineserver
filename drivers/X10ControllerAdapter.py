@@ -118,3 +118,10 @@ class X10ControllerAdapter:
   def DeviceAllLightsOff(cls, house_code):
     logger.info("Device all lights off")
     return cls.Driver.DeviceAllLightsOff(house_code)
+
+  #************************************************************************
+  # Turn all lights on
+  @classmethod
+  def DeviceAllLightsOn(cls, house_code):
+    logger.info("Device all lights on")
+    return cls.Driver.DeviceAllLightsOn(house_code)

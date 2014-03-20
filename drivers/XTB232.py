@@ -128,6 +128,13 @@ class XTB232(X10ControllerInterface.X10ControllerInterface):
     return self.SendStandardCommand(house_code, 0, XTB232.AllLightsOff)
 
   #************************************************************************
+  # Turn all lights on
+  # house_code = "A"..."P"
+  def DeviceAllLightsOn(self, house_code):
+    self.ClearLastError()
+    return self.SendStandardCommand(house_code, 0, XTB232.AllLightsOn)
+
+  #************************************************************************
   def SelectAddress(self, house_device_code):
     SelectCommand = bytearray(2) #array.array('B', [0x04, 0])
 

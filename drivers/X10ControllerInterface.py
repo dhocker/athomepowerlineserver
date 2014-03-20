@@ -90,6 +90,13 @@ class X10ControllerInterface:
     pass
 
   #######################################################################
+  # Turn all lights on
+  # house_code = "A"..."P"
+  @abc.abstractmethod
+  def DeviceAllLightsOn(self, house_code):
+    pass
+
+  #######################################################################
   # Return a datetime type
   @abc.abstractmethod
   def GetTime(self):

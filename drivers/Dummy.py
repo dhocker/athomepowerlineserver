@@ -80,6 +80,13 @@ class Dummy(X10ControllerInterface.X10ControllerInterface):
     return True
 
   #######################################################################
+  # Turn all lights on
+  # house_code = "A"..."P"
+  def DeviceAllLightsOn(self, house_code):
+    logger.debug("DeviceAllLightsOn for: %s", house_code)
+    return True
+
+  #######################################################################
   # Return a datetime type
   def GetTime(self):
     pass
