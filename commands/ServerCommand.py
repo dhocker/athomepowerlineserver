@@ -15,6 +15,7 @@
 #
 
 import datetime
+import socket
 import Version
 
 class ServerCommand:
@@ -36,6 +37,6 @@ class ServerCommand:
     r = response["X10Response"]    
     r['request'] = command
     r['date-time'] = str(datetime.datetime.now())
-    r['server'] = "AtHomePowerlineServer"
+    r['server'] = "{0}/AtHomePowerlineServer".format(socket.gethostname())
     r['server-version'] = Version.GetVersion()
     return response
