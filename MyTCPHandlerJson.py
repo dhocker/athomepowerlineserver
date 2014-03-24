@@ -46,24 +46,26 @@ class MyTCPHandlerJson(SocketServer.BaseRequestHandler):
       response = CommandHandler.CommandHandler().Execute(self.json)
 
       logger.info("Request completed")
-      
-      # Return the response to the client
-      self.request.sendall(json.JSONEncoder().encode(response))
-    # except Exception as ex:
-      # logger.error("Exception occurred while parsing json request")
-      # logginf.error(str(ex))
-      # logger.error(self.raw_json)
-      # # Send an error response???
-      # raise ex
+    except Exception as ex:
+      logger.error("Exception occurred while parsing json request")
+      logger.error(str(ex))
+      logger.error(self.raw_json)
+      # Send an error response
+      response = CommandHandler.CommandHandler.CreateErrorResponse(self.json["request"],
+        CommandHandler.CommandHandler.UnhandledException,
+        "Unhandled exception occurred", ex.message)
     finally:
       pass
-      
+
+    # Return the response to the client
+    self.request.sendall(json.JSONEncoder().encode(response))
+
     MyTCPHandlerJson.call_sequence += 1
   
-  """
-  Read a JSON payload from a socket
-  """
   def ReadJson(self):
+    """
+    Read a JSON payload from a socket
+    """
     depth = 0
     json_data = ""
     

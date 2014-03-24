@@ -35,6 +35,7 @@ class CommandHandler:
 
   # Error codes
   NotImplemented = 404
+  UnhandledException = 405
   
   #######################################################################
   # Return an instance of the handler for a given command
@@ -103,13 +104,19 @@ class CommandHandler:
       response['X10Response']['call-sequence'] = CommandHandler.call_sequence
     else:
       logger.error("No handler for command: %s", request["request"])
-      response = commands.ServerCommand.ServerCommand.CreateResponse(request["request"])
-      r = response['X10Response']
-      r['result-code'] = CommandHandler.NotImplemented
-      r['error'] = "Command is not recognized or implemented"
-      r['call-sequence'] = CommandHandler.call_sequence
-      r['data'] = ""
-      
+      response = CommandHandler.CreateErrorResponse(request["request"], CommandHandler.NotImplemented,
+                                                    "Command is not recognized or implemented", "")
+
     CommandHandler.call_sequence += 1
     
+    return response
+
+  @classmethod
+  def CreateErrorResponse(cls, request_command, result_code, error_msg, extra_data):
+    response = commands.ServerCommand.ServerCommand.CreateResponse(request_command)
+    r = response['X10Response']
+    r['result-code'] = result_code
+    r['error'] = error_msg
+    r['call-sequence'] = cls.call_sequence
+    r['data'] = extra_data
     return response
