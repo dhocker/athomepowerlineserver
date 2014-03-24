@@ -23,6 +23,7 @@ import commands.DeviceDim
 import commands.DeviceBright
 import commands.DeviceAllUnitsOff
 import commands.DeviceAllLightsOff
+import commands.DeviceAllLightsOn
 import commands.GetTime
 import commands.SetTime
 
@@ -77,7 +78,7 @@ class CommandHandler:
     elif ci_command == "allunitsoff":
       handler = commands.DeviceAllUnitsOff.DeviceAllUnitsOff()
     elif ci_command == "alllightson":
-      handler = None
+      handler = commands.DeviceAllLightsOn.DeviceAllLightsOn()
     elif ci_command == "dim":
       handler = commands.DeviceDim.DeviceDim()
     elif ci_command == "bright":
