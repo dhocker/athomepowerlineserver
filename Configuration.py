@@ -154,4 +154,7 @@ class Configuration():
     """
     if Configuration.IsLinux():
       return "/var/local/athomepowerlineserver/{0}".format(file_name)
+    elif Configuration.IsWindows():
+      return "{0}\\AtHomePowerlineServer\\{1}".format(os.environ["LOCALAPPDATA"], file_name)
+
     return file_name
