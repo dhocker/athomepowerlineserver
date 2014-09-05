@@ -8,3 +8,5 @@ Thumbs.db
 *.odt#
 *.odg#
 .idea/
+athomepowerlineserver/
+.DS_Store

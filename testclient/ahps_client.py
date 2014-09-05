@@ -26,6 +26,7 @@ from optparse import OptionParser
 #Host, Port = "localHost", 9999
 Host, Port = "hedwig", 9999
 #Host, Port = "192.168.1.111", 9999
+Verbose = True
 
 # ahps_client
 # Sends and receives JSON formatted payloads
@@ -82,15 +83,16 @@ def ReadJson(sock):
 #######################################################################
 # Display a formatted response on the console        
 def DisplayResponse(response):
-    jr = json.loads(response)["X10Response"]
-    
-    print "Response for request:", jr["request"]
-   
-    # Loop through all of the entries in the response dict
-    for k, v in jr.iteritems():
-      if k != "request":
-        print " ", k, ":", v
-    print        
+    if Verbose:
+        jr = json.loads(response)["X10Response"]
+
+        print "Response for request:", jr["request"]
+
+        # Loop through all of the entries in the response dict
+        for k, v in jr.iteritems():
+          if k != "request":
+            print " ", k, ":", v
+        print
 
 #######################################################################
 # Send a command to the server
@@ -122,7 +124,7 @@ def SendCommand(data):
   finally:
     sock.close()
 
-  return json_data
+  return json.loads(json_data)["X10Response"]
 
 #######################################################################
 # Test the Get Time command
@@ -130,7 +132,7 @@ def GetTime():
   #
   data = CreateRequest("GetTime")
 
-  SendCommand(data)
+  return SendCommand(data)
 
 #######################################################################
 # Test the Set Time command
@@ -138,7 +140,7 @@ def SetTime():
   #
   data = CreateRequest("SetTime")
 
-  SendCommand(data)
+  return SendCommand(data)
 
 #######################################################################
 # Test the Device On command        
@@ -148,7 +150,7 @@ def DeviceOn(house_device_code, dim_amount):
   data["args"]["house-device-code"] = house_device_code
   data["args"]["dim-amount"] = dim_amount
 
-  SendCommand(data)
+  return SendCommand(data)
         
 #######################################################################
 # Test the Device Off command        
@@ -158,7 +160,7 @@ def DeviceOff(house_device_code, dim_amount):
   data["args"]["house-device-code"] = house_device_code
   data["args"]["dim-amount"] = dim_amount
 
-  SendCommand(data)
+  return SendCommand(data)
 
 #######################################################################
 # Test the Device Dim command
@@ -168,7 +170,7 @@ def DeviceDim(house_device_code, dim_amount):
   data["args"]["house-device-code"] = house_device_code
   data["args"]["dim-amount"] = dim_amount
 
-  SendCommand(data)
+  return SendCommand(data)
 
 #######################################################################
 # Test the Device Bright command
@@ -178,7 +180,7 @@ def DeviceBright(house_device_code, bright_amount):
   data["args"]["house-device-code"] = house_device_code
   data["args"]["bright-amount"] = bright_amount
 
-  SendCommand(data)
+  return SendCommand(data)
 
 #######################################################################
 # Test the Device All Units Off command
@@ -187,7 +189,7 @@ def DeviceAllUnitsOff(house_code):
   data = CreateRequest("AllUnitsOff")
   data["args"]["house-code"] = house_code
 
-  SendCommand(data)
+  return SendCommand(data)
 
 #######################################################################
 # Test the Device All Light Off command
@@ -196,7 +198,7 @@ def DeviceAllLightsOff(house_code):
   data = CreateRequest("AllLightsOff")
   data["args"]["house-code"] = house_code
 
-  SendCommand(data)
+  return SendCommand(data)
 
 #######################################################################
 # Test the status request command        
@@ -207,7 +209,7 @@ def StatusRequest():
   # This DOES work. Why?
   data = CreateRequest("StatusRequest")
 
-  SendCommand(data)
+  return SendCommand(data)
 
 #######################################################################
 def LoadTimers(): 
@@ -285,7 +287,7 @@ def LoadTimers():
   # for i in range(0, 98):
     # data["args"].append(program)
 
-  SendCommand(data)    
+  return SendCommand(data)
 
 #######################################################################
 def LoadActions():
@@ -309,7 +311,7 @@ def LoadActions():
   data["args"]["actions"].append(action1)
   data["args"]["actions"].append(action2)
 
-  SendCommand(data)
+  return SendCommand(data)
 
 #######################################################################
 #
