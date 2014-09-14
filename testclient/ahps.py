@@ -44,12 +44,12 @@ if __name__ == "__main__":
 
   # Create an argument parser for the optional and positional arguments
   parser = argparse.ArgumentParser(description="ahps - AtHomePowerlineServer command line utility")
-  parser.add_argument("command", help="X10 command: applianceon, lampon, applianceoff, lampoff")
+  parser.add_argument("command", help="X10 command: applianceon, lampon, applianceoff, lampoff, deviceoff")
   parser.add_argument("housedevicecode", help="House device code (e.g. A7)")
   parser.add_argument("-s", "--server", help="Host name or host address")
   parser.add_argument("-p", "--port", type=int, help="Port number")
-  parser.add_argument("-d", "--dimamount", type=int, default=100,
-                      help="For lamp module commands, the dim amount. Default=100")
+  parser.add_argument("-d", "--dimamount", type=int, default=0,
+                      help="For lamp module commands, the dim amount. Default=0")
   args = parser.parse_args()
 
   # Local default is raspberrypi-fs at 192.168.1.151
