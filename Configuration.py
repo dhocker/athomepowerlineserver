@@ -137,6 +137,11 @@ class Configuration():
 
   ######################################################################
   @classmethod
+  def DatabasePath(cls):
+    return cls.ActiveConfig["DatabasePath"]
+
+  ######################################################################
+  @classmethod
   def GetConfigurationFilePath(cls):
     """
     Returns the full path to the configuration file
@@ -153,7 +158,14 @@ class Configuration():
     Returns the full path to the SQLite database file
     """
     if Configuration.IsLinux():
-      return "/var/local/athomepowerlineserver/{0}".format(file_name)
+      # return "/var/local/athomepowerlineserver/{0}".format(file_name)
+      dbpath = Configuration.DatabasePath()
+      if dbpath == "":
+          return file_name
+      else:    
+          if not dbpath.endswith("/"):
+              dbpath += "/"      
+          return "{0}{1}".format(dbpath, file_name)
     elif Configuration.IsWindows():
       return "{0}\\AtHomePowerlineServer\\{1}".format(os.environ["LOCALAPPDATA"], file_name)
 
