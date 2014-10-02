@@ -24,7 +24,7 @@ from optparse import OptionParser
 
 # Host and Port can be overriden by the -s and -p command line options
 #Host, Port = "localHost", 9999
-Host, Port = "hedwig", 9999
+Host, Port = "localhost", 9999
 #Host, Port = "192.168.1.111", 9999
 Verbose = True
 
@@ -313,6 +313,15 @@ def LoadActions():
 
   return SendCommand(data)
 
+def GetSunData(for_isodate):
+  data = CreateRequest("GetSunData")
+  data["args"]["date"] = for_isodate
+
+  result = SendCommand(data)
+
+  return result
+
+
 #######################################################################
 #
 # Main
@@ -351,8 +360,8 @@ if __name__ == "__main__":
   print "A7 on 50"
   DeviceOn("A7", 50)
   #
-  print "sleep 10"
-  time.sleep(10)
+  #print "sleep 10"
+  #time.sleep(10)
   #
   print "A7 bright 50"
   DeviceBright("a7", 50)
@@ -366,8 +375,8 @@ if __name__ == "__main__":
   # print "A7 off"
   # DeviceOff("A7", 0)
 
-  print "sleep 10"
-  time.sleep(10)
+  #print "sleep 10"
+  #time.sleep(10)
 
   print "All units off A"
   DeviceAllUnitsOff("A")
@@ -376,3 +385,9 @@ if __name__ == "__main__":
 
   #print "All lights off"
   #DeviceAllLightsOff("A")
+
+  date_str = "2014-11-02"
+  print "Sending GetSunData for " + date_str
+  result = GetSunData(date_str)
+  print "sunset", result["data"]["sunset"]
+  print "sunrise", result["data"]["sunrise"]

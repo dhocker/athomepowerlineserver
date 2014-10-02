@@ -26,6 +26,7 @@ import commands.DeviceAllLightsOff
 import commands.DeviceAllLightsOn
 import commands.GetTime
 import commands.SetTime
+import commands.GetSunData
 
 logger = logging.getLogger("server")
 
@@ -91,6 +92,8 @@ class CommandHandler:
       handler = commands.GetTime.GetTime()
     elif ci_command == "settime":
       handler = commands.SetTime.SetTime()
+    elif ci_command == "getsundata":
+      handler = commands.GetSunData.GetSunData()
     else:
       handler = None
       
