@@ -147,8 +147,14 @@ class Configuration():
     Returns the full path to the configuration file
     """
     file_name = 'AtHomePowerlineServer.conf'
+
+    # A local configuration file (in the home directory) takes precedent
+    if os.path.exists(file_name):
+        return file_name
+
     if Configuration.IsLinux():
       return "/etc/{0}".format(file_name)
+
     return file_name
 
   ######################################################################

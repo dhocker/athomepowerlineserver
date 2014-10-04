@@ -79,6 +79,7 @@ def main():
 
   logger.info("Starting up...")
 
+  logger.info("Using configuration file: %s", Configuration.Configuration.GetConfigurationFilePath())
   logger.info("X10 controller: %s", Configuration.Configuration.X10ControllerDevice())
   logger.info("ComPort: %s", Configuration.Configuration.ComPort())
 
