@@ -20,6 +20,7 @@ import time
 import io
 import glob
 import AtHomePowerlineServerDb
+from helpers.TimeZone import TimeZone
 
 # Depends on the current directory being the server root directory
 SUN_DATA_FILE_NAME = "database/sunrise_sunset.sql"
@@ -60,8 +61,9 @@ def get_sunrise(for_date):
   rst = csr.execute("select sunrise from sun_table where calendar_date=date(?)", [for_date.isoformat()])
   r = rst.fetchone()
   sunrise_without_date = datetime.datetime.strptime(r["sunrise"], "%H:%M:%S")
-  sunrise_with_date = datetime.datetime(for_date.year, for_date.month, for_date.day, \
-                                        sunrise_without_date.hour, sunrise_without_date.minute, sunrise_without_date.second)
+  sunrise_with_date = datetime.datetime(for_date.year, for_date.month, for_date.day,
+                                        sunrise_without_date.hour, sunrise_without_date.minute,
+                                        sunrise_without_date.second, tzinfo=TimeZone())
 
   # Adjustment for DST (database times are ALL in STD time)
   if time.localtime().tm_isdst:
@@ -79,8 +81,9 @@ def get_sunset(for_date):
   rst = csr.execute("select sunset from sun_table where calendar_date=date(?)", [for_date.isoformat()])
   r = rst.fetchone()
   sunset_without_date = datetime.datetime.strptime(r["sunset"], "%H:%M:%S")
-  sunset_with_date = datetime.datetime(for_date.year, for_date.month, for_date.day, \
-                                        sunset_without_date.hour, sunset_without_date.minute, sunset_without_date.second)
+  sunset_with_date = datetime.datetime(for_date.year, for_date.month, for_date.day,
+                                        sunset_without_date.hour, sunset_without_date.minute,
+                                        sunset_without_date.second, tzinfo=TimeZone())
 
   # Adjustment for DST (database times are ALL in STD time)
   if time.localtime().tm_isdst:

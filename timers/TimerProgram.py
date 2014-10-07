@@ -18,6 +18,7 @@
 import datetime
 import random
 import database.sun_table
+from helpers.TimeZone import TimeZone
 import logging
 
 logger = logging.getLogger("server")
@@ -99,7 +100,7 @@ class TimerProgram:
     now = datetime.datetime.now()
 
     # time without seconds
-    now_dt = datetime.datetime(now.year, now.month, now.day, now.hour, now.minute, 0)
+    now_dt = datetime.datetime(now.year, now.month, now.day, now.hour, now.minute, 0, tzinfo=TimeZone())
 
     # Randomized amount
     randomized_amount = 0
@@ -110,7 +111,7 @@ class TimerProgram:
     # Factory testing based on trigger method
     if self.StartTriggerMethod == "clock-time":
       today_starttime = datetime.datetime(now.year, now.month, now.day, self.StartTime.hour,
-                                          self.StartTime.minute, self.StartTime.second)
+                                          self.StartTime.minute, self.StartTime.second, tzinfo=TimeZone())
       today_starttime = today_starttime + datetime.timedelta(minutes=randomized_amount)
       return today_starttime == now_dt
     elif self.StartTriggerMethod == "sunset":
@@ -143,13 +144,13 @@ class TimerProgram:
     logger.debug("Stop randomize amount: %s", randomized_amount)
 
     # time without seconds
-    now_dt = datetime.datetime(now.year, now.month, now.day, now.hour, now.minute, 0)
+    now_dt = datetime.datetime(now.year, now.month, now.day, now.hour, now.minute, 0, tzinfo=TimeZone())
 
     # Factory testing based on trigger method
     if self.StopTriggerMethod == "clock-time":
       # Stop time using today's date
       today_stoptime = datetime.datetime(now.year, now.month, now.day, self.StopTime.hour,
-                                         self.StopTime.minute, self.StopTime.second)
+                                         self.StopTime.minute, self.StopTime.second, tzinfo=TimeZone())
       today_stoptime = today_stoptime + datetime.timedelta(minutes=randomized_amount)
       #logger.debug("Target stop time: %s", today_stoptime)
       return today_stoptime == now_dt
