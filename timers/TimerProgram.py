@@ -112,7 +112,7 @@ class TimerProgram:
     if self.StartTriggerMethod == "clock-time":
       today_starttime = datetime.datetime(now.year, now.month, now.day, self.StartTime.hour,
                                           self.StartTime.minute, self.StartTime.second, tzinfo=TimeZone())
-      today_starttime = today_starttime + datetime.timedelta(minutes=randomized_amount)
+      today_starttime = today_starttime + datetime.timedelta(minutes=(self.StartOffset + randomized_amount))
       return today_starttime == now_dt
     elif self.StartTriggerMethod == "sunset":
       #logger.debug("Testing start sunset trigger")
@@ -151,7 +151,7 @@ class TimerProgram:
       # Stop time using today's date
       today_stoptime = datetime.datetime(now.year, now.month, now.day, self.StopTime.hour,
                                          self.StopTime.minute, self.StopTime.second, tzinfo=TimeZone())
-      today_stoptime = today_stoptime + datetime.timedelta(minutes=randomized_amount)
+      today_stoptime = today_stoptime + datetime.timedelta(minutes=(self.StopOffset + randomized_amount))
       #logger.debug("Target stop time: %s", today_stoptime)
       return today_stoptime == now_dt
     elif self.StopTriggerMethod == "sunset":
