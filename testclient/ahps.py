@@ -52,8 +52,8 @@ if __name__ == "__main__":
                       help="For lamp module commands, the dim amount. Default=0")
   args = parser.parse_args()
 
-  # Local default is raspberrypi-fs at 192.168.1.151
-  ahps_client.Host = "192.168.1.151"
+  # Local default is the localhost
+  ahps_client.Host = "localhost"
   if args.server is not None:
     ahps_client.Host = args.server
   if args.port is not None:

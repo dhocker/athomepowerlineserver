@@ -17,8 +17,8 @@
 
 import datetime
 import random
-import database.sun_table
 from helpers.TimeZone import TimeZone
+from helpers.sun_data import get_sunrise, get_sunset
 import logging
 
 logger = logging.getLogger("server")
@@ -116,12 +116,12 @@ class TimerProgram:
       return today_starttime == now_dt
     elif self.StartTriggerMethod == "sunset":
       #logger.debug("Testing start sunset trigger")
-      sunset = database.sun_table.get_sunset(datetime.date(now_dt.year, now_dt.month, now_dt.day))
+      sunset = get_sunset(now_dt)
       offset_sunset = sunset + datetime.timedelta(minutes=(self.StartOffset + randomized_amount))
       return now_dt == offset_sunset
     elif self.StartTriggerMethod == "sunrise":
       #logger.debug("Testing start sunrise trigger")
-      sunrise = database.sun_table.get_sunrise(datetime.date(now_dt.year, now_dt.month, now_dt.day))
+      sunrise = get_sunrise(now_dt)
       offset_sunrise = sunrise + datetime.timedelta(minutes=(self.StartOffset + randomized_amount))
       return now_dt == offset_sunrise
 
@@ -156,13 +156,14 @@ class TimerProgram:
       return today_stoptime == now_dt
     elif self.StopTriggerMethod == "sunset":
       #logger.debug("Testing stop sunset trigger")
-      sunset = database.sun_table.get_sunset(datetime.date(now_dt.year, now_dt.month, now_dt.day))
+      sunset = get_sunset(now_dt)
       offset_sunset = sunset + datetime.timedelta(minutes=(self.StopOffset + randomized_amount))
       return now_dt == offset_sunset
     elif self.StopTriggerMethod == "sunrise":
       #logger.debug("Testing stop sunrise trigger")
-      sunrise = database.sun_table.get_sunrise(datetime.date(now_dt.year, now_dt.month, now_dt.day))
+      sunrise = get_sunrise(now_dt)
       offset_sunrise = sunrise + datetime.timedelta(minutes=(self.StopOffset + randomized_amount))
+      logger.debug("Testing stop sunrise trigger: {0} == {1}".format(now_dt, offset_sunrise))
       return now_dt == offset_sunrise
 
     # "none" falls to here

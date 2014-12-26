@@ -15,7 +15,7 @@
 
 import ServerCommand
 import datetime
-import database.sun_table as sun_table
+from helpers.sun_data import get_sunrise, get_sunset
 
 #######################################################################
 # Command handler for GetSunData command
@@ -36,8 +36,8 @@ class GetSunData(ServerCommand.ServerCommand):
     # The sun_data functions expect a date type, so we convert to date here
     for_date = datetime.date(for_datetime.year, for_datetime.month, for_datetime.day)
 
-    sunset_dt = sun_table.get_sunset(for_date)
-    sunrise_dt = sun_table.get_sunrise(for_date)
+    sunset_dt = get_sunset(for_date)
+    sunrise_dt = get_sunrise(for_date)
 
     r['data']['sunset'] = sunset_dt.isoformat()
     r['data']['sunrise'] = sunrise_dt.isoformat()

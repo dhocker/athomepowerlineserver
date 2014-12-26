@@ -17,7 +17,6 @@ import sqlite3
 import os.path
 import datetime
 import logging
-import sun_table
 import Configuration
 
 logger = logging.getLogger("server")
@@ -71,10 +70,7 @@ class AtHomePowerlineServerDb:
     # Actions
     conn.execute("CREATE TABLE Actions (name text PRIMARY KEY, command text, dimamount integer, args text, updatetime timestamp)")
 
-    # Sun times
-    conn.execute("CREATE TABLE sun_table (calendar_date date, sunrise time, sunset time)")
-    # Load all of the sun data files into the sun-table
-    sun_table.load_sun_table(conn)
+    # Sun times now calculated using astral package
 
     # Done
     conn.close()

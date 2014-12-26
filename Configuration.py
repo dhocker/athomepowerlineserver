@@ -33,6 +33,9 @@ import os
 import json
 import drivers.XTB232
 import drivers.Dummy
+import logging
+
+logger = logging.getLogger("server")
 
 ########################################################################
 class Configuration():
@@ -91,6 +94,20 @@ class Configuration():
     Returns True if the OS is a Windows type (Windows 7, etc.)
     """
     return os.name == "nt"
+
+
+  ######################################################################
+  @classmethod
+  def get_config_var(cls, var_name):
+      try:
+          return cls.ActiveConfig[var_name]
+      except Exception as ex:
+          logger.error("Unable to find configuration variable {0}".format(var_name))
+          logger.error(str(ex))
+          pass
+      return None
+
+
   ######################################################################
   # Get the X10 controller device. Used to determine what driver should be used.
   @classmethod
@@ -113,32 +130,47 @@ class Configuration():
   ######################################################################
   @classmethod
   def ComPort(cls):
-    return cls.ActiveConfig["ComPort"]
+    return cls.get_config_var("ComPort")
     
   ######################################################################
   @classmethod
   def Port(cls):
-    return cls.ActiveConfig["Port"]
+    return cls.get_config_var("Port")
 
   ######################################################################
   @classmethod
   def Logconsole(cls):
-    return cls.ActiveConfig["LogConsole"].lower() == "true"
+    return cls.get_config_var("LogConsole").lower() == "true"
 
   ######################################################################
   @classmethod
   def Logfile(cls):
-    return cls.ActiveConfig["LogFile"]
+    return cls.get_config_var("LogFile")
 
   ######################################################################
   @classmethod
   def LogLevel(cls):
-    return cls.ActiveConfig["LogLevel"]
+    return cls.get_config_var("LogLevel")
 
   ######################################################################
   @classmethod
   def DatabasePath(cls):
-    return cls.ActiveConfig["DatabasePath"]
+    return cls.get_config_var("DatabasePath")
+
+  ######################################################################
+  @classmethod
+  def City(cls):
+      return cls.get_config_var("City")
+
+  ######################################################################
+  @classmethod
+  def Latitude(cls):
+      return cls.get_config_var("Latitude")
+
+  ######################################################################
+  @classmethod
+  def Longitude(cls):
+      return cls.get_config_var("Longitude")
 
   ######################################################################
   @classmethod
