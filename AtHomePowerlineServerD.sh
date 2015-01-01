@@ -1,19 +1,24 @@
 #!/bin/sh
 
 ### BEGIN INIT INFO
-# Provides:          AtHomePowerlineServer
-# Required-Start:    $remote_fs $syslog
+# Provides:          AtHomePowerlineServerD.sh
+# Required-Start:    $all
 # Required-Stop:     $remote_fs $syslog
+# Should-Start:
+# Should-Stop:
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
 # Short-Description: Manages AtHomePowerlineServer as a daemon
-# Description:       Adapter from the article: http://blog.scphillips.com/2013/07/getting-a-python-script-to-run-in-the-background-as-a-service-on-boot/
+# Description:       Adapted from the article: http://blog.scphillips.com/2013/07/getting-a-python-script-to-run-in-the-background-as-a-service-on-boot/
 ### END INIT INFO
+
+# Require $all in attempt to get system to a state with all volumes mounted
+# Required-Start:    $remote_fs $syslog
 
 # Change the next 3 lines to suit where you install your script and what you want to call it
 DIR=/home/pi/rpi/elfstone_athomeserver
 DAEMON=$DIR/AtHomePowerlineServer.py
-DAEMON_NAME=AtHomePowerlineServer
+DAEMON_NAME=AtHomePowerlineServerD.sh
 
 # This next line determines what user the script runs as.
 # Root generally not recommended but necessary if you are using the Raspberry Pi GPIO from Python.
