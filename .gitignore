@@ -1,6 +1,6 @@
 *.pyc
 *.log
-AtHomePowerlineServer.conf
+*.conf
 AtHomePowerlineServer.log*
 *.sqlite3
 Thumbs.db
