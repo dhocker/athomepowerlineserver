@@ -17,6 +17,7 @@ import threading
 import time
 import datetime
 import logging
+import traceback
 import timers.TimerStore
 import timers.TimerProgram
 import database.Actions
@@ -75,6 +76,7 @@ class TimerServiceThread(threading.Thread):
     except Exception as ex:
         logger.error("Exception caught while running timer programs")
         logger.error(ex.message)
+        logger.error(traceback.format_exc())
     finally:
       timers.TimerStore.TimerStore.ReleaseTimerProgramList()
       logger.info("RunTimePrograms lock released")
