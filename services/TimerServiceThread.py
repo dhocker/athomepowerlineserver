@@ -42,19 +42,17 @@ class TimerServiceThread(threading.Thread):
   def run(self):
     # logger.info("Timer service running")
 
-    # Line up timing to the minute
-    time_count = datetime.datetime.now().second
     # Check the terminate signal every second
     while not self.terminate_signal:
-      time.sleep(1.0)
-      time_count += 1
-      # Every minute run the program checks
-      if time_count >= 60:
+        logger.info("Timer checks sleep")
+        time.sleep(60 - datetime.datetime.now().second)
+        # Every minute run the program checks
         # Maintain top of the minute alignment
         time_count = datetime.datetime.now().second
         # run checks
-        logger.info("Timer checks")
+        logger.info("Timer checks start")
         self.RunTimerPrograms()
+        logger.info("Timer checks end")
 
   ########################################################################
   # Terminate the timer service thread
