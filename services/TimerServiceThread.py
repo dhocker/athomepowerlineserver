@@ -67,13 +67,15 @@ class TimerServiceThread(threading.Thread):
   # Run timer programs that have reached their trigger time
   def RunTimerPrograms(self):
     tp_list = timers.TimerStore.TimerStore.AcquireTimerProgramList()
+    logger.info("RunTimePrograms lock acquired")
 
     try:
       for tp in tp_list:
         self.RunTimerProgram(tp)
     finally:
       timers.TimerStore.TimerStore.ReleaseTimerProgramList()
-  
+      logger.info("RunTimePrograms lock released")
+
   ########################################################################
   # Run a single timer program
   def RunTimerProgram(self, tp):

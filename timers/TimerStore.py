@@ -137,7 +137,7 @@ class TimerStore:
   @classmethod
   def AcquireTimerProgramList(cls):
     # Wait for lock
-    cls.TimerProgramListLock.acquire(1)
+    cls.TimerProgramListLock.acquire(True)
     return cls.TimerProgramList
 
   @classmethod
