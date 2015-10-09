@@ -36,7 +36,7 @@ class TimerServiceThread(threading.Thread):
     threading.Thread.__init__(self)
     self.thread_id = thread_id
     self.name = name
-    self.terminate_signal = False
+    self.terminate_signal = threading.Event()
 
   ########################################################################
   # Called by threading on the new thread
@@ -44,21 +44,27 @@ class TimerServiceThread(threading.Thread):
     # logger.info("Timer service running")
 
     # Check the terminate signal every second
-    while not self.terminate_signal:
+    while not self.terminate_signal.isSet():
         logger.info("Timer checks sleep")
-        time.sleep(60 - datetime.datetime.now().second)
-        # Every minute run the program checks
-        # Maintain top of the minute alignment
-        time_count = datetime.datetime.now().second
-        # run checks
-        logger.info("Timer checks start")
-        self.RunTimerPrograms()
-        logger.info("Timer checks end")
+        # This sleeps until the next minute.
+        # We sleep in a granular fashion so that
+        # a service stop/restart command takes effect
+        # in a minimal amount of time.
+        wait_time = 60 - datetime.datetime.now().second
+        while (wait_time > 0) and (not self.terminate_signal.isSet()):
+            time.sleep(1)
+            wait_time -= 1
+
+        # Every minute run the program checks if terminate is not set
+        if not self.terminate_signal.isSet():
+            logger.info("Timer checks start")
+            self.RunTimerPrograms()
+            logger.info("Timer checks end")
 
   ########################################################################
   # Terminate the timer service thread
   def Terminate(self):
-    self.terminate_signal = True
+    self.terminate_signal.set()
     # wait for service thread to exit - could be a while
     logger.info("Waiting for timer service to stop...this could take a few seconds")
     self.join()
@@ -68,7 +74,7 @@ class TimerServiceThread(threading.Thread):
   # Run timer programs that have reached their trigger time
   def RunTimerPrograms(self):
     tp_list = timers.TimerStore.TimerStore.AcquireTimerProgramList()
-    logger.info("RunTimePrograms lock acquired")
+    logger.info("RunTimerPrograms lock acquired")
 
     try:
       for tp in tp_list:
@@ -76,10 +82,10 @@ class TimerServiceThread(threading.Thread):
     except Exception as ex:
         logger.error("Exception caught while running timer programs")
         logger.error(ex.message)
-        #logger.error(traceback.format_exc())
+        logger.debug(traceback.format_exc())
     finally:
       timers.TimerStore.TimerStore.ReleaseTimerProgramList()
-      logger.info("RunTimePrograms lock released")
+      logger.info("RunTimerPrograms lock released")
 
   ########################################################################
   # Run a single timer program
