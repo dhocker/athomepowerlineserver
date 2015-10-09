@@ -8,7 +8,7 @@
 # See the LICENSE file for more details.
 #
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from astral import Astral
 from Configuration import Configuration
 
@@ -61,11 +61,12 @@ def get_sun_data(for_datetime):
 
 def round_to_minute(time_to_round):
     round_adj = 0
-    if time_to_round.second >= 30:
-        round_adj = 1
     rounded = datetime(time_to_round.year, time_to_round.month, time_to_round.day,
-                       hour=time_to_round.hour, minute=(time_to_round.minute + round_adj), second=0, microsecond=0,
+                       hour=time_to_round.hour, minute=time_to_round.minute, second=0, microsecond=0,
                        tzinfo=time_to_round.tzinfo)
+    if time_to_round.second >= 30:
+        round_adj = timedelta(minutes=1)
+        rounded = rounded + round_adj
     return rounded
 
 
