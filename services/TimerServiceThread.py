@@ -76,7 +76,7 @@ class TimerServiceThread(threading.Thread):
     except Exception as ex:
         logger.error("Exception caught while running timer programs")
         logger.error(ex.message)
-        logger.error(traceback.format_exc())
+        #logger.error(traceback.format_exc())
     finally:
       timers.TimerStore.TimerStore.ReleaseTimerProgramList()
       logger.info("RunTimePrograms lock released")
