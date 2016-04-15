@@ -15,13 +15,20 @@
 # Require $all in attempt to get system to a state with all volumes mounted
 # Required-Start:    $remote_fs $syslog
 
+# Setup the path to lead with the virtualenv. When it's python is executed it
+# will activate the virtualenv.
+VENV=/home/pi/Virtualenvs/elfstone_athomeserver
+PATH=$VENV/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
 # Change the next 3 lines to suit where you install your script and what you want to call it
 DIR=/home/pi/rpi/elfstone_athomeserver
-DAEMON=$DIR/AtHomePowerlineServer.py
+DAEMON_SCRIPT=$DIR/AtHomePowerlineServer.py
 DAEMON_NAME=AtHomePowerlineServerD.sh
+PYTHON_INT=$VENV/bin/python
 
 # This next line determines what user the script runs as.
 # Root generally not recommended but necessary if you are using the Raspberry Pi GPIO from Python.
+# In this case we may be using a USB based serial port which by default requires root access.
 DAEMON_USER=root
 
 # The process ID of the script when it runs is stored here:
@@ -31,7 +38,8 @@ PIDFILE=/var/run/$DAEMON_NAME.pid
 
 do_start () {
     log_daemon_msg "Starting system $DAEMON_NAME daemon"
-    start-stop-daemon --start --background --pidfile $PIDFILE --make-pidfile --user $DAEMON_USER --chuid $DAEMON_USER --startas $DAEMON
+    start-stop-daemon --start --background --pidfile $PIDFILE --make-pidfile --user $DAEMON_USER \
+        --chuid $DAEMON_USER --startas $PYTHON_INT -- $DAEMON_SCRIPT
     log_end_msg $?
 }
 do_stop () {
