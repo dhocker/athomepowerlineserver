@@ -43,9 +43,14 @@ The full source is maintained on [GitHub](https://www.github.com/dhocker/athomep
 
 ## Build Environment
 
-AtHomePowerlineServer is written in Python 2.7. A suitable development environment would use virtualenv and virtualenvwrapper to create a working virtual environment. The requirements.txt file can be used with pip to create the required virtual environment with all dependencies.
+AtHomePowerlineServer is written in Python 2.7. Use virtualenv 
+and virtualenvwrapper to create a working virtual environment named elfstone_athomeserver. 
+The requirements.txt file can be used 
+with pip to create the required virtual environment with all dependencies. Complete details
+for installation, setup and configuration can be found in the AtHomePowerlineServer.pdf document.
 
-AtHomePowerlineServer was developed using PyCharm CE. PyCharm CE is highly recommended. However, a good text editor of your choice is all that is really required.
+AtHomePowerlineServer was developed using PyCharm CE. PyCharm CE is highly recommended. However, a good 
+text editor of your choice is all that is really required.
 
 ## Documentation
 
