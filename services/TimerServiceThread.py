@@ -109,7 +109,8 @@ class TimerServiceThread(threading.Thread):
       # TODO We need a factory approach to determining if the start or stop event has occurred
 
       # Start event check
-      if (not tp.StartEventRun) and (tp.IsStartEventTriggered()):
+      # if (not tp.StartEventRun) and (tp.IsStartEventTriggered()):
+      if tp.IsStartEventTriggered():
         # Start event triggered. Reset Stop event.
         tp.StartEventRun = True
         tp.StopEventRun = False
@@ -118,7 +119,8 @@ class TimerServiceThread(threading.Thread):
         self.RunTimerAction(tp.StartAction, tp.HouseDeviceCode)
 
       # Stop event check
-      if (not tp.StopEventRun) and (tp.IsStopEventTriggered()):
+      # if (not tp.StopEventRun) and (tp.IsStopEventTriggered()):
+      if tp.IsStopEventTriggered():
         # Stop event triggered. Reset Start event.
         tp.StopEventRun = True
         tp.StartEventRun = False
