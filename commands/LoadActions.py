@@ -9,7 +9,7 @@
 # See the LICENSE file for more details.
 #
 
-import ServerCommand
+import commands.ServerCommand as ServerCommand
 import database.Actions
 import datetime
 import logging

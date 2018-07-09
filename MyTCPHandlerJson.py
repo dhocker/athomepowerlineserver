@@ -9,14 +9,14 @@
 # See the LICENSE file for more details.
 #
 
-import SocketServer
+import socketserver
 import json
 import logging
 import CommandHandler
 
 logger = logging.getLogger("server")
 
-class MyTCPHandlerJson(SocketServer.BaseRequestHandler):
+class MyTCPHandlerJson(socketserver.BaseRequestHandler):
   """
   The RequestHandler class for our server.
 

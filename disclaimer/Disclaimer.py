@@ -32,7 +32,7 @@ def DisplayDisclaimer():
   Show the disclaimer as recommended by the GPL v3 license
   """
   for line in _disclaimer:
-    print line
+    print(line)
 
 
 def LogDisclaimer():
@@ -40,4 +40,4 @@ def LogDisclaimer():
   Show the disclaimer as recommended by the GPL v3 license
   """
   for line in _disclaimer:
-    logger.info( line)
+    logger.info(line)

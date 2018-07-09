@@ -14,7 +14,7 @@
 #
 
 import threading
-import TimerServiceThread
+import services.TimerServiceThread as TimerServiceThread
 
 # This class should be used as a singleton
 class TimerService:

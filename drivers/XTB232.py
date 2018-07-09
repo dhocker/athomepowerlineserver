@@ -17,7 +17,7 @@
 #   http://jvde.us//xtb/XTB-232_description.htm
 #
 
-import X10ControllerInterface
+import drivers.X10ControllerInterface as X10ControllerInterface
 import Configuration
 import serial
 import datetime

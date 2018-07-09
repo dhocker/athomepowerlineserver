@@ -13,7 +13,7 @@
 # Dummy X10 controller driver
 #
 
-import X10ControllerInterface
+import drivers.X10ControllerInterface as X10ControllerInterface
 import logging
 
 logger = logging.getLogger("server")

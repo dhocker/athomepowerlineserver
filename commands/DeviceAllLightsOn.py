@@ -13,7 +13,7 @@
 # Device all lights on
 #
 
-import ServerCommand
+import commands.ServerCommand as ServerCommand
 import drivers.X10ControllerAdapter
 
 #######################################################################

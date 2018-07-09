@@ -13,7 +13,7 @@
 # GetTime
 #
 
-import ServerCommand
+import commands.ServerCommand as ServerCommand
 import datetime
 from helpers.sun_data import get_sunrise, get_sunset
 

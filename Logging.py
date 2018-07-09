@@ -63,4 +63,4 @@ def EnableServerLogging():
 # Controlled logging shutdown
 def Shutdown():
   logging.shutdown()
-  print "Logging shutdown"
+  print("Logging shutdown")

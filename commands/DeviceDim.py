@@ -13,7 +13,7 @@
 # Device dim
 #
 
-import ServerCommand
+import commands.ServerCommand as ServerCommand
 import drivers.X10ControllerAdapter
 import datetime
 

@@ -9,14 +9,14 @@
 # See the LICENSE file for more details.
 #
 
-import ServerCommand
+import commands.ServerCommand
 import timers.TimerStore
 import datetime
 import logging
 
 #######################################################################
 # Command handler for loading timer initiators
-class LoadTimers(ServerCommand.ServerCommand):
+class LoadTimers(commands.ServerCommand.ServerCommand):
   
   #######################################################################
   # Execute the load timers command.

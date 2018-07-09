@@ -13,7 +13,7 @@
 # Actions table model
 #
 
-import AtHomePowerlineServerDb
+import database.AtHomePowerlineServerDb as AtHomePowerlineServerDb
 import datetime
 import logging
 

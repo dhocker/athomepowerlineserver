@@ -9,11 +9,11 @@
 # See the LICENSE file for more details.
 #
 
-import SocketServer
+import socketserver
 
 """
 TCP server using threads.
 Supports JSON formatted payloads.
 """
-class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
+class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
   pass

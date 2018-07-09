@@ -13,7 +13,7 @@
 # Timers table model
 #
 
-import AtHomePowerlineServerDb
+import database.AtHomePowerlineServerDb as AtHomePowerlineServerDb
 import datetime
 
 #######################################################################
@@ -27,8 +27,8 @@ class Timers:
   # Empty all records from the Timers table
   @classmethod
   def DeleteAll(cls):
-    conn = AtHomePowerlineServerDb.AtHomePowerlineServerDb.GetConnection()
-    c = AtHomePowerlineServerDb.AtHomePowerlineServerDb.GetCursor(conn)
+    conn = database.AtHomePowerlineServerDb.AtHomePowerlineServerDb.GetConnection()
+    c = database.AtHomePowerlineServerDb.AtHomePowerlineServerDb.GetCursor(conn)
     c.execute("DELETE FROM Timers")
     conn.commit()
     conn.close()    

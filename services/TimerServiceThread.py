@@ -20,8 +20,8 @@ import logging
 import traceback
 import timers.TimerStore
 import timers.TimerProgram
-import database.Actions
-import commands.ActionFactory
+import database.Actions as Actions
+import commands.ActionFactory as ActionFactory
 
 logger = logging.getLogger("server")
 
@@ -133,13 +133,13 @@ class TimerServiceThread(threading.Thread):
   ########################################################################
   # Run an action
   def RunTimerAction(self, name, house_device_code):
-    rset = database.Actions.Actions.GetByName(name)
+    rset = Actions.Actions.GetByName(name)
     if rset is not None:
       #print type(rset)
       #print rset
       # TODO We want a factory here, one that looks up the action and returns an action handler
       logger.info("Executing action: %s %s", rset["command"], house_device_code)
-      commands.ActionFactory.RunAction(rset["command"], house_device_code, int(rset["dimamount"]))
+      ActionFactory.RunAction(rset["command"], house_device_code, int(rset["dimamount"]))
     else:
       logger.info("No Actions table record was found for: %s", name)
 
