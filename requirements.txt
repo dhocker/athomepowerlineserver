@@ -5,8 +5,8 @@ chardet==3.0.4
 future==0.16.0
 idna==2.7
 iso8601==0.1.12
+pyserial==3.4
 pytz==2018.5
 PyYAML==3.13
 requests==2.19.1
-serial==0.0.66
 urllib3==1.23
