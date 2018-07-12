@@ -15,6 +15,8 @@
 # ahps_test.py [-s hostname|hostaddress] [-p portnumber]
 #
 
+import sys
+import time
 import ahps_client
 from optparse import OptionParser
 
@@ -23,61 +25,62 @@ from optparse import OptionParser
 # Main
 #
 if __name__ == "__main__":
-  # Show license advertisement
-  sys.path.append("../")
-  import disclaimer.Disclaimer
-  disclaimer.Disclaimer.DisplayDisclaimer()
+    # Show license advertisement
+    sys.path.append("../")
+    import disclaimer.Disclaimer
 
-  #import pdb; pdb.set_trace()
+    disclaimer.Disclaimer.DisplayDisclaimer()
 
-  parser = OptionParser()
-  parser.add_option("-s")
-  parser.add_option("-p")
-  (options, args) = parser.parse_args()
-  #print options
+    # import pdb; pdb.set_trace()
 
-  if options.s is not None:
-    Host = options.s
-  if options.p is not None:
-    Port = int(options.p)
+    parser = OptionParser()
+    parser.add_option("-s")
+    parser.add_option("-p")
+    (options, args) = parser.parse_args()
+    # print options
 
-  # Try a status request command
-  ahps_client.StatusRequest()
+    if options.s is not None:
+        Host = options.s
+    if options.p is not None:
+        Port = int(options.p)
 
-  # Test the time requests
-  #SetTime()
-  #GetTime()
+    # Try a status request command
+    ahps_client.StatusRequest()
 
-  # Try some timer programs
-  #LoadTimers()
+    # Test the time requests
+    # SetTime()
+    # GetTime()
 
-  #LoadActions()
+    # Try some timer programs
+    # LoadTimers()
 
-  print "A7 on 50"
-  ahps_client.DeviceOn("A7", 50)
-  #
-  print "sleep 10"
-  time.sleep(10)
-  #
-  print "A7 bright 50"
-  ahps_client.DeviceBright("a7", 50)
-  #
-  #print "A7 dim 50"
-  #ahps_client.DeviceDim("A7", 50)
-  #
-  # print "sleep 5"
-  # time.sleep(5)
-  #
-  # print "A7 off"
-  # ahps_client.DeviceOff("A7", 0)
+    # LoadActions()
 
-  print "sleep 10"
-  time.sleep(10)
+    print("A7 on 50")
+    ahps_client.DeviceOn("A7", 50)
+    #
+    print("sleep 10")
+    time.sleep(10)
+    #
+    print("A7 bright 50")
+    ahps_client.DeviceBright("a7", 50)
+    #
+    # print "A7 dim 50"
+    # ahps_client.DeviceDim("A7", 50)
+    #
+    # print "sleep 5"
+    # time.sleep(5)
+    #
+    # print "A7 off"
+    # ahps_client.DeviceOff("A7", 0)
 
-  print "All units off A"
-  ahps_client.DeviceAllUnitsOff("A")
-  #print "All units off P"
-  #ahps_client.DeviceAllUnitsOff("P")
+    print("sleep 10")
+    time.sleep(10)
 
-  #print "All lights off"
-  #ahps_client.DeviceAllLightsOff("A")
+    print("All units off A")
+    ahps_client.DeviceAllUnitsOff("A")
+    # print "All units off P"
+    # ahps_client.DeviceAllUnitsOff("P")
+
+    # print "All lights off"
+    # ahps_client.DeviceAllLightsOff("A")

@@ -64,7 +64,7 @@ if __name__ == "__main__":
   # Make sure we received a good response
   rc = response["result-code"]
   if rc != 0:
-    print "StatusRequest failed with result-code ", rc
+    print("StatusRequest failed with result-code ", rc)
     exit()
 
   # Command parsing
@@ -79,11 +79,11 @@ if __name__ == "__main__":
   elif cmd == "lampoff":
     response = ahps_client.DeviceOff(args.housedevicecode, args.dimamount)
   else:
-    print "Unrecognized command: ", cmd
+    print("Unrecognized command: ", cmd)
     parser.print_help()
 
   # Report results
   if response is not None:
-    print "Result code: ", response["result-code"]
+    print("Result code: ", response["result-code"])
   else:
-    print "Command did not return a response"
+    print("Command did not return a response")

@@ -58,7 +58,7 @@ class MyTCPHandlerJson(socketserver.BaseRequestHandler):
       pass
 
     # Return the response to the client
-    self.request.sendall(json.JSONEncoder().encode(response))
+    self.request.sendall(json.JSONEncoder().encode(response).encode())
 
     MyTCPHandlerJson.call_sequence += 1
   
@@ -70,12 +70,12 @@ class MyTCPHandlerJson(socketserver.BaseRequestHandler):
     json_data = ""
     
     while (True):
-      c = self.request.recv(1)
+      c = self.request.recv(1).decode()
 
       if (len(json_data) == 0) and (c == "\""):
         pass
       else:
-        json_data += c      
+        json_data += c
       
       if (c == "{"):
         depth += 1

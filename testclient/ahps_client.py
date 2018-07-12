@@ -58,8 +58,8 @@ def ConnectToServer(Host):
     sock.connect((Host, Port))
     return sock
   except Exception as ex:
-    print "Unable to connect to server:", Host, Port
-    print str(ex)
+    print("Unable to connect to server:", Host, Port)
+    print(str(ex))
   
   return None
   
@@ -70,7 +70,7 @@ def ReadJson(sock):
   json_data = ""
   
   while (True):
-    c = sock.recv(1)
+    c = sock.recv(1).decode()
     json_data += c
     
     if (c == "{"):
@@ -86,13 +86,13 @@ def DisplayResponse(response):
     if Verbose:
         jr = json.loads(response)["X10Response"]
 
-        print "Response for request:", jr["request"]
+        print("Response for request:", jr["request"])
 
         # Loop through all of the entries in the response dict
-        for k, v in jr.iteritems():
+        for k, v in jr.items():
           if k != "request":
-            print " ", k, ":", v
-        print
+            print(" ", k, ":", v)
+        print()
 
 #######################################################################
 # Send a command to the server
@@ -100,7 +100,7 @@ def SendCommand(data):
   # Convert the payload structure into json text.
   # Effectively this serializes the payload.
   #print "raw json:", data
-  json_data = json.JSONEncoder().encode(data)
+  json_data = json.JSONEncoder().encode(data).encode()
 
   # Create a socket connection to the server
   sock = ConnectToServer(Host)
@@ -109,7 +109,7 @@ def SendCommand(data):
 
   # send status request to server
   try:
-    print "Sending request:", json_data
+    print("Sending request:", json_data)
     sock.sendall(json_data)
 
     # Receive data from the server and shut down
@@ -119,7 +119,7 @@ def SendCommand(data):
     #print "Received: {}".format(json_data)
     DisplayResponse(json_data)
   except Exception as ex:
-    print str(ex)
+    print(str(ex))
     json_data = None
   finally:
     sock.close()
@@ -357,13 +357,13 @@ if __name__ == "__main__":
 
   #LoadActions()
 
-  print "A7 on 50"
+  print("A7 on 50")
   DeviceOn("A7", 50)
   #
   #print "sleep 10"
   #time.sleep(10)
   #
-  print "A7 bright 50"
+  print("A7 bright 50")
   DeviceBright("a7", 50)
   #
   #print "A7 dim 50"
@@ -378,7 +378,7 @@ if __name__ == "__main__":
   #print "sleep 10"
   #time.sleep(10)
 
-  print "All units off A"
+  print("All units off A")
   DeviceAllUnitsOff("A")
   #print "All units off P"
   #DeviceAllUnitsOff("P")
@@ -387,7 +387,7 @@ if __name__ == "__main__":
   #DeviceAllLightsOff("A")
 
   date_str = "2014-11-02"
-  print "Sending GetSunData for " + date_str
+  print("Sending GetSunData for " + date_str)
   result = GetSunData(date_str)
-  print "sunset", result["data"]["sunset"]
-  print "sunrise", result["data"]["sunrise"]
+  print("sunset", result["data"]["sunset"])
+  print("sunrise", result["data"]["sunrise"])
