@@ -17,11 +17,11 @@
 
 # Setup the path to lead with the virtualenv. When it's python is executed it
 # will activate the virtualenv.
-VENV=/home/pi/Virtualenvs/elfstone_athomeserver
+VENV=/home/pi/Virtualenvs/athomepowerlineserver3
 PATH=$VENV/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 # Change the next 3 lines to suit where you install your script and what you want to call it
-DIR=/home/pi/rpi/elfstone_athomeserver
+DIR=/home/pi/rpi/athomepowerlineserver
 DAEMON_SCRIPT=$DIR/AtHomePowerlineServer.py
 DAEMON_NAME=AtHomePowerlineServerD.sh
 PYTHON_INT=$VENV/bin/python
