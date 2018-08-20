@@ -191,7 +191,7 @@ class X10ControllerInterface:
     """
     Return the dict key for a given value (reverse lookup)
     """
-    for key, value in dict.iteritems():
+    for key, value in dict.items():
       if value == find_value:
         return key
     return None
