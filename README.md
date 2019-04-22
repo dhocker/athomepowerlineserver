@@ -1,5 +1,5 @@
 # AtHomePowerlineServer
-Copyright © 2015 by Dave Hocker
+Copyright © 2015, 2018 by Dave Hocker
 
 ## Overview
 
@@ -12,7 +12,7 @@ First, the AtHomePowerline server is designed to run on a light weight system (e
 and fan-less. This is as opposed to a PC or Mac based solution. The small size of such a system like the Raspberry Pi allows
 it to be positioned more freely (ideally, close to the breaker panel). And, a Raspberry Pi system can be assembled for
 considerably less than a PC. While the server was designed to run on a lightweight system, it will run on any system that
-supports Python 2.7 (including Windows).
+supports Python 3.5 or later (including Windows).
 
 Second, the communication mechanism to the AtHomePowerlineServer is TCP/IP (over Ethernet). A light weight system like the
 Raspberry Pi supports many WiFi USB interfaces. This further improves the freedom of location for the X10 controller. In the
@@ -43,8 +43,8 @@ The full source is maintained on [GitHub](https://www.github.com/dhocker/athomep
 
 ## Build Environment
 
-AtHomePowerlineServer is written in Python 2.7. Use virtualenv 
-and virtualenvwrapper to create a working virtual environment named elfstone_athomeserver. 
+AtHomePowerlineServer was originally written in Python 2.7, but has since been converted 
+to Python 3.5+. Use virtualenv and virtualenvwrapper to create a working virtual environment. 
 The requirements.txt file can be used 
 with pip to create the required virtual environment with all dependencies. Complete details
 for installation, setup and configuration can be found in the AtHomePowerlineServer.pdf document.

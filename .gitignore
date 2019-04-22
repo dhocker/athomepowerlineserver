@@ -4,7 +4,6 @@
 AtHomePowerlineServer.log*
 *.sqlite3
 Thumbs.db
-*.odt
 *.odg
 *.odt#
 *.odg#
