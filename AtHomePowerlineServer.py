@@ -22,7 +22,7 @@
 import SocketServerThread
 import Configuration
 import Logging
-import drivers.X10ControllerAdapter
+import drivers.device_driver_manager
 import database.AtHomePowerlineServerDb
 import timers.TimerStore
 import services.TimerService
@@ -80,13 +80,10 @@ def main():
   logger.info("Starting up...")
 
   logger.info("Using configuration file: %s", Configuration.Configuration.GetConfigurationFilePath())
-  logger.info("X10 controller: %s", Configuration.Configuration.X10ControllerDevice())
-  logger.info("ComPort: %s", Configuration.Configuration.ComPort())
 
   # Inject the X10 controller driver
   # TODO Implement new driver abstraction to cover multiple device types
-  driver = Configuration.Configuration.GetX10ControllerDriver()
-  drivers.X10ControllerAdapter.X10ControllerAdapter.Open(driver)
+  drivers.device_driver_manager.DeviceDriverManager.init(Configuration.Configuration.DeviceDrivers())
 
   # Initialize the database
   logger.info("Initializing database")

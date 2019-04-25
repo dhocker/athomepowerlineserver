@@ -113,6 +113,10 @@ class Configuration():
   @classmethod
   def X10ControllerDevice(cls):
     return cls.ActiveConfig["X10ControllerDevice"]
+
+  @classmethod
+  def DeviceDrivers(cls):
+    return cls.ActiveConfig["Drivers"]
     
   ######################################################################
   # Get the driver instance called out by the configuration
