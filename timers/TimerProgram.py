@@ -27,12 +27,14 @@ class TimerProgram:
 
   #######################################################################
   # Instance constructor
-  def __init__(self, name, house_device_code, day_mask,
+  def __init__(self, name, device_id, device_type, device_address, day_mask,
                start_trigger_method, start_time, start_offset, start_randomize, start_randomize_amount,
                stop_trigger_method, stop_time, stop_offset, stop_randomize, stop_randomize_amount,
                start_action, stop_action, security):
     self.Name = name
-    self.HouseDeviceCode = house_device_code
+    self.device_id = device_id
+    self.device_type = device_type
+    self.device_address = device_address
     self.DayMask = day_mask
     self.StartTriggerMethod = start_trigger_method
     self.StartTime = start_time
@@ -56,7 +58,7 @@ class TimerProgram:
     """
     Custom str implementation
     """
-    s = "{0} {1} {2} ".format(self.Name, self.HouseDeviceCode, self.DayMask)
+    s = "{0} {1} {2} {3} {4} ".format(self.Name, self.device_id, self.device_type, self.device_address, self.DayMask)
 
     if self.StartTriggerMethod == "clock-time":
       s = s + "Start: {0} {1} ".format(self.StartTriggerMethod, self.StartTime)

@@ -84,6 +84,7 @@ def main():
   logger.info("ComPort: %s", Configuration.Configuration.ComPort())
 
   # Inject the X10 controller driver
+  # TODO Implement new driver abstraction to cover multiple device types
   driver = Configuration.Configuration.GetX10ControllerDriver()
   drivers.X10ControllerAdapter.X10ControllerAdapter.Open(driver)
 

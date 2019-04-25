@@ -39,7 +39,7 @@ class Timers:
   def GetAll(cls):
     conn = AtHomePowerlineServerDb.AtHomePowerlineServerDb.GetConnection()
     c = AtHomePowerlineServerDb.AtHomePowerlineServerDb.GetCursor(conn)
-    rset = c.execute("SELECT * from Timers")
+    rset = c.execute("SELECT Timers.*, Devices.id, Devices.type, Devices.address from Timers join Devices on Timers.deviceid=Devices.id")
     return rset
 
   #######################################################################

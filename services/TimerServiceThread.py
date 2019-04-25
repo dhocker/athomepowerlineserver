@@ -116,7 +116,7 @@ class TimerServiceThread(threading.Thread):
         tp.StopEventRun = False
         logger.info("RunProgramTimers start event triggered: %s %s", tp.Name, tp.StartAction)
         # Fire the action
-        self.RunTimerAction(tp.StartAction, tp.HouseDeviceCode)
+        self.RunTimerAction(tp.StartAction, tp.device_id, tp.device_type, tp.device_address)
 
       # Stop event check
       # if (not tp.StopEventRun) and (tp.IsStopEventTriggered()):
@@ -126,20 +126,20 @@ class TimerServiceThread(threading.Thread):
         tp.StartEventRun = False
         logger.info("RunProgramTimers stop event triggered: %s %s", tp.Name, tp.StopAction)
         # Fire the action
-        self.RunTimerAction(tp.StopAction, tp.HouseDeviceCode)
+        self.RunTimerAction(tp.StopAction, tp.device_id, tp.device_type, tp.device_address)
     else:
       logger.debug("%s is not enabled for the current weekday", tp.Name)
 
   ########################################################################
   # Run an action
-  def RunTimerAction(self, name, house_device_code):
+  def RunTimerAction(self, name, device_id, device_type, device_address):
     rset = Actions.Actions.GetByName(name)
     if rset is not None:
       #print type(rset)
       #print rset
       # TODO We want a factory here, one that looks up the action and returns an action handler
-      logger.info("Executing action: %s %s", rset["command"], house_device_code)
-      ActionFactory.RunAction(rset["command"], house_device_code, int(rset["dimamount"]))
+      logger.info("Executing action: %s %s %s", rset["command"], device_type, device_address)
+      ActionFactory.RunAction(rset["command"], device_id, device_type, device_address, int(rset["dimamount"]))
     else:
       logger.info("No Actions table record was found for: %s", name)
 
