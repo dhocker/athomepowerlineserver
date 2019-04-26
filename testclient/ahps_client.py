@@ -372,8 +372,8 @@ if __name__ == "__main__":
   # print "sleep 5"
   # time.sleep(5)
   #
-  # print "A7 off"
-  # DeviceOff("A7", 0)
+  print("Device 1 off")
+  DeviceOff("1", 0)
 
   #print "sleep 10"
   #time.sleep(10)

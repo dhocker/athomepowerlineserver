@@ -14,8 +14,7 @@
 #
 
 import commands.ServerCommand as ServerCommand
-import drivers.X10ControllerAdapter
-import datetime
+from drivers.device_driver_manager import DeviceDriverManager
 
 #######################################################################
 # Command handler for off command
@@ -23,19 +22,23 @@ class DeviceOff(ServerCommand.ServerCommand):
   
   #######################################################################
   # Execute the "of" command.
-  def Execute(self, request):     
-    result = drivers.X10ControllerAdapter.X10ControllerAdapter.DeviceOff(request["args"]["house-device-code"], int(request["args"]["dim-amount"]))
-    
+  def Execute(self, request):
+    device_id = int(request["args"]["device-id"])
+    dim_amount = int(request["args"]["dim-amount"])
+
+    driver = self.get_driver_for_id(device_id)
+    result = driver.DeviceOff(device_id, dim_amount)
+
     # Generate a successful response
-    response = DeviceOff.CreateResponse(request["request"])
+    response = self.CreateResponse(request["request"])
     r = response["X10Response"]    
     
-    r['result-code'] = drivers.X10ControllerAdapter.X10ControllerAdapter.GetLastErrorCode()
+    r['result-code'] = driver.LastErrorCode
     if result:
       #r['error'] = "Command not fully implemented"
       r['message'] = "Success"
     else:
-      r['error'] = drivers.X10ControllerAdapter.X10ControllerAdapter.GetLastError()
+      r['error'] = driver.LastError
       r['message'] = "Failure"
 
     return response
