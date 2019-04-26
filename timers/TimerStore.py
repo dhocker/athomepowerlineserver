@@ -58,8 +58,6 @@ class TimerStore:
       for r in rset:
         name = r["name"]
         device_id = r["id"]
-        device_type = r["type"]
-        device_address = r["address"]
         day_mask = r["daymask"]
         start_trigger_method = r["starttriggermethod"]
         # We really want the on/off times to be in datetime format, not string format
@@ -78,13 +76,13 @@ class TimerStore:
         # Note that we don't do anything with the lastupdate column
 
         # Some debugging/tracing output
-        logger.info("%s %d %s %s %s Start: {%s %s %s %s %s %s} Stop: {%s %s %s %s %s %s}",
-                    name, device_id, device_type, device_address, day_mask,
+        logger.info("%s %d %s Start: {%s %s %s %s %s %s} Stop: {%s %s %s %s %s %s}",
+                    name, device_id, day_mask,
                     start_trigger_method, start_time, start_offset, start_randomize, start_randomize_amount, start_action,
                     stop_trigger_method, stop_time, stop_offset, stop_randomize, stop_randomize_amount, stop_action)
 
         # Add each timer program to the current list of programs
-        cls.AppendTimer(name, device_id, device_type, device_address, day_mask,
+        cls.AppendTimer(name, device_id, day_mask,
                         start_trigger_method, start_time, start_offset, start_randomize, start_randomize_amount,
                         stop_trigger_method, stop_time, stop_offset, stop_randomize, stop_randomize_amount,
                         start_action, stop_action, security)
@@ -110,7 +108,7 @@ class TimerStore:
         # print "Saving timer program:", tp.name
         # It may be necessary to format on/off time to be certain that the format is held across save/load
         # TODO Replace house-device-code with device id
-        Timers.Timers.Insert(tp.Name, tp.HouseDeviceCode, tp.DayMask,
+        Timers.Timers.Insert(tp.Name, tp.device_id, tp.DayMask,
           tp.StartTriggerMethod, tp.StartTime, tp.StartOffset, tp.StartRandomize, tp.StartRandomizeAmount,
           tp.StopTriggerMethod, tp.StopTime, tp.StopOffset, tp.StopRandomize, tp.StopRandomizeAmount,
           tp.StartAction, tp.StopAction, tp.Security )
@@ -120,11 +118,11 @@ class TimerStore:
   #######################################################################
   # Append a timer program to the end of the current list
   @classmethod
-  def AppendTimer(cls, name, device_id, device_type, device_address, day_mask,
+  def AppendTimer(cls, name, device_id, day_mask,
                   start_trigger_method, start_time, start_offset, start_randomize, start_randomize_amount,
                   stop_trigger_method, stop_time, stop_offset, stop_randomize, stop_randomize_amount,
                   start_action, stop_action, security = False):
-    tp = TimerProgram.TimerProgram(name, device_id, device_type, device_address, day_mask,
+    tp = TimerProgram.TimerProgram(name, int(device_id), day_mask,
       start_trigger_method, start_time, start_offset, start_randomize, start_randomize_amount,
       stop_trigger_method, stop_time, stop_offset, stop_randomize, stop_randomize_amount,
       start_action, stop_action, security)
@@ -154,7 +152,7 @@ class TimerStore:
   def DumpTimerProgramList(cls):
     logger.info("Timer Program List Dump")
     for tp in cls.TimerProgramList:
-      logger.info("%s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s", tp.Name, tp.HouseDeviceCode, tp.DayMask,
+      logger.info("%s %d %s %s %s %s %s %s %s %s %s %s %s %s %s %s", tp.Name, tp.device_id, tp.DayMask,
                   tp.StartTriggerMethod, tp.StartTime, tp.StartOffset, tp.StartRandomize, tp.StartRandomizeAmount,
                   tp.StopTriggerMethod, tp.StopTime, tp.StopOffset, tp.StopRandomize, tp.StopRandomizeAmount,
                   tp.StartAction, tp.StopAction, tp.Security)

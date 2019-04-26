@@ -46,7 +46,7 @@ class Timers:
   # Insert a record into the Timers table.
   # This is not exactly optimized, but we don't expect to be saving that many timer programs.
   @classmethod
-  def Insert(cls, name, house_device_code, day_mask,
+  def Insert(cls, name, device_id, day_mask,
              start_trigger_method, start_time, start_offset, start_randomize, start_randomize_amount,
              stop_trigger_method, stop_time, stop_offset, stop_randomize, stop_randomize_amount,
              start_action, stop_action, security):
@@ -56,7 +56,7 @@ class Timers:
     # Note that the current time is inserted as the update time. This is added to the 
     # row as a convenient way to know when the timer was stored. It isn't used for
     # any other purpose.
-    c.execute("INSERT INTO Timers values (?, ?, ?, ?, ?, ?, ?, ? ,?, ?, ?, ?, ?, ?, ?, ?, ?)", (name, house_device_code, day_mask,
+    c.execute("INSERT INTO Timers values (?, ?, ?, ?, ?, ?, ?, ? ,?, ?, ?, ?, ?, ?, ?, ?, ?)", (name, device_id, day_mask,
       start_trigger_method, start_time, start_offset, start_randomize, start_randomize_amount,
       stop_trigger_method, stop_time, stop_offset, stop_randomize, stop_randomize_amount,
       start_action, stop_action, security, datetime.datetime.now()))

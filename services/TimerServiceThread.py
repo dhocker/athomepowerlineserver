@@ -21,6 +21,7 @@ import traceback
 import timers.TimerStore
 import timers.TimerProgram
 import database.Actions as Actions
+from database.devices import Devices
 import commands.ActionFactory as ActionFactory
 
 logger = logging.getLogger("server")
@@ -116,7 +117,7 @@ class TimerServiceThread(threading.Thread):
         tp.StopEventRun = False
         logger.info("RunProgramTimers start event triggered: %s %s", tp.Name, tp.StartAction)
         # Fire the action
-        self.RunTimerAction(tp.StartAction, tp.device_id, tp.device_type, tp.device_address)
+        self.RunTimerAction(tp.StartAction, tp.device_id)
 
       # Stop event check
       # if (not tp.StopEventRun) and (tp.IsStopEventTriggered()):
@@ -126,18 +127,18 @@ class TimerServiceThread(threading.Thread):
         tp.StartEventRun = False
         logger.info("RunProgramTimers stop event triggered: %s %s", tp.Name, tp.StopAction)
         # Fire the action
-        self.RunTimerAction(tp.StopAction, tp.device_id, tp.device_type, tp.device_address)
+        self.RunTimerAction(tp.StopAction, tp.device_id)
     else:
       logger.debug("%s is not enabled for the current weekday", tp.Name)
 
   ########################################################################
   # Run an action
-  def RunTimerAction(self, name, device_id, device_type, device_address):
+  def RunTimerAction(self, name, device_id):
     rset = Actions.Actions.GetByName(name)
     if rset is not None:
-      #print type(rset)
-      #print rset
-      # TODO We want a factory here, one that looks up the action and returns an action handler
+      device_rec = Devices.get_device_by_id(device_id)
+      device_type = device_rec["type"]
+      device_address = device_rec["address"]
       logger.info("Executing action: %s %s %s", rset["command"], device_type, device_address)
       ActionFactory.RunAction(rset["command"], device_id, device_type, device_address, int(rset["dimamount"]))
     else:

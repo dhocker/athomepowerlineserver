@@ -40,7 +40,7 @@ class LoadTimers(commands.ServerCommand.ServerCommand):
 
       # Pull all of the timer program values out of the dict entry
       name = timer_program["name"]
-      house_device_code = timer_program["house-device-code"]
+      device_id = timer_program["device-id"]
       day_mask = timer_program["day-mask"]
       start_trigger_method = timer_program["start-trigger-method"]
       start_time = datetime.datetime.strptime(timer_program["start-time"], "%H:%M")
@@ -58,10 +58,10 @@ class LoadTimers(commands.ServerCommand.ServerCommand):
       security = False
 
       # Add the timer program to the current list
-      timers.TimerStore.TimerStore.AppendTimer(name, house_device_code, day_mask, \
+      timers.TimerStore.TimerStore.AppendTimer(name, device_id, day_mask, \
         start_trigger_method, start_time, start_offset, start_randomize, start_randomize_amount, \
         stop_trigger_method, stop_time, stop_offset, stop_randomize, stop_randomize_amount, \
-        start_action, stop_action, security)
+        start_action, stop_action, security=security)
 
     # Debugging...
     timers.TimerStore.TimerStore.DumpTimerProgramList()

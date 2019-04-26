@@ -243,33 +243,61 @@ def LoadTimers():
   on_time_str = on_time.strftime("%H:%M")
   off_time_str = off_time.strftime("%H:%M")
 
-  program = {
-    "name": "program-a1", 
-    "house-device-code": "a1", 
-    "start-time": on_time_str, 
-    "stop-time": off_time_str, 
-    "day-mask": ".......", 
-    "start-action": "action-1", 
-    "stop-action": "action-2"}
+  """
+  name, device_id, day_mask, start_trigger_method, start_time,
+                   start_offset, stop_trigger_method, stop_time, stop_offset,
+                   start_action, stop_action, start_randomize, start_randomize_amount,
+                   stop_randomize, stop_randomize_amount
+  """
 
-  program2 = {
-  "name": "program-c16", 
-  "house-device-code": "c16", 
-  "start-time": on_time_str, 
-  "stop-time": off_time_str, 
-  "day-mask": "mtwtfss",
-  "start-action": "action-1", 
-  "stop-action": "action-2" }
-  
-  program3 = {}
-  program3["name"] = "program-a3"
-  program3["house-device-code"] = "a3"
-  program3["start-time"] = on_time_str
-  program3["stop-time"] = off_time_str
-  program3["day-mask"] = "mtwtfss"
-  program3["start-action"] = "action-1"
-  program3["stop-action"] = "action-2"
-  
+  program = create_program("program-a1",
+                           1,
+                           "mtwtfss",
+                           "clock-time",
+                           on_time,
+                           0,
+                           "clock-time",
+                           off_time,
+                           0,
+                           "action-1",
+                           "action-2",
+                           0,
+                           0,
+                           0,
+                           0)
+
+  program2 = create_program("program-c16",
+                           2,
+                           "mtwtfss",
+                           "clock-time",
+                           on_time,
+                           0,
+                           "clock-time",
+                           off_time,
+                           0,
+                           "action-1",
+                           "action-2",
+                           0,
+                           0,
+                           0,
+                           0)
+
+  program3 = create_program("program-a3",
+                           3,
+                           "mtwtfss",
+                           "clock-time",
+                           on_time,
+                           0,
+                           "clock-time",
+                           off_time,
+                           0,
+                           "action-3",
+                           "action-4",
+                           0,
+                           0,
+                           0,
+                           0)
+
   program4 = {
     "name": "program-a4", 
     "house-device-code": "a4", 
@@ -282,12 +310,35 @@ def LoadTimers():
   data["args"]["programs"].append(program)
   data["args"]["programs"].append(program2)
   data["args"]["programs"].append(program3)
-  data["args"]["programs"].append(program4)
+  # data["args"]["programs"].append(program4)
   
   # for i in range(0, 98):
     # data["args"].append(program)
 
   return SendCommand(data)
+
+def create_program(name, device_id, day_mask, start_trigger_method, start_time,
+                   start_offset, stop_trigger_method, stop_time, stop_offset,
+                   start_action, stop_action, start_randomize, start_randomize_amount,
+                   stop_randomize, stop_randomize_amount):
+  timer_program = {
+    "name": name,
+    "device-id": str(device_id),
+    "day-mask": day_mask,
+    "start-trigger-method": start_trigger_method,
+    "start-time": start_time.strftime("%H:%M"),
+    "start-time-offset": str(start_offset),
+    "stop-trigger-method": stop_trigger_method,
+    "stop-time": stop_time.strftime("%H:%M"),
+    "stop-time-offset": str(stop_offset),
+    "start-action": start_action,
+    "stop-action": stop_action,
+    "start-randomize": True if start_randomize else False,
+    "start-randomize-amount": str(start_randomize_amount),
+    "stop-randomize": True if stop_randomize else False,
+    "stop-randomize-amount": str(stop_randomize_amount)
+  }
+  return timer_program
 
 #######################################################################
 def LoadActions():
@@ -353,7 +404,7 @@ if __name__ == "__main__":
   #GetTime()
 
   # Try some timer programs
-  #LoadTimers()
+  LoadTimers()
 
   #LoadActions()
 
