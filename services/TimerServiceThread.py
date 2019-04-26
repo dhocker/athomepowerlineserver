@@ -142,7 +142,7 @@ class TimerServiceThread(threading.Thread):
       logger.info("Executing action: %s %s %s", rset["command"], device_type, device_address)
       ActionFactory.RunAction(rset["command"], device_id, device_type, device_address, int(rset["dimamount"]))
     else:
-      logger.info("No Actions table record was found for: %s", name)
+      logger.error("No Actions table record was found for: %s", name)
 
   ########################################################################
   # Test a date to see if its weekday is enabled

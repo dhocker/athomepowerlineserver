@@ -298,22 +298,26 @@ def LoadTimers():
                            0,
                            0)
 
-  program4 = {
-    "name": "program-a4", 
-    "house-device-code": "a4", 
-    "start-time": on_time_str, 
-    "stop-time": off_time_str, 
-    "day-mask": "mtwtf--", 
-    "start-action": "action-undefined", 
-    "stop-action": "action-undefined"}
-    
+  program4 = create_program("program-a4",
+                           3,
+                           "mtwtf--",
+                           "clock-time",
+                           on_time,
+                           0,
+                           "clock-time",
+                           off_time,
+                           0,
+                           "action-undefined",
+                           "action-undefined",
+                           0,
+                           0,
+                           0,
+                           0)
+
   data["args"]["programs"].append(program)
   data["args"]["programs"].append(program2)
   data["args"]["programs"].append(program3)
-  # data["args"]["programs"].append(program4)
-  
-  # for i in range(0, 98):
-    # data["args"].append(program)
+  data["args"]["programs"].append(program4)
 
   return SendCommand(data)
 
@@ -359,8 +363,20 @@ def LoadActions():
     "command": "off", 
     "dim-amount": 0 }
 
+  action3 = {
+    "name": "action-3",
+    "command": "on",
+    "dim-amount": 0 }
+
+  action4 = {
+    "name": "action-4",
+    "command": "off",
+    "dim-amount": 0 }
+
   data["args"]["actions"].append(action1)
   data["args"]["actions"].append(action2)
+  data["args"]["actions"].append(action3)
+  data["args"]["actions"].append(action4)
 
   return SendCommand(data)
 
@@ -406,7 +422,7 @@ if __name__ == "__main__":
   # Try some timer programs
   LoadTimers()
 
-  #LoadActions()
+  LoadActions()
 
   print("Device 1 on 50")
   DeviceOn("1", 50)
