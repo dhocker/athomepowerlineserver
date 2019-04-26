@@ -1,8 +1,8 @@
 #!/usr/bin/python
 
 #
-# AtHomePowerlineServer - networked server for CM11/CM11A/XTB-232 X10 controllers
-# Copyright (C) 2014  Dave Hocker (email: AtHomeX10@gmail.com)
+# AtHomePowerlineServer - networked server for remote power controlled devices
+# Copyright © 2014, 2019  Dave Hocker (email: AtHomeX10@gmail.com)
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,12 +17,10 @@
 # along with this program (the LICENSE file).  If not, see <http://www.gnu.org/licenses/>.
 #
 
-#import ThreadedTCPServer
-#import MyTCPHandlerJson
 import SocketServerThread
 import Configuration
 import Logging
-import drivers.device_driver_manager
+from drivers.device_driver_manager import DeviceDriverManager
 import database.AtHomePowerlineServerDb
 import timers.TimerStore
 import services.TimerService
@@ -30,7 +28,6 @@ import disclaimer.Disclaimer
 import logging
 import signal
 import os
-import threading
 import time
 import sys
 
@@ -51,7 +48,7 @@ def main():
   def CleanUp():
     timer_service.Stop()
     server.Stop()
-    drivers.X10ControllerAdapter.X10ControllerAdapter.Close()
+    DeviceDriverManager.close_drivers()
     logger.info("AtHomePowerlineServer shutdown complete")
     logger.info("################################################################################")
     Logging.Shutdown()
@@ -83,7 +80,7 @@ def main():
 
   # Inject the X10 controller driver
   # TODO Implement new driver abstraction to cover multiple device types
-  drivers.device_driver_manager.DeviceDriverManager.init(Configuration.Configuration.DeviceDrivers())
+  DeviceDriverManager.init(Configuration.Configuration.DeviceDrivers())
 
   # Initialize the database
   logger.info("Initializing database")

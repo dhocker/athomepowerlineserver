@@ -22,17 +22,28 @@ class DeviceDriverManager():
     # device name to device driver look up table
     driver_list = {}
 
+    # All of the supported X10 devices and drivers
+    X10_DEVICE_LIST = ["x10", "x10-appliance", "x10-lamp"]
+    X10_DRIVER_LIST = ["xtb232", "xtb-232", "cm11a", "cm11"]
+
     @classmethod
     def init(cls, driver_list_config):
         for device_name, driver_name in driver_list_config.items():
-            if device_name.lower() in ["x10", "x10-appliance", "x10-lamp"]:
-                if driver_name.lower() in ["xtb232", "xtb-232", "cm11a", "cm11"]:
+            # X10 devices
+            if device_name.lower() in cls.X10_DEVICE_LIST:
+                if driver_name.lower() in cls.X10_DRIVER_LIST:
                     cls.driver_list[device_name] = drivers.XTB232.XTB232()
                 elif driver_name.lower() == "dummy":
                     cls.driver_list[device_name] = drivers.Dummy.Dummy()
                 else:
                     cls.driver_list[device_name] = drivers.Dummy.Dummy()
+
             # TODO Implement TPLink devices
+
+    @classmethod
+    def close_drivers(cls):
+        # TODO Call each driver's close method
+        pass
 
     @classmethod
     def get_driver(cls, device_name):

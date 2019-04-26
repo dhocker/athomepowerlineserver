@@ -10,6 +10,7 @@
 #
 
 #
+# DEPRECATED by v2019 redesign
 # Adapter pattern for the X10 controller.
 #
 # This class presents a consistent interface to the rest of the server application.

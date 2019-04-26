@@ -20,8 +20,7 @@ logger = logging.getLogger("server")
 
 class BaseDriverInterface:
     def __init__(self):
-        self.LastErrorCode = 0
-        self.LastError = None
+        self.ClearLastError()
         logger.info("Device driver base class initialized")
 
     def Open(self):
@@ -54,9 +53,9 @@ class BaseDriverInterface:
     # TODO Consider defining this as SetCurrentTime taking no parameters.
     # Set the controller time to the current, local time.
     def SetTime(self, time_value):
-        pass
+        raise NotImplementedError()
 
     # Reset the last error info
     def ClearLastError(self):
-        self.LastErrorCode = X10ControllerInterface.Success
+        self.LastErrorCode = 0
         self.LastError = None

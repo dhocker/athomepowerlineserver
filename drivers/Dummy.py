@@ -1,6 +1,6 @@
 #
-# AtHomePowerlineServer - networked server for CM11/CM11A/XTB-232 X10 controllers
-# Copyright (C) 2014  Dave Hocker
+# Dummy device driver that works for all devices
+# Copyright © 2014, 2019  Dave Hocker
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -9,19 +9,16 @@
 # See the LICENSE file for more details.
 #
 
-#
-# Dummy X10 controller driver
-#
-
 import drivers.X10ControllerInterface as X10ControllerInterface
+from .base_driver_interface import BaseDriverInterface
 import logging
 
 logger = logging.getLogger("server")
 
-class Dummy(X10ControllerInterface.X10ControllerInterface):
+class Dummy(BaseDriverInterface):
   
   def __init__(self):
-    X10ControllerInterface.X10ControllerInterface.__init__(self)
+    super().__init__()
     logger.info("Dummy driver initialized")
     pass
     
@@ -87,23 +84,6 @@ class Dummy(X10ControllerInterface.X10ControllerInterface):
     return True
 
   #######################################################################
-  # Return a datetime type
-  def GetTime(self):
-    pass
-
-  #######################################################################
-  # Return controller status
-  def GetStatus(self):
-    pass
-
-  #######################################################################
   # Set the controller time to the current, local time.
   def SetTime(self, time_value):
     pass
-
-  def SelectAddress(self, house_device_code):
-    pass        
-    
-  # TODO Consider defining a method for each device function
-  def ExecuteFunction(self, house_code, dim_amount, device_function):
-    pass        
