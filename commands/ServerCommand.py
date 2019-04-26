@@ -17,26 +17,35 @@
 import datetime
 import socket
 import Version
+from database.devices import Devices
+from drivers.device_driver_manager import DeviceDriverManager
+
 
 class ServerCommand:
 
-  def Execute(self, request):
-    response = CreateResponse()
-    r = response["X10Response"]
-    r['result-code'] = 404
-    r['error'] = "Command not recognized"
-    r['date-time'] = str(datetime.datetime.now())
-    r['message'] = "none"
+    def Execute(self, request):
+        response = self.CreateResponse()
+        r = response["X10Response"]
+        r['result-code'] = 404
+        r['error'] = "Command not recognized"
+        r['date-time'] = str(datetime.datetime.now())
+        r['message'] = "none"
 
-    return response
-    
-  # Create an empty response instance    
-  @classmethod
-  def CreateResponse(cls, command):
-    response = {"X10Response": {}}
-    r = response["X10Response"]    
-    r['request'] = command
-    r['date-time'] = str(datetime.datetime.now())
-    r['server'] = "{0}/AtHomePowerlineServer".format(socket.gethostname())
-    r['server-version'] = Version.GetVersion()
-    return response
+        return response
+
+    # Create an empty response instance
+    @classmethod
+    def CreateResponse(cls, command):
+        response = {"X10Response": {}}
+        r = response["X10Response"]
+        r['request'] = command
+        r['date-time'] = str(datetime.datetime.now())
+        r['server'] = "{0}/AtHomePowerlineServer".format(socket.gethostname())
+        r['server-version'] = Version.GetVersion()
+        return response
+
+    @classmethod
+    def get_driver_for_id(cls, device_id):
+        r = Devices.get_device_by_id(device_id)
+        driver = DeviceDriverManager.get_driver(r["type"])
+        return driver

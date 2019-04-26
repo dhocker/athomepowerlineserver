@@ -23,6 +23,22 @@ class BaseDriverInterface:
         self.ClearLastError()
         logger.info("Device driver base class initialized")
 
+    @property
+    def LastErrorCode(self):
+        return self._last_error_code
+
+    @LastErrorCode.setter
+    def LastErrorCode(self, v):
+        self._last_error_code = v
+
+    @property
+    def LastError(self):
+        return self._last_error
+
+    @LastError.setter
+    def LastError(self, v):
+        self._last_error = v
+
     def Open(self):
         pass
 

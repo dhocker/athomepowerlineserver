@@ -1,6 +1,6 @@
 #
-# AtHomePowerlineServer - networked server for CM11/CM11A/XTB-232 X10 controllers
-# Copyright (C) 2014  Dave Hocker
+# Device on
+# Copyright © 2014, 2019  Dave Hocker
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -9,36 +9,34 @@
 # See the LICENSE file for more details.
 #
 
-#
-# Device on
-#
-
 import commands.ServerCommand as ServerCommand
-import drivers.X10ControllerAdapter
+from drivers.device_driver_manager import DeviceDriverManager
 import datetime
+
 
 #######################################################################
 # Command handler for on command
 class DeviceOn(ServerCommand.ServerCommand):
-  
-  #######################################################################
-  # Execute the "on" command.
-  def Execute(self, request):
-    house_device_code = request["args"]["house-device-code"]
-    dim_amount = int(request["args"]["dim-amount"])
 
-    result = drivers.X10ControllerAdapter.X10ControllerAdapter.DeviceOn(house_device_code, dim_amount)
+    #######################################################################
+    # Execute the "on" command.
+    def Execute(self, request):
+        device_id = int(request["args"]["device-id"])
+        dim_amount = int(request["args"]["dim-amount"])
 
-    # Generate a successful response
-    response = DeviceOn.CreateResponse(request["request"])
-    r = response["X10Response"]    
-    
-    r['result-code'] = drivers.X10ControllerAdapter.X10ControllerAdapter.GetLastErrorCode()
-    if result:
-      #r['error'] = "Command not fully implemented"
-      r['message'] = "Success"
-    else:
-      r['error'] = drivers.X10ControllerAdapter.X10ControllerAdapter.GetLastError()
-      r['message'] = "Failure"
+        driver = self.get_driver_for_id(device_id)
+        result = driver.DeviceOn(device_id, dim_amount)
 
-    return response
+        # Generate a successful response
+        response = self.CreateResponse(request["request"])
+        r = response["X10Response"]
+
+        r['result-code'] = driver.LastErrorCode
+        if result:
+            # r['error'] = "Command not fully implemented"
+            r['message'] = "Success"
+        else:
+            r['error'] = driver.LastError
+            r['message'] = "Failure"
+
+        return response

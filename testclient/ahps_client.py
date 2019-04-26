@@ -147,7 +147,7 @@ def SetTime():
 def DeviceOn(house_device_code, dim_amount):
   # 
   data = CreateRequest("On")
-  data["args"]["house-device-code"] = house_device_code
+  data["args"]["device-id"] = house_device_code
   data["args"]["dim-amount"] = dim_amount
 
   return SendCommand(data)
@@ -157,7 +157,7 @@ def DeviceOn(house_device_code, dim_amount):
 def DeviceOff(house_device_code, dim_amount):
   # 
   data = CreateRequest("Off")
-  data["args"]["house-device-code"] = house_device_code
+  data["args"]["device-id"] = house_device_code
   data["args"]["dim-amount"] = dim_amount
 
   return SendCommand(data)
@@ -357,14 +357,14 @@ if __name__ == "__main__":
 
   #LoadActions()
 
-  print("A7 on 50")
-  DeviceOn("A7", 50)
+  print("Device 1 on 50")
+  DeviceOn("1", 50)
   #
   #print "sleep 10"
   #time.sleep(10)
   #
-  print("A7 bright 50")
-  DeviceBright("a7", 50)
+  # print("A7 bright 50")
+  # DeviceBright("a7", 50)
   #
   #print "A7 dim 50"
   #DeviceDim("A7", 50)
@@ -378,16 +378,10 @@ if __name__ == "__main__":
   #print "sleep 10"
   #time.sleep(10)
 
-  print("All units off A")
-  DeviceAllUnitsOff("A")
+  # print("All units off A")
+  # DeviceAllUnitsOff("A")
   #print "All units off P"
   #DeviceAllUnitsOff("P")
 
   #print "All lights off"
   #DeviceAllLightsOff("A")
-
-  date_str = "2014-11-02"
-  print("Sending GetSunData for " + date_str)
-  result = GetSunData(date_str)
-  print("sunset", result["data"]["sunset"])
-  print("sunrise", result["data"]["sunrise"])

@@ -30,10 +30,12 @@ class DeviceDriverManager():
     def init(cls, driver_list_config):
         for device_name, driver_name in driver_list_config.items():
             # X10 devices
-            if device_name.lower() in cls.X10_DEVICE_LIST:
-                if driver_name.lower() in cls.X10_DRIVER_LIST:
+            device_name = device_name.lower()
+            driver_name = driver_name.lower()
+            if device_name in cls.X10_DEVICE_LIST:
+                if driver_name in cls.X10_DRIVER_LIST:
                     cls.driver_list[device_name] = drivers.XTB232.XTB232()
-                elif driver_name.lower() == "dummy":
+                elif driver_name == "dummy":
                     cls.driver_list[device_name] = drivers.Dummy.Dummy()
                 else:
                     cls.driver_list[device_name] = drivers.Dummy.Dummy()

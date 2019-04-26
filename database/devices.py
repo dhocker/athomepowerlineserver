@@ -9,7 +9,7 @@
 # See the LICENSE file for more details.
 #
 
-import database.AtHomePowerlineServerDb as AtHomePowerlineServerDb
+from database.AtHomePowerlineServerDb import AtHomePowerlineServerDb
 import datetime
 import logging
 
@@ -25,9 +25,16 @@ class Devices:
     #######################################################################
     # Empty all records from the Devices table
     @classmethod
-    def DeleteAll(cls):
-        conn = AtHomePowerlineServerDb.AtHomePowerlineServerDb.GetConnection()
-        c = AtHomePowerlineServerDb.AtHomePowerlineServerDb.GetCursor(conn)
-        c.execute("DELETE FROM Timers")
+    def delete_all(cls):
+        conn = AtHomePowerlineServerDb.GetConnection()
+        c = AtHomePowerlineServerDb.GetCursor(conn)
+        c.execute("DELETE FROM Devices")
         conn.commit()
         conn.close()
+
+    @classmethod
+    def get_device_by_id(cls, device_id):
+        conn = AtHomePowerlineServerDb.GetConnection()
+        c = AtHomePowerlineServerDb.GetCursor(conn)
+        rset = c.execute("SELECT * from Devices where id=?", str(device_id))
+        return rset.fetchone()
