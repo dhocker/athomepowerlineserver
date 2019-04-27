@@ -45,16 +45,16 @@ class BaseDriverInterface:
     def Close(self):
         pass
 
-    def DeviceOn(self, house_device_code, dim_amount):
+    def DeviceOn(self, device_type, device_name_tag, house_device_code, dim_amount):
         pass
 
-    def DeviceOff(self, house_device_code, dim_amount):
+    def DeviceOff(self, device_type, device_name_tag, house_device_code, dim_amount):
         pass
 
-    def DeviceDim(self, house_device_code, dim_amount):
+    def DeviceDim(self, device_type, device_name_tag, house_device_code, dim_amount):
         pass
 
-    def DeviceBright(self, house_device_code, dim_amount):
+    def DeviceBright(self, device_type, device_name_tag, house_device_code, bright_amount):
         pass
 
     def DeviceAllUnitsOff(self, house_code):

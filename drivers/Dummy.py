@@ -15,75 +15,98 @@ import logging
 
 logger = logging.getLogger("server")
 
+
 class Dummy(BaseDriverInterface):
-  
-  def __init__(self):
-    super().__init__()
-    logger.info("Dummy driver initialized")
-    pass
-    
-  # Open the device
-  def Open(self):
-    logger.debug("Driver opened")
-    
-  # Close the device
-  def Close(self):
-    logger.debug("Driver closed")
 
-  #######################################################################
-  # Turn a device on
-  # house_device_code = Ex. 'A1'
-  # dim_amount as a percent 0 <= v <= 100
-  def DeviceOn(self, house_device_code, dim_amount):
-    logger.debug("DeviceOn for: %s %s", house_device_code, dim_amount)
-    return True
+    def __init__(self):
+        super().__init__()
+        logger.info("Dummy driver initialized")
+        pass
 
-  #######################################################################
-  # Turn a device off
-  # house_device_code = Ex. 'A1'
-  # dim_amount 0 <= v <= 100
-  def DeviceOff(self, house_device_code, dim_amount):
-    logger.debug("DeviceOff for: %s %s", house_device_code, dim_amount)
-    return True
+    # Open the device
+    def Open(self):
+        logger.debug("Driver opened")
 
-  #######################################################################
-  # Dim a lamp module
-  # house_device_code = Ex. 'A1'
-  # dim_amount as a percent 0 <= v <= 100
-  def DeviceDim(self, house_device_code, dim_amount):
-    logger.debug("DeviceDim for: %s %s", house_device_code, dim_amount)
-    return True
+    # Close the device
+    def Close(self):
+        logger.debug("Driver closed")
 
-  #######################################################################
-  # Bright(en) a lamp module
-  # house_device_code = Ex. 'A1'
-  # bright_amount as a percent 0 <= v <= 100
-  def DeviceBright(self, house_device_code, bright_amount):
-    logger.debug("DeviceBright for: %s %s", house_device_code, bright_amount)
-    return True
+    def DeviceOn(self, device_type, device_name_tag, house_device_code, dim_amount):
+        """
+        Turn device on
+        :param device_type: the device's type (e.g. x10, hs100, smartplug, etc.)
+        :param device_name_tag: human readable name of device
+        :param house_device_code: address of the device, depending on device type
+        :param dim_amount: a percent 0 to 100
+        :return:
+        """
+        logger.debug("DeviceOn for: %s %s", house_device_code, dim_amount)
+        return True
 
-  #######################################################################
-  # Turn all units off (for a given house code)
-  # house_code = "A"..."P"
-  def DeviceAllUnitsOff(self, house_code):
-    logger.debug("DeviceAllUnitsOff for: %s", house_code)
-    return True
+    def DeviceOff(self, device_type, device_name_tag, house_device_code, dim_amount):
+        """
+        Turn device off
+        :param device_type: the device's type (e.g. x10, hs100, smartplug, etc.)
+        :param device_name_tag: human readable name of device
+        :param house_device_code: address of the device, depending on device type
+        :param dim_amount: a percent 0 to 100
+        :return:
+        """
+        logger.debug("DeviceOff for: %s %s", house_device_code, dim_amount)
+        return True
 
-  #######################################################################
-  # Turn all lights off
-  # house_code = "A"..."P"
-  def DeviceAllLightsOff(self, house_code):
-    logger.debug("DeviceAllLightsOff for: %s", house_code)
-    return True
+    def DeviceDim(self, device_type, device_name_tag, house_device_code, dim_amount):
+        """
+        Dim device
+        :param device_type: the device's type (e.g. x10, hs100, smartplug, etc.)
+        :param device_name_tag: human readable name of device
+        :param house_device_code: address of the device, depending on device type
+        :param dim_amount: a percent 0 to 100
+        :return:
+        """
+        logger.debug("DeviceDim for: %s %s", house_device_code, dim_amount)
+        return True
 
-  #######################################################################
-  # Turn all lights on
-  # house_code = "A"..."P"
-  def DeviceAllLightsOn(self, house_code):
-    logger.debug("DeviceAllLightsOn for: %s", house_code)
-    return True
+    def DeviceBright(self, device_type, device_name_tag, house_device_code, bright_amount):
+        """
+        Turn device on
+        :param device_type: the device's type (e.g. x10, hs100, smartplug, etc.)
+        :param device_name_tag: human readable name of device
+        :param house_device_code: address of the device, depending on device type
+        :param bright_amount: a percent 0 to 100
+        :return:
+        """
+        logger.debug("DeviceBright for: %s %s", house_device_code, bright_amount)
+        return True
 
-  #######################################################################
-  # Set the controller time to the current, local time.
-  def SetTime(self, time_value):
-    pass
+    def DeviceAllUnitsOff(self, house_code):
+        """
+        Turn all units off. Not implemented by all device types.
+        :param house_code:
+        :return:
+        """
+        logger.debug("DeviceAllUnitsOff for: %s", house_code)
+        return True
+
+    def DeviceAllLightsOff(self, house_code):
+        """
+        Turn all lights off. Not implemented by all device types.
+        :param house_code:
+        :return:
+        """
+        logger.debug("DeviceAllLightsOff for: %s", house_code)
+        return True
+
+    def DeviceAllLightsOn(self, house_code):
+        """
+        Turn all lights on. Not implemented by all device types
+        :param house_code:
+        :return:
+        """
+        logger.debug("DeviceAllLightsOn for: %s", house_code)
+        return True
+
+    #######################################################################
+    # Set the controller time to the current, local time.
+    def SetTime(self, time_value):
+        pass

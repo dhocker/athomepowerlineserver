@@ -43,10 +43,8 @@ def EnableServerLogging():
 
   # Do we log to console?
   if Configuration.Configuration.Logconsole():
-    ch = logging.StreamHandler()
-    ch.setLevel(loglevel)
-    ch.setFormatter(formatter)
-    logger.addHandler(ch)
+    # Covers the server and pyHS100 package
+    logging.basicConfig(level=loglevel, format=logformat, datefmt=logdateformat)
 
   # Do we log to a file?
   logfile = Configuration.Configuration.Logfile()

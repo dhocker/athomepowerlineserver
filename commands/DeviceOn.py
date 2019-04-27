@@ -23,8 +23,8 @@ class DeviceOn(ServerCommand.ServerCommand):
         dim_amount = int(request["args"]["dim-amount"])
 
         driver = self.get_driver_for_id(device_id)
-        address = self.get_address_for_id(device_id)
-        result = driver.DeviceOn(address, dim_amount)
+        device = self.get_device_for_id(device_id)
+        result = driver.DeviceOn(device["type"], device["name"], device["address"], dim_amount)
 
         # Generate a successful response
         response = self.CreateResponse(request["request"])

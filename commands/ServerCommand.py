@@ -54,3 +54,7 @@ class ServerCommand:
     def get_address_for_id(cls, device_id):
         r = Devices.get_device_by_id(device_id)
         return r["address"]
+
+    @classmethod
+    def get_device_for_id(cls, device_id):
+        return Devices.get_device_by_id(device_id)

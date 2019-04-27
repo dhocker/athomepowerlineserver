@@ -34,7 +34,24 @@ class Devices:
 
     @classmethod
     def get_device_by_id(cls, device_id):
+        """
+        Return the dvice record for a given device
+        :param device_id: The device id (key)
+        :return: device record as a dict
+        """
         conn = AtHomePowerlineServerDb.GetConnection()
         c = AtHomePowerlineServerDb.GetCursor(conn)
         rset = c.execute("SELECT * from Devices where id=?", str(device_id))
-        return rset.fetchone()
+        return cls.row_to_dict(rset.fetchone())
+
+    @classmethod
+    def row_to_dict(cls, row):
+        """
+        Convert an SQLite row set to a dict
+        :param row: the row set to be converted
+        :return: a dict containing all of the columns in the row set
+        """
+        d = {}
+        for key in row.keys():
+            d[key] = row[key]
+        return d
