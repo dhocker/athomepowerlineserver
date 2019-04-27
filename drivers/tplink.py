@@ -15,12 +15,6 @@ import logging
 
 logger = logging.getLogger("server")
 
-# Setup logging for the pyHS100 package
-logformat = '%(asctime)s, %(module)s, %(levelname)s, %(message)s'
-logdateformat = '%Y-%m-%d %H:%M:%S'
-loglevel = logging.DEBUG
-# logging.basicConfig(level=loglevel, format=logformat, datefmt=logdateformat)
-
 
 class TPLinkDriver(BaseDriverInterface):
     """
