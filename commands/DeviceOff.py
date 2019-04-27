@@ -27,7 +27,8 @@ class DeviceOff(ServerCommand.ServerCommand):
     dim_amount = int(request["args"]["dim-amount"])
 
     driver = self.get_driver_for_id(device_id)
-    result = driver.DeviceOff(device_id, dim_amount)
+    address = self.get_address_for_id(device_id)
+    result = driver.DeviceOff(address, dim_amount)
 
     # Generate a successful response
     response = self.CreateResponse(request["request"])

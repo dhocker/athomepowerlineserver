@@ -420,12 +420,12 @@ if __name__ == "__main__":
   #GetTime()
 
   # Try some timer programs
-  LoadTimers()
+  # LoadTimers()
 
-  LoadActions()
+  # LoadActions()
 
-  print("Device 1 on 50")
-  DeviceOn("1", 50)
+  print("Device 4 on 50")
+  DeviceOn("4", 50)
   #
   #print "sleep 10"
   #time.sleep(10)
@@ -436,11 +436,11 @@ if __name__ == "__main__":
   #print "A7 dim 50"
   #DeviceDim("A7", 50)
   #
-  # print "sleep 5"
-  # time.sleep(5)
+  print("sleep 5")
+  time.sleep(5)
   #
-  print("Device 1 off")
-  DeviceOff("1", 0)
+  print("Device 4 off")
+  DeviceOff("4", 0)
 
   #print "sleep 10"
   #time.sleep(10)

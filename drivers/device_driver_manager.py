@@ -10,8 +10,9 @@
 #
 
 import logging
-import drivers.Dummy
-import drivers.XTB232
+from drivers.Dummy import Dummy
+from drivers.XTB232 import XTB232
+from drivers.tplink import TPLinkDriver
 
 logger = logging.getLogger("server")
 
@@ -26,6 +27,18 @@ class DeviceDriverManager():
     X10_DEVICE_LIST = ["x10", "x10-appliance", "x10-lamp"]
     X10_DRIVER_LIST = ["xtb232", "xtb-232", "cm11a", "cm11"]
 
+    # All of the supported TPLink/Kasa devices and drivers
+    TPLINK_DEVICE_LIST = ["tplink", "hs100", "hs103", "hs105", "hs107", "smartplug", "smartswitch", "smartbulb"]
+    TPLINK_DRIVER_LIST = ["tplink"]
+
+    # Driver list for creating a custom device name
+    # DriverName:DriverClass
+    DRIVER_LIST = {
+        "xtb232": XTB232,
+        "tplink": TPLinkDriver,
+        "dummy": Dummy
+    }
+
     @classmethod
     def init(cls, driver_list_config):
         for device_name, driver_name in driver_list_config.items():
@@ -34,13 +47,38 @@ class DeviceDriverManager():
             driver_name = driver_name.lower()
             if device_name in cls.X10_DEVICE_LIST:
                 if driver_name in cls.X10_DRIVER_LIST:
-                    cls.driver_list[device_name] = drivers.XTB232.XTB232()
+                    cls.driver_list[device_name] = XTB232()
+                    logger.info("Device %s using driver %s", device_name, driver_name)
                 elif driver_name == "dummy":
-                    cls.driver_list[device_name] = drivers.Dummy.Dummy()
+                    cls.driver_list[device_name] = Dummy()
+                    logger.info("Device %s using driver %s", device_name, driver_name)
                 else:
-                    cls.driver_list[device_name] = drivers.Dummy.Dummy()
+                    logger.error("Configuration error: unrecognized driver name %s for device %s", driver_name, device_name)
+                    logger.error("Defaulting to Dummy driver for device %s", device_name)
+                    cls.driver_list[device_name] = Dummy()
+                    logger.info("Device %s using driver %s", device_name, driver_name)
 
-            # TODO Implement TPLink devices
+            # TPLink/Kasa devices
+            elif device_name in cls.TPLINK_DEVICE_LIST:
+                if driver_name in cls.TPLINK_DRIVER_LIST:
+                    cls.driver_list[device_name] = TPLinkDriver()
+                    logger.info("Device %s using driver %s", device_name, driver_name)
+                else:
+                    logger.error("Configuration error: unrecognized driver name %s for device %s", driver_name, device_name)
+                    logger.error("Defaulting to Dummy driver for device %s", device_name)
+                    cls.driver_list[device_name] = Dummy()
+                    logger.info("Device %s using driver %s", device_name, driver_name)
+
+            # Custom device name
+            else:
+                if driver_name in cls.DRIVER_LIST.keys():
+                    cls.driver_list[device_name] = cls.DRIVER_LIST[driver_name]()
+                    logger.info("Custom device-to-driver mapping created: %s/%s", device_name, driver_name)
+                else:
+                    logger.error("Configuration error: unrecognized device name %s", device_name)
+                    logger.error("Defaulting to Dummy driver for device %s", device_name)
+                    cls.driver_list[device_name] = Dummy()
+                    logger.info("Device %s using driver %s", device_name, driver_name)
 
     @classmethod
     def close_drivers(cls):

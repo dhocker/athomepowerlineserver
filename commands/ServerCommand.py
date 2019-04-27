@@ -49,3 +49,8 @@ class ServerCommand:
         r = Devices.get_device_by_id(device_id)
         driver = DeviceDriverManager.get_driver(r["type"])
         return driver
+
+    @classmethod
+    def get_address_for_id(cls, device_id):
+        r = Devices.get_device_by_id(device_id)
+        return r["address"]
