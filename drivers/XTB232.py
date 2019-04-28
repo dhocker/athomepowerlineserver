@@ -48,10 +48,15 @@ logger = logging.getLogger("server")
 
 
 class XTB232(BaseDriverInterface):
-    # XTB232/CM11A constants. See protocol spec for these values.
+    """
+    CM11/CM11a/XTB232 X10 controller driver
+    """
+
+    # XTB232/CM11A constants. See CM11a Protocol.txt spec for these values.
     InterfaceAck = 0x00
     InterfaceReady = 0x55
     InterfacePoll = 0x5A
+    InterfacePollAck = 0xC3
     InterfaceTimeRequest = 0xA5
     SelectFunction = 0x04
 
@@ -90,6 +95,7 @@ class XTB232(BaseDriverInterface):
     # ************************************************************************
     # Close the device
     def Close(self):
+        logger.info("Closing XTB232 controller")
         if self.port is not None:
             self.port.close()
 
@@ -270,6 +276,11 @@ class XTB232(BaseDriverInterface):
                     logger.info("ResetController received interface ready")
                     # response = self.ReadSerialByte()
                     reset_complete = True
+                elif response == XTB232.InterfacePoll:
+                    logger.info("ResetController received interface poll")
+                    count = self.receive_data()
+                    if count:
+                        reset_complete = True
                 else:
                     logger.info("ResetController unexpected byte %x", response)
                     # Read another byte from the controller and hope for something better
@@ -281,6 +292,28 @@ class XTB232(BaseDriverInterface):
                 reset_complete = True
 
         logger.info("ResetController arrived at a known state")
+
+    def receive_data(self):
+        """
+        Receive data from an interface poll request.
+        The data is effectively ignored.
+        :return:
+        """
+        # Send poll ack
+        ack = bytearray(1)
+        ack[0] = XTB232.InterfacePollAck
+        self.port.write(ack)
+
+        # Receive data.
+        # Note that the serial read returns bytes
+        count = ord(self.port.read(1))
+        # The maximum count is 9 (see CM11a Protocol spec)
+        for i in range(count):
+            b = ord(self.port.read(1))
+
+        logger.debug("Read %d bytes from interface", count)
+        return count
+
 
     # ************************************************************************
     def SetInterfaceTime(self, time_value):
@@ -411,7 +444,7 @@ class XTB232(BaseDriverInterface):
                     self.LastErrorCode = XTB232.InterfaceReadyTimeout
                     self.LastError = "Expected interface ready signal, but received {0}".format(
                         response if not None else "None")
-                    logger.warn(self.LastError)
+                    logger.warning(self.LastError)
                     # At this point, we have received a good checksum and sent the ACK (committed the command).
                     # However, we did not receive an interface ready. It's 50-50 as to whether everything
                     # is OK. We'll assume it is.
@@ -421,15 +454,18 @@ class XTB232(BaseDriverInterface):
                 # Looks like we got an interface ready, so we'll move on.
                 self.LastErrorCode = XTB232.Success
                 self.LastError = "SendCommand expected a checksum, but has received an interface ready"
-                logger.warn(self.LastError)
+                logger.warning(self.LastError)
                 return True
             elif response == XTB232.InterfaceTimeRequest:
                 # We received an interface timer request. This likely means that the
                 # power line controller was reset and is now waiting for the current time.
                 # We'll reset the controller and retry the command.
-                logger.info("Expected checksum, but received an InterfaceTimeRequest. Resetting controller.")
+                logger.warning("Expected checksum, but received an InterfaceTimeRequest. Resetting controller.")
                 self.ResetController(response)
                 retry_count += 1
+            elif response == XTB232.InterfacePoll:
+                logger.debug("Received interface poll")
+                count = self.receive_data()
             elif (response == '') or (response is None):
                 self.LastErrorCode = XTB232.ChecksumTimeout
                 self.LastError = "Timeout waiting for checksum from controller"
@@ -463,8 +499,9 @@ class XTB232(BaseDriverInterface):
         Read a byte from the serial port
         Returns an integer
         """
+        # Note that the serial read returns bytes
         b = self.port.read(1)
-        logger.info("ReadSerialByte: 0x%X", ord(b) if len(b) > 0 else 0)
+        logger.debug("ReadSerialByte: 0x%X", ord(b) if len(b) > 0 else 0)
         if len(b) == 1:
             return ord(b)
         return None
