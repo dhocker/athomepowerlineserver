@@ -39,6 +39,13 @@ class DeviceDriverManager():
         "dummy": Dummy
     }
 
+    # Tracks drivers in use. We basically treat a driver as a singleton.
+    used_driver_list = {
+        "xtb232": None,
+        "tplink": None,
+        "dummy": None
+    }
+
     @classmethod
     def init(cls, driver_list_config):
         for device_name, driver_name in driver_list_config.items():
@@ -47,43 +54,61 @@ class DeviceDriverManager():
             driver_name = driver_name.lower()
             if device_name in cls.X10_DEVICE_LIST:
                 if driver_name in cls.X10_DRIVER_LIST:
-                    cls.driver_list[device_name] = XTB232()
+                    if not cls.used_driver_list[driver_name]:
+                        cls.used_driver_list[driver_name] = XTB232()
+                    cls.driver_list[device_name] = cls.used_driver_list[driver_name]
                     logger.info("Device %s using driver %s", device_name, driver_name)
                 elif driver_name == "dummy":
-                    cls.driver_list[device_name] = Dummy()
+                    if not cls.used_driver_list[driver_name]:
+                        cls.used_driver_list[driver_name] = Dummy()
+                    cls.driver_list[device_name] = cls.used_driver_list[driver_name]
                     logger.info("Device %s using driver %s", device_name, driver_name)
                 else:
                     logger.error("Configuration error: unrecognized driver name %s for device %s", driver_name, device_name)
                     logger.error("Defaulting to Dummy driver for device %s", device_name)
-                    cls.driver_list[device_name] = Dummy()
+                    if not cls.used_driver_list[driver_name]:
+                        cls.used_driver_list[driver_name] = Dummy()
+                    cls.driver_list[device_name] = cls.used_driver_list[driver_name]
                     logger.info("Device %s using driver %s", device_name, driver_name)
 
             # TPLink/Kasa devices
             elif device_name in cls.TPLINK_DEVICE_LIST:
                 if driver_name in cls.TPLINK_DRIVER_LIST:
-                    cls.driver_list[device_name] = TPLinkDriver()
+                    if not cls.used_driver_list[driver_name]:
+                        cls.used_driver_list[driver_name] = TPLinkDriver()
+                    cls.driver_list[device_name] = cls.used_driver_list[driver_name]
                     logger.info("Device %s using driver %s", device_name, driver_name)
                 else:
                     logger.error("Configuration error: unrecognized driver name %s for device %s", driver_name, device_name)
                     logger.error("Defaulting to Dummy driver for device %s", device_name)
-                    cls.driver_list[device_name] = Dummy()
+                    if not cls.used_driver_list[driver_name]:
+                        cls.used_driver_list[driver_name] = Dummy()
+                    cls.driver_list[device_name] = cls.used_driver_list[driver_name]
                     logger.info("Device %s using driver %s", device_name, driver_name)
 
             # Custom device name
             else:
                 if driver_name in cls.DRIVER_LIST.keys():
+                    # TODO This won't work if the driver is a true singleton like XTB232
                     cls.driver_list[device_name] = cls.DRIVER_LIST[driver_name]()
                     logger.info("Custom device-to-driver mapping created: %s/%s", device_name, driver_name)
                 else:
                     logger.error("Configuration error: unrecognized device name %s", device_name)
                     logger.error("Defaulting to Dummy driver for device %s", device_name)
-                    cls.driver_list[device_name] = Dummy()
+                    if not cls.used_driver_list["dummy"]:
+                        cls.used_driver_list["dummy"] = Dummy()
+                    cls.driver_list[device_name] = cls.used_driver_list["dummy"]
                     logger.info("Device %s using driver %s", device_name, driver_name)
+
+        # Open all used drivers
+        for dn, driver in cls.used_driver_list.items():
+            driver.Open()
 
     @classmethod
     def close_drivers(cls):
-        # TODO Call each driver's close method
-        pass
+        # Call each driver's close method
+        for dn, driver in cls.used_driver_list.items():
+            driver.Close()
 
     @classmethod
     def get_driver(cls, device_name):
