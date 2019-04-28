@@ -16,6 +16,25 @@
 #   http://jvde.us/info/CM11A_protocol.txt
 #   http://jvde.us//xtb/XTB-232_description.htm
 #
+# Complete list of CM11A functions from protocol spec
+# Function                  Binary Value
+# All Units Off             0000
+# All Lights On             0001
+# On                        0010
+# Off                       0011
+# Dim                       0100
+# Bright                    0101
+# All Lights Off            0110
+# Extended Code             0111
+# Hail Request              1000
+# Hail Acknowledge          1001
+# Pre-set Dim (1)           1010
+# Pre-set Dim (2)           1011
+# Extended Data Transfer    1100
+# Status On                 1101
+# Status Off                1110
+# Status Request            1111
+#
 
 import drivers.X10ControllerInterface as X10ControllerInterface
 import Configuration
