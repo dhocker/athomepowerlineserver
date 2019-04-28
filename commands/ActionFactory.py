@@ -20,21 +20,21 @@ import logging
 logger = logging.getLogger("server")
 
 
-def RunAction(command, device_id, device_type, device_address, dim_amount):
+def RunAction(command, device_id, device_type, device_name, device_address, dim_amount):
     if command.startswith("all"):
         run_all_units_action(command, device_id, device_type, device_address)
     else:
         driver = DeviceDriverManager.get_driver(device_type)
         # Cases for command
         if command == "on":
-            driver.DeviceOn(device_address, dim_amount)
+            driver.DeviceOn(device_type, device_name, device_address, dim_amount)
         elif command == "off":
-            driver.DeviceOff(device_address, dim_amount)
+            driver.DeviceOff(device_type, device_name, device_address, dim_amount)
         elif command == "dim":
-            driver.DeviceDim(device_address, dim_amount)
+            driver.DeviceDim(device_type, device_name, device_address, dim_amount)
         elif (command == "bright") or (command == "brighten"):
             # The dim_amount is really a bright_amount
-            driver.DeviceBright(device_address, dim_amount)
+            driver.DeviceBright(device_type, device_name, device_address, dim_amount)
 
 
 def run_all_units_action(command, device_id, device_type, device_address):

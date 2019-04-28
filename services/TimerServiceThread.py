@@ -141,9 +141,10 @@ class TimerServiceThread(threading.Thread):
         if rset is not None:
             device_rec = Devices.get_device_by_id(device_id)
             device_type = device_rec["type"]
+            device_name = device_rec["name"]
             device_address = device_rec["address"]
             logger.info("Executing action: %s %s %s", rset["command"], device_type, device_address)
-            ActionFactory.RunAction(rset["command"], device_id, device_type, device_address, int(rset["dimamount"]))
+            ActionFactory.RunAction(rset["command"], device_id, device_type, device_name, device_address, int(rset["dimamount"]))
         else:
             logger.error("No Actions table record was found for: %s", name)
 
