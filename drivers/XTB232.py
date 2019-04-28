@@ -1,6 +1,6 @@
 #
 # AtHomePowerlineServer - networked server for CM11/CM11A/XTB-232 X10 controllers
-# Copyright (C) 2014  Dave Hocker
+# Copyright © 2014, 2019  Dave Hocker
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -36,11 +36,10 @@
 # Status Request            1111
 #
 
-import drivers.X10ControllerInterface as X10ControllerInterface
+from drivers.base_driver_interface import BaseDriverInterface
 import Configuration
 import serial
 import datetime
-import array
 import logging
 import binascii
 import time
@@ -48,7 +47,7 @@ import time
 logger = logging.getLogger("server")
 
 
-class XTB232(X10ControllerInterface.X10ControllerInterface):
+class XTB232(BaseDriverInterface):
     # XTB232/CM11A constants. See protocol spec for these values.
     InterfaceAck = 0x00
     InterfaceReady = 0x55
@@ -71,6 +70,7 @@ class XTB232(X10ControllerInterface.X10ControllerInterface):
     HdrAlwaysOne = 0x04
 
     # Error codes
+    Success = 0
     ChecksumTimeout = 1
     InterfaceReadyTimeout = 2
     AckNotReceived = 3
@@ -80,7 +80,7 @@ class XTB232(X10ControllerInterface.X10ControllerInterface):
 
     # ************************************************************************
     def __init__(self):
-        X10ControllerInterface.X10ControllerInterface.__init__(self)
+        super().__init__()
 
     # ************************************************************************
     # Open the device
@@ -97,7 +97,7 @@ class XTB232(X10ControllerInterface.X10ControllerInterface):
     # Turn a device on
     # house_device_code = Ex. 'A1'
     # dim_amount as a percent 0 <= v <= 100
-    def DeviceOn(self, house_device_code, dim_amount):
+    def DeviceOn(self, device_type, device_name_tag, house_device_code, dim_amount):
         self.ClearLastError()
 
         # The XTB-232 does not seem to perform the dim action as part of the on action.
@@ -111,7 +111,7 @@ class XTB232(X10ControllerInterface.X10ControllerInterface):
     # Turn a device off
     # house_device_code = Ex. 'A1'
     # dim_amount 0 <= v <= 100
-    def DeviceOff(self, house_device_code, dim_amount):
+    def DeviceOff(self, device_type, device_name_tag, house_device_code, dim_amount):
         self.ClearLastError()
         return self.ExecuteFunction(house_device_code, self.ConvertDimPercent(dim_amount), XTB232.Off)
 
@@ -119,7 +119,7 @@ class XTB232(X10ControllerInterface.X10ControllerInterface):
     # Dim a lamp module
     # house_device_code = Ex. 'A1'
     # dim_amount as a percent 0 <= v <= 100
-    def DeviceDim(self, house_device_code, dim_amount):
+    def DeviceDim(self, device_type, device_name_tag, house_device_code, dim_amount):
         self.ClearLastError()
         return self.ExecuteFunction(house_device_code, self.ConvertDimPercent(dim_amount), XTB232.Dim)
 
@@ -127,7 +127,7 @@ class XTB232(X10ControllerInterface.X10ControllerInterface):
     # Bright(en) a lamp module
     # house_device_code = Ex. 'A1'
     # bright_amount as a percent 0 <= v <= 100
-    def DeviceBright(self, house_device_code, bright_amount):
+    def DeviceBright(self, device_type, device_name_tag, house_device_code, bright_amount):
         self.ClearLastError()
         return self.ExecuteFunction(house_device_code, self.ConvertDimPercent(bright_amount), XTB232.Bright)
 
@@ -162,7 +162,7 @@ class XTB232(X10ControllerInterface.X10ControllerInterface):
         SelectCommand[0] = XTB232.SelectFunction
         SelectCommand[1] = ((HouseBinary << 4) + DeviceBinary)
 
-        logger.info(X10ControllerInterface.X10ControllerInterface.FormatStandardTransmission(SelectCommand))
+        logger.info(self.FormatStandardTransmission(SelectCommand))
 
         return self.SendCommand(SelectCommand)
 
@@ -171,8 +171,7 @@ class XTB232(X10ControllerInterface.X10ControllerInterface):
     # Common function for sending a complete function to the controller.
     # The device function code is treated as a data value.
     def ExecuteFunction(self, house_device_code, dim_amount, device_function):
-        logger.debug("Executing function: %s",
-                     X10ControllerInterface.X10ControllerInterface.GetFunctionName(device_function))
+        logger.debug("Executing function: %s", self.GetFunctionName(device_function))
         # First part of two step sequence. Select the specific device that is the command target.
         if not self.SelectAddress(house_device_code):
             logger.error("SelectAddress failed")
@@ -190,7 +189,7 @@ class XTB232(X10ControllerInterface.X10ControllerInterface):
         HouseBinary = XTB232.GetHouseCode(house_code)
         Xfunction[1] = (HouseBinary << 4) + device_function
 
-        logger.info(X10ControllerInterface.X10ControllerInterface.FormatStandardTransmission(Xfunction))
+        logger.info(self.FormatStandardTransmission(Xfunction))
 
         return self.SendCommand(Xfunction)
 
@@ -469,3 +468,125 @@ class XTB232(X10ControllerInterface.X10ControllerInterface):
         if len(b) == 1:
             return ord(b)
         return None
+
+    #####################
+    # X10 common methods
+    #####################
+
+
+    FUNCTION_LOOKUP = {0: "All Units Off",
+                       1: "All Lights On",
+                       2: "On",
+                       3: "Off",
+                       4: "Dim",
+                       5: "Bright",
+                       6: "All Lights Off",
+                       7: "Extended Code",
+                       8: "Hail Request",
+                       9: "Hail Acknowledge",
+                       10: "Pre-set Dim 1",
+                       11: "Pre-set Dim 2",
+                       12: "Extended Data Transfer",
+                       13: "Status On",
+                       14: "Status Off",
+                       15: "Status Request"}
+    
+    
+    @classmethod
+    def GetFunctionName(cls, func_code):
+        """
+        Return the function name for a given X10 function code
+        """
+        return cls.FUNCTION_LOOKUP[func_code]
+    
+    
+    DEVICE_CODE_LOOKUP = {1: 6, 2: 14, 3: 2, 4: 10, 5: 1, 6: 9, 7: 5, 8: 13, \
+                          9: 7, 10: 15, 11: 3, 12: 11, 13: 0, 14: 8, 15: 4, 16: 12}
+    
+    
+    #######################################################################
+    # Return the X10 device code for a device  
+    @classmethod
+    def GetDeviceCode(cls, device_code):
+        return cls.DEVICE_CODE_LOOKUP[int(device_code)]
+    
+    
+    HOUSE_CODE_LOOKUP = {"a": 6, "b": 14, "c": 2, "d": 10, "e": 1, "f": 9, "g": 5, "h": 13, \
+                       "i": 7, "j": 15, "k": 3, "l": 11, "m": 0, "n": 8, "o": 4, "p": 12}
+    
+    
+    #######################################################################
+    # Return the X10 house code for a house  
+    # house_code is case insensitive
+    @classmethod
+    def GetHouseCode(cls, house_code):
+        return cls.HOUSE_CODE_LOOKUP[house_code.lower()]
+    
+    
+    # ************************************************************************
+    #
+    # Returns day of week mask for set time
+    # NOTE: This method is not required for this implementation since
+    # the X10 controller does not support downloaded programs.
+    #
+    # Bit
+    #    7  6  5  4  3  2  1  0
+    #    0  Sa F  Th W  Tu M  Su
+    #
+    # ************************************************************************
+    DayOfWeekLookup = [0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x01]
+    
+    
+    @classmethod
+    def GetDayOfWeek(cls, dt):
+        # day of week where Monday = 0 and Sunday = 7
+        dow = dt.weekday()
+        return cls.DayOfWeekLookup[dow]
+    
+    
+    @classmethod
+    def GetKeyForValue(cls, dict, find_value):
+        """
+        Return the dict key for a given value (reverse lookup)
+        """
+        for key, value in dict.items():
+            if value == find_value:
+                return key
+        return None
+    
+    
+    @classmethod
+    def FormatStandardTransmission(cls, hc):
+        """
+        Format a two-byte header:code into human readable text.
+        Useful for logging commands sent to controller.
+        """
+        # Bit:	      7   6   5   4   3   2   1   0
+        # Header:	    < Dim amount    >   1  F/A E/S
+        dim_amount = (hc[0] >> 3) & 0x1F
+        sync_bit = (hc[0] & 0x04) >> 2
+        f_a_bit = (hc[0] & 0x02) >> 1
+        f_a_text = "F" if f_a_bit else "A"
+        e_s_bit = hc[0] & 0x01
+        e_s_text = "E" if e_s_bit else "S"
+    
+        line_1 = "Dim={0} Sync={1} F/A={2} E/S={3}".format(dim_amount, sync_bit, f_a_text, e_s_text)
+    
+        # Bit: 	    7   6   5   4   3   2   1   0
+        # Address:  < Housecode >   <Device Code>
+        # Function: < Housecode >   < Function  >
+        house_code_encoded = (hc[1] >> 4) & 0x0F
+        house_code = cls.GetKeyForValue(cls.HOUSE_CODE_LOOKUP, house_code_encoded)
+        if f_a_bit:
+            # Function
+            func = hc[1] & 0x0F
+            func_name = cls.FUNCTION_LOOKUP[func]
+            line_2 = "HouseCode={0} Function={1}".format(house_code, func_name)
+        else:
+            # Address
+            device_code_encoded = hc[1] & 0x0F
+            device_code = cls.GetKeyForValue(cls.DEVICE_CODE_LOOKUP, device_code_encoded)
+            line_2 = "HouseCode={0} DeviceCode={1}".format(house_code.upper(), device_code)
+    
+        return line_1 + " " + line_2
+    
