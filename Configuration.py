@@ -37,178 +37,176 @@ import logging
 
 logger = logging.getLogger("server")
 
+
 ########################################################################
 class Configuration():
+    ActiveConfig = None
 
-  ActiveConfig = None
-  
-  ######################################################################
-  def __init__(self):
-    Configuration.LoadConfiguration()
-    pass
-    
-  ######################################################################
-  # Load the configuration file
-  @classmethod
-  def LoadConfiguration(cls):
-    # Try to open the conf file. If there isn't one, we give up.
-    try:
-      cfg_path = Configuration.GetConfigurationFilePath()
-      print("Opening configuration file {0}".format(cfg_path))
-      cfg = open(cfg_path, 'r')
-    except Exception as ex:
-      print("Unable to open {0}".format(cfg_path))
-      print(str(ex))
-      return
-      
-    # Read the entire contents of the conf file
-    cfg_json = cfg.read()
-    cfg.close()
-    #print cfg_json
-    
-    # Try to parse the conf file into a Python structure
-    try:
-      config = json.loads(cfg_json)
-      # The interesting part of the configuration is in the "Configuration" section.
-      cls.ActiveConfig = config["Configuration"]
-    except Exception as ex:
-      print("Unable to parse configuration file as JSON")
-      print(str(ex))
-      return
-      
-    #print str(Configuration.ActiveConfig)
-    return
+    ######################################################################
+    def __init__(self):
+        Configuration.LoadConfiguration()
+        pass
 
-  ######################################################################
-  @classmethod
-  def IsLinux(cls):
-    """
-    Returns True if the OS is of Linux type (Debian, Ubuntu, etc.)
-    """
-    return os.name == "posix"
+    ######################################################################
+    # Load the configuration file
+    @classmethod
+    def LoadConfiguration(cls):
+        # Try to open the conf file. If there isn't one, we give up.
+        try:
+            cfg_path = Configuration.GetConfigurationFilePath()
+            print("Opening configuration file {0}".format(cfg_path))
+            cfg = open(cfg_path, 'r')
+        except Exception as ex:
+            print("Unable to open {0}".format(cfg_path))
+            print(str(ex))
+            return
 
-  ######################################################################
-  @classmethod
-  def IsWindows(cls):
-    """
-    Returns True if the OS is a Windows type (Windows 7, etc.)
-    """
-    return os.name == "nt"
+        # Read the entire contents of the conf file
+        cfg_json = cfg.read()
+        cfg.close()
+        # print cfg_json
 
+        # Try to parse the conf file into a Python structure
+        try:
+            config = json.loads(cfg_json)
+            # The interesting part of the configuration is in the "Configuration" section.
+            cls.ActiveConfig = config["Configuration"]
+        except Exception as ex:
+            print("Unable to parse configuration file as JSON")
+            print(str(ex))
+            return
 
-  ######################################################################
-  @classmethod
-  def get_config_var(cls, var_name):
-      try:
-          return cls.ActiveConfig[var_name]
-      except Exception as ex:
-          logger.error("Unable to find configuration variable {0}".format(var_name))
-          logger.error(str(ex))
-          pass
-      return None
+        # print str(Configuration.ActiveConfig)
+        return
 
+    ######################################################################
+    @classmethod
+    def IsLinux(cls):
+        """
+        Returns True if the OS is of Linux type (Debian, Ubuntu, etc.)
+        """
+        return os.name == "posix"
 
-  ######################################################################
-  # Get the X10 controller device. Used to determine what driver should be used.
-  @classmethod
-  def X10ControllerDevice(cls):
-    return cls.ActiveConfig["X10ControllerDevice"]
+    ######################################################################
+    @classmethod
+    def IsWindows(cls):
+        """
+        Returns True if the OS is a Windows type (Windows 7, etc.)
+        """
+        return os.name == "nt"
 
-  @classmethod
-  def DeviceDrivers(cls):
-    return cls.ActiveConfig["Drivers"]
-    
-  ######################################################################
-  # Get the driver instance called out by the configuration
-  @classmethod
-  def GetX10ControllerDriver(cls):
-    dev = cls.X10ControllerDevice().upper()
-    if (dev == "XTB232") or (dev == "XTB-232"):
-      return drivers.XTB232.XTB232()
-    elif (dev == "CM11A") or (dev == "CM11"):
-      return drivers.XTB232.XTB232()
-    elif dev == "DUMMY":
-      return drivers.Dummy.Dummy()
-    return None
-    
-  ######################################################################
-  @classmethod
-  def ComPort(cls):
-    return cls.get_config_var("ComPort")
-    
-  ######################################################################
-  @classmethod
-  def Port(cls):
-    return cls.get_config_var("Port")
+    ######################################################################
+    @classmethod
+    def get_config_var(cls, var_name):
+        try:
+            return cls.ActiveConfig[var_name]
+        except Exception as ex:
+            logger.error("Unable to find configuration variable {0}".format(var_name))
+            logger.error(str(ex))
+            pass
+        return None
 
-  ######################################################################
-  @classmethod
-  def Logconsole(cls):
-    return cls.get_config_var("LogConsole").lower() == "true"
+    ######################################################################
+    # Get the X10 controller device. Used to determine what driver should be used.
+    @classmethod
+    def X10ControllerDevice(cls):
+        return cls.ActiveConfig["X10ControllerDevice"]
 
-  ######################################################################
-  @classmethod
-  def Logfile(cls):
-    return cls.get_config_var("LogFile")
+    @classmethod
+    def DeviceDrivers(cls):
+        return cls.ActiveConfig["Drivers"]
 
-  ######################################################################
-  @classmethod
-  def LogLevel(cls):
-    return cls.get_config_var("LogLevel")
+    ######################################################################
+    # Get the driver instance called out by the configuration
+    @classmethod
+    def GetX10ControllerDriver(cls):
+        dev = cls.X10ControllerDevice().upper()
+        if (dev == "XTB232") or (dev == "XTB-232"):
+            return drivers.XTB232.XTB232()
+        elif (dev == "CM11A") or (dev == "CM11"):
+            return drivers.XTB232.XTB232()
+        elif dev == "DUMMY":
+            return drivers.Dummy.Dummy()
+        return None
 
-  ######################################################################
-  @classmethod
-  def DatabasePath(cls):
-    return cls.get_config_var("DatabasePath")
+    ######################################################################
+    @classmethod
+    def ComPort(cls):
+        return cls.get_config_var("ComPort")
 
-  ######################################################################
-  @classmethod
-  def City(cls):
-      return cls.get_config_var("City")
+    ######################################################################
+    @classmethod
+    def Port(cls):
+        return cls.get_config_var("Port")
 
-  ######################################################################
-  @classmethod
-  def Latitude(cls):
-      return cls.get_config_var("Latitude")
+    ######################################################################
+    @classmethod
+    def Logconsole(cls):
+        return cls.get_config_var("LogConsole").lower() == "true"
 
-  ######################################################################
-  @classmethod
-  def Longitude(cls):
-      return cls.get_config_var("Longitude")
+    ######################################################################
+    @classmethod
+    def Logfile(cls):
+        return cls.get_config_var("LogFile")
 
-  ######################################################################
-  @classmethod
-  def GetConfigurationFilePath(cls):
-    """
-    Returns the full path to the configuration file
-    """
-    file_name = 'AtHomePowerlineServer.conf'
+    ######################################################################
+    @classmethod
+    def LogLevel(cls):
+        return cls.get_config_var("LogLevel")
 
-    # A local configuration file (in the home directory) takes precedent
-    if os.path.exists(file_name):
+    ######################################################################
+    @classmethod
+    def DatabasePath(cls):
+        return cls.get_config_var("DatabasePath")
+
+    ######################################################################
+    @classmethod
+    def City(cls):
+        return cls.get_config_var("City")
+
+    ######################################################################
+    @classmethod
+    def Latitude(cls):
+        return cls.get_config_var("Latitude")
+
+    ######################################################################
+    @classmethod
+    def Longitude(cls):
+        return cls.get_config_var("Longitude")
+
+    ######################################################################
+    @classmethod
+    def GetConfigurationFilePath(cls):
+        """
+        Returns the full path to the configuration file
+        """
+        file_name = 'AtHomePowerlineServer.conf'
+
+        # A local configuration file (in the home directory) takes precedent
+        if os.path.exists(file_name):
+            return file_name
+
+        if Configuration.IsLinux():
+            return "/etc/{0}".format(file_name)
+
         return file_name
 
-    if Configuration.IsLinux():
-      return "/etc/{0}".format(file_name)
+    ######################################################################
+    @classmethod
+    def GetDatabaseFilePath(cls, file_name):
+        """
+        Returns the full path to the SQLite database file
+        """
+        if Configuration.IsLinux():
+            # return "/var/local/athomepowerlineserver/{0}".format(file_name)
+            dbpath = Configuration.DatabasePath()
+            if dbpath == "":
+                return file_name
+            else:
+                if not dbpath.endswith("/"):
+                    dbpath += "/"
+                return "{0}{1}".format(dbpath, file_name)
+        elif Configuration.IsWindows():
+            return "{0}\\AtHomePowerlineServer\\{1}".format(os.environ["LOCALAPPDATA"], file_name)
 
-    return file_name
-
-  ######################################################################
-  @classmethod
-  def GetDatabaseFilePath(cls, file_name):
-    """
-    Returns the full path to the SQLite database file
-    """
-    if Configuration.IsLinux():
-      # return "/var/local/athomepowerlineserver/{0}".format(file_name)
-      dbpath = Configuration.DatabasePath()
-      if dbpath == "":
-          return file_name
-      else:    
-          if not dbpath.endswith("/"):
-              dbpath += "/"      
-          return "{0}{1}".format(dbpath, file_name)
-    elif Configuration.IsWindows():
-      return "{0}\\AtHomePowerlineServer\\{1}".format(os.environ["LOCALAPPDATA"], file_name)
-
-    return file_name
+        return file_name

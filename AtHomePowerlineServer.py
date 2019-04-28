@@ -31,107 +31,109 @@ import os
 import time
 import sys
 
+
 #
 # main
 #
 def main():
-  logger = logging.getLogger("server")
+    logger = logging.getLogger("server")
 
-  # Clean up when killed
-  def term_handler(signum, frame):
-    logger.info("AtHomePowerlineServer received kill signal...shutting down")
-    # This will break the forever loop at the foot of main()
-    terminate_service = True
-    sys.exit(0)
+    # Clean up when killed
+    def term_handler(signum, frame):
+        logger.info("AtHomePowerlineServer received kill signal...shutting down")
+        # This will break the forever loop at the foot of main()
+        terminate_service = True
+        sys.exit(0)
 
-  # Orderly clean up of the server
-  def CleanUp():
-    timer_service.Stop()
-    server.Stop()
-    DeviceDriverManager.close_drivers()
-    logger.info("AtHomePowerlineServer shutdown complete")
+    # Orderly clean up of the server
+    def CleanUp():
+        timer_service.Stop()
+        server.Stop()
+        DeviceDriverManager.close_drivers()
+        logger.info("AtHomePowerlineServer shutdown complete")
+        logger.info("################################################################################")
+        Logging.Shutdown()
+
+    # Change the current directory so we can find the configuration file.
+    # For Linux we should probably put the configuration file in the /etc directory.
+    just_the_path = os.path.dirname(os.path.realpath(__file__))
+    os.chdir(just_the_path)
+
+    # Load the configuration file
+    Configuration.Configuration.LoadConfiguration()
+
+    # Per GPL, show the disclaimer
+    disclaimer.Disclaimer.DisplayDisclaimer()
+    print("Use ctrl-c to shutdown server\n")
+
+    # Activate logging to console or file
+    # Logging.EnableLogging()
+    Logging.EnableServerLogging()
+
     logger.info("################################################################################")
-    Logging.Shutdown()
 
-  # Change the current directory so we can find the configuration file.
-  # For Linux we should probably put the configuration file in the /etc directory.
-  just_the_path = os.path.dirname(os.path.realpath(__file__))
-  os.chdir(just_the_path)
+    # For additional coverage, log the disclaimer
+    disclaimer.Disclaimer.LogDisclaimer()
 
-  # Load the configuration file
-  Configuration.Configuration.LoadConfiguration()
+    logger.info("Starting up...")
 
-  # Per GPL, show the disclaimer
-  disclaimer.Disclaimer.DisplayDisclaimer()
-  print("Use ctrl-c to shutdown server\n")
+    logger.info("Using configuration file: %s", Configuration.Configuration.GetConfigurationFilePath())
 
-  # Activate logging to console or file
-  # Logging.EnableLogging()
-  Logging.EnableServerLogging()
+    # Inject the X10 controller driver
+    # TODO Implement new driver abstraction to cover multiple device types
+    DeviceDriverManager.init(Configuration.Configuration.DeviceDrivers())
 
-  logger.info("################################################################################")
+    # Initialize the database
+    logger.info("Initializing database")
+    database.AtHomePowerlineServerDb.AtHomePowerlineServerDb.Initialize()
+    logger.info("Loading timer programs")
+    timers.TimerStore.TimerStore.LoadTimerProgramList()
 
-  # For additional coverage, log the disclaimer
-  disclaimer.Disclaimer.LogDisclaimer()
+    # HOST, PORT = "localhost", 9999
+    # HOST, PORT = "hedwig", 9999
+    # This accepts connections from any network interface. It was the only
+    # way to get it to work in the RPi from remote machines.
+    HOST, PORT = "0.0.0.0", Configuration.Configuration.Port()
 
-  logger.info("Starting up...")
+    # Fire up the timer service - watches for timer events to occur
+    timer_service = services.TimerService.TimerService()
+    timer_service.Start()
+    logger.info("Timer service started")
 
-  logger.info("Using configuration file: %s", Configuration.Configuration.GetConfigurationFilePath())
+    # Create the TCP socket server on its own thread.
+    # This is done so that we can handle the kill signal which
+    # arrives on the main thread. If we didn't put the TCP server
+    # on its own thread we would not be able to shut it down in
+    # an orderly fashion.
+    server = SocketServerThread.SocketServerThread(HOST, PORT)
 
-  # Inject the X10 controller driver
-  # TODO Implement new driver abstraction to cover multiple device types
-  DeviceDriverManager.init(Configuration.Configuration.DeviceDrivers())
+    # Set up handler for the kill signal
+    signal.signal(signal.SIGTERM, term_handler)
 
-  # Initialize the database
-  logger.info("Initializing database")
-  database.AtHomePowerlineServerDb.AtHomePowerlineServerDb.Initialize()
-  logger.info("Loading timer programs")
-  timers.TimerStore.TimerStore.LoadTimerProgramList()
+    # Activate the server; this will keep running until you
+    # interrupt the program with Ctrl-C or kill the daemon.
 
-  #HOST, PORT = "localhost", 9999
-  #HOST, PORT = "hedwig", 9999
-  # This accepts connections from any network interface. It was the only
-  # way to get it to work in the RPi from remote machines.
-  HOST, PORT = "0.0.0.0", Configuration.Configuration.Port()
+    # Launch the socket server
+    try:
+        # This runs "forever", until ctrl-c or killed
+        server.Start()
+        terminate_service = False
+        while not terminate_service:
+            # We do a lot of sleeping to avoid using too much CPU :-)
+            time.sleep(1)
+    except KeyboardInterrupt:
+        logger.info("AtHomePowerlineServer shutting down...")
+    except Exception as e:
+        logger.error("Unhandled exception occurred")
+        logger.error(e.strerror)
+        logger.error(sys.exc_info()[0])
+    finally:
+        # We actually get here through ctrl-c or process kill (SIGTERM)
+        CleanUp()
 
-  # Fire up the timer service - watches for timer events to occur
-  timer_service = services.TimerService.TimerService()
-  timer_service.Start()
-  logger.info("Timer service started")
-
-  # Create the TCP socket server on its own thread.
-  # This is done so that we can handle the kill signal which
-  # arrives on the main thread. If we didn't put the TCP server
-  # on its own thread we would not be able to shut it down in
-  # an orderly fashion.
-  server = SocketServerThread.SocketServerThread(HOST, PORT)
-
-  # Set up handler for the kill signal
-  signal.signal(signal.SIGTERM, term_handler)
-
-  # Activate the server; this will keep running until you
-  # interrupt the program with Ctrl-C or kill the daemon.
-
-  # Launch the socket server
-  try:
-    # This runs "forever", until ctrl-c or killed
-    server.Start()
-    terminate_service = False
-    while not terminate_service:
-      # We do a lot of sleeping to avoid using too much CPU :-)
-      time.sleep(1)
-  except KeyboardInterrupt:
-    logger.info("AtHomePowerlineServer shutting down...")
-  except Exception as e:
-    logger.error("Unhandled exception occurred")
-    logger.error(e.strerror)
-    logger.error(sys.exc_info()[0])
-  finally:
-    # We actually get here through ctrl-c or process kill (SIGTERM)
-    CleanUp()
 
 #
 # Run as an application or daemon
 #
 if __name__ == "__main__":
-  main()
+    main()
