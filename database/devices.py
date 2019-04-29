@@ -17,6 +17,26 @@ logger = logging.getLogger("server")
 
 
 class Devices:
+    TPLINK = "tplink"
+    X10 = "x10"
+    # All valid device types and the device type class they belong to
+    VALID_DEVICE_LIST = {
+        "x10": X10,
+        "x10-appliance": X10,
+        "x10-lamp": X10,
+        "tplink": TPLINK,
+        "hs100": TPLINK,
+        "hs103": TPLINK,
+        "hs105": TPLINK,
+        "hs107": TPLINK,
+        "hs110": TPLINK,
+        "hs200": TPLINK,
+        "hs210": TPLINK,
+        "hs220": TPLINK,
+        "smartplug": TPLINK,
+        "smartswitch": TPLINK,
+        "smartbulb": TPLINK
+    }
 
     #######################################################################
     def __init__(self):
@@ -31,6 +51,31 @@ class Devices:
         c.execute("DELETE FROM Devices")
         conn.commit()
         conn.close()
+
+    @classmethod
+    def insert(cls, device_name, device_type, device_address):
+        """
+        Insert a new device record
+        :param device_name: name/tag/label for the device (human readable)
+        :param device_type: device type (e.g. x10, tplink, hs100, etc.)
+        :param device_address: x10 house-device-code or ip address or ...
+        :return:
+        """
+        if not cls.is_valid_device_type(device_type):
+            return -1
+
+        conn = AtHomePowerlineServerDb.GetConnection()
+        c = AtHomePowerlineServerDb.GetCursor(conn)
+        # SQL insertion safe...
+        # Note that the current time is inserted as the update time. This is added to the
+        # row as a convenient way to know when the record was inserted. It isn't used for
+        # any other purpose.
+        c.execute("INSERT INTO Devices (name,type,address,updatetime) values (?,?,?,?)",
+                  (device_name, device_type, device_address, datetime.datetime.now()))
+        id = c.lastrowid
+        conn.commit()
+        conn.close()
+        return id
 
     @classmethod
     def get_device_by_id(cls, device_id):
@@ -55,3 +100,7 @@ class Devices:
         for key in row.keys():
             d[key] = row[key]
         return d
+
+    @classmethod
+    def is_valid_device_type(cls, device_type):
+        return device_type.lower() in cls.VALID_DEVICE_LIST.keys()

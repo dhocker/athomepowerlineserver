@@ -27,6 +27,7 @@ import commands.DeviceAllLightsOn
 import commands.GetTime
 import commands.SetTime
 import commands.GetSunData
+import commands.define_device
 
 logger = logging.getLogger("server")
 
@@ -52,7 +53,8 @@ class CommandHandler:
         "statusrequest": commands.StatusRequest.StatusRequest,
         "gettime": commands.GetTime.GetTime,
         "settime": commands.SetTime.SetTime,
-        "getsundata": commands.GetSunData.GetSunData
+        "getsundata": commands.GetSunData.GetSunData,
+        "definedevice": commands.define_device.DefineDevice
     }
 
     def GetHandler(self, command):
