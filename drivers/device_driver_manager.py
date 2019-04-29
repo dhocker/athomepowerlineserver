@@ -13,6 +13,7 @@ import logging
 from drivers.Dummy import Dummy
 from drivers.XTB232 import XTB232
 from drivers.tplink import TPLinkDriver
+from database.devices import Devices
 
 logger = logging.getLogger("server")
 
@@ -24,11 +25,11 @@ class DeviceDriverManager():
     driver_list = {}
 
     # All of the supported X10 devices and drivers
-    X10_DEVICE_LIST = ["x10", "x10-appliance", "x10-lamp"]
+    X10_DEVICE_LIST = []
     X10_DRIVER_LIST = ["xtb232", "xtb-232", "cm11a", "cm11"]
 
     # All of the supported TPLink/Kasa devices and drivers
-    TPLINK_DEVICE_LIST = ["tplink", "hs100", "hs103", "hs105", "hs107", "smartplug", "smartswitch", "smartbulb"]
+    TPLINK_DEVICE_LIST = []
     TPLINK_DRIVER_LIST = ["tplink"]
 
     # Driver list for creating a custom device name
@@ -45,6 +46,14 @@ class DeviceDriverManager():
         "tplink": None,
         "dummy": None
     }
+
+    # Build list of supported devices
+    # The point is to have one list of devices in the Devices model
+    for device, device_type in Devices.VALID_DEVICE_LIST.items():
+        if device_type == "x10":
+            X10_DEVICE_LIST.append(device)
+        elif device_type == "tplink":
+            TPLINK_DEVICE_LIST.append(device)
 
     @classmethod
     def init(cls, driver_list_config):
