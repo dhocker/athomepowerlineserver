@@ -95,6 +95,15 @@ def get_column_names(conn, table_name):
     return col_names
 
 
+def get_table_names(conn):
+    c = get_cursor(conn)
+    rset = c.execute("SELECT name from sqlite_master")
+    tables = []
+    for r in rset:
+        tables.append(r["name"])
+    return tables
+
+
 def update_schema():
     conn = get_connection()
     c = get_cursor(conn)
@@ -112,11 +121,15 @@ def update_schema():
         else:
             print("deviceid column already in Timers table")
 
-        # Create Devices table
-        conn.execute(
-            "CREATE TABLE Devices (id integer PRIMARY KEY, name text, type text, address text, updatetime timestamp)")
-        conn.commit()
-        print("Devices table created")
+        # Create Devices table if necessary
+        tables = get_table_names(conn)
+        if "Devices" not in tables:
+            conn.execute(
+                "CREATE TABLE Devices (id integer PRIMARY KEY, name text, type text, address text, updatetime timestamp)")
+            conn.commit()
+            print("Devices table created")
+        else:
+            print("Devices table already exists")
 
         # Update schema version record
         c = get_cursor(conn)
