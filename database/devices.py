@@ -53,12 +53,14 @@ class Devices:
         conn.close()
 
     @classmethod
-    def insert(cls, device_name, device_type, device_address):
+    def insert(cls, device_name, device_location, device_type, device_address, device_selected):
         """
         Insert a new device record
         :param device_name: name/tag/label for the device (human readable)
+        :param device_location: location of device in house
         :param device_type: device type (e.g. x10, tplink, hs100, etc.)
         :param device_address: x10 house-device-code or ip address or ...
+        :param device_selected: device is selected for "all selected" action
         :return:
         """
         if not cls.is_valid_device_type(device_type):
@@ -70,8 +72,8 @@ class Devices:
         # Note that the current time is inserted as the update time. This is added to the
         # row as a convenient way to know when the record was inserted. It isn't used for
         # any other purpose.
-        c.execute("INSERT INTO Devices (name,type,address,updatetime) values (?,?,?,?)",
-                  (device_name, device_type, device_address, datetime.datetime.now()))
+        c.execute("INSERT INTO Devices (name,location,type,address,selected,updatetime) values (?,?,?,?,?,?)",
+                  (device_name, device_location, device_type, device_address, device_selected, datetime.datetime.now()))
         id = c.lastrowid
         conn.commit()
         conn.close()
