@@ -18,6 +18,7 @@
 import sqlite3
 import datetime
 
+# This is the database being converted
 db = ""
 
 
@@ -32,6 +33,16 @@ def get_connection():
 
 def get_cursor(conn):
     return conn.cursor()
+
+
+def get_schema_version():
+    conn = get_connection()
+    c = get_cursor(conn)
+    rset = c.execute("SELECT * FROM SchemaVersion")
+    r = rset.fetchone()
+    version = r["Version"]
+    conn.close()
+    return version
 
 
 def delete_devices(conn):
@@ -104,44 +115,84 @@ def get_table_names(conn):
     return tables
 
 
-def update_schema():
+def update_schema_first():
+    """
+    Because SQLite3 does not support deleting columns,
+    the schema must be updated in two passes. The first
+    pass adds new columns and tables. The second pass will
+    remove columns.
+    :return: None
+    """
     conn = get_connection()
-    c = get_cursor(conn)
-    rset = c.execute("SELECT * FROM SchemaVersion")
-    r = rset.fetchone()
 
-    if r["Version"] != "4.0.0.0":
-        # If Timers does not have a deviceid column, add it
-        timer_cols = get_column_names(conn, "Timers")
-        if "deviceid" not in timer_cols:
-            print("Adding deviceid column to Timers table")
-            c = get_cursor(conn)
-            c.execute("ALTER TABLE Timers ADD COLUMN deviceid INTEGER")
-            conn.commit()
-        else:
-            print("deviceid column already in Timers table")
-
-        # Create Devices table if necessary
-        tables = get_table_names(conn)
-        if "Devices" not in tables:
-            conn.execute(
-                "CREATE TABLE Devices (id integer PRIMARY KEY, name text, type text, address text, updatetime timestamp)")
-            conn.commit()
-            print("Devices table created")
-        else:
-            print("Devices table already exists")
-
-        # Update schema version record
+    # If Timers does not have a deviceid column, add it
+    timer_cols = get_column_names(conn, "Timers")
+    if "deviceid" not in timer_cols:
+        print("Adding deviceid column to Timers table")
         c = get_cursor(conn)
-        c.execute("DELETE FROM SchemaVersion")
-        c.execute("INSERT INTO SchemaVersion values (?,?)", ("4.0.0.0", datetime.datetime.now(), ))
+        c.execute("ALTER TABLE Timers ADD COLUMN deviceid INTEGER")
         conn.commit()
-        print("SchemaVersion updated")
-
     else:
-        print("Schema is up to date")
+        print("deviceid column already in Timers table")
+
+    # Create Devices table if necessary
+    tables = get_table_names(conn)
+    if "Devices" not in tables:
+        conn.execute(
+            "CREATE TABLE Devices (id integer PRIMARY KEY, name text, type text, address text, updatetime timestamp)")
+        conn.commit()
+        print("Devices table created")
+    else:
+        print("Devices table already exists")
+
+    # Update schema version record
+    c = get_cursor(conn)
+    c.execute("DELETE FROM SchemaVersion")
+    c.execute("INSERT INTO SchemaVersion values (?,?)", ("4.0.0.0", datetime.datetime.now(), ))
+    conn.commit()
+    print("SchemaVersion updated")
 
     conn.close()
+
+
+def update_schema_last():
+    """
+    This is the second pass of the schema update. The housedevicecode column
+    of the Timers table is removed by creating a new table without that column.
+    The existing Timers records are copied to the new table, the old table
+    is dropped and the new table is renamed back to Timers. This is a lot of
+    work just to remove one column.
+    :return:
+    """
+    conn = get_connection()
+
+    timer_cols = get_column_names(conn, "Timers")
+    if "housedevicecode" in timer_cols:
+        print("Removing columns from Timers")
+        # Create a temp table with the version 4.0.0.0 schema for Timers
+        conn.execute("CREATE TABLE temptimers (name text PRIMARY KEY, deviceid integer, daymask text, \
+                    starttriggermethod text, starttime timestamp, startoffset integer, \
+                    startrandomize integer, startrandomizeamount integer, \
+                    stoptriggermethod text, stoptime timestamp, stopoffset integer, \
+                    stoprandomize integer, stoprandomizeamount integer, \
+                    startaction text, stopaction text, security integer, updatetime timestamp)")
+
+        # Copy records to temp table
+        conn.execute("INSERT INTO temptimers SELECT name, deviceid, daymask, \
+                    starttriggermethod, starttime, startoffset, \
+                    startrandomize, startrandomizeamount, \
+                    stoptriggermethod, stoptime, stopoffset, \
+                    stoprandomize, stoprandomizeamount, \
+                    startaction, stopaction, security, updatetime FROM Timers")
+
+        # Drop old table and rename temp table
+        conn.execute("DROP TABLE IF EXISTS Timers")
+        conn.execute("ALTER TABLE temptimers RENAME TO Timers")
+
+        conn.commit()
+
+    conn.close()
+
 
 def create_devices():
     print("Creating devices used by Timers")
@@ -201,17 +252,26 @@ def update_timers():
 
 
 def main():
-    update_schema()
-    create_devices()
-    update_timers()
+    schema_version = get_schema_version()
+    if schema_version != "4.0.0.0":
+        update_schema_first()
+        create_devices()
+        update_timers()
+        update_schema_last()
+    else:
+        print("Database already up to date")
+
 
 if __name__ == "__main__":
-    db = "x.sqlite3"
-    # TODO Create Devices table as needed
-    # TODO Add deviceid column to Timers as needed
+    import sys
+    testing = len(sys.argv) > 1 and sys.argv[1].lower() == "testing"
+    if testing:
+        # For testing
+        db = "x.sqlite3"
+    else:
+        # For production, get database path from configuration
+        from Configuration import Configuration
+        Configuration.LoadConfiguration()
+        db = Configuration.GetDatabaseFilePath("AtHomePowerlineServer.sqlite3")
     print("Converting %s to v2019" % db)
     main()
-    # conn = get_connection()
-    # col_names = get_column_names(conn, "Timers")
-    # for col in col_names:
-    #     print("Column name: %s" % col)

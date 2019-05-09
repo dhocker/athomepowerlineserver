@@ -405,6 +405,15 @@ def GetSunData(for_isodate):
 
     return result
 
+def define_device(device_name, device_type, device_address):
+    data = CreateRequest("DefineDevice")
+    data["args"]["device-name"] = device_name
+    data["args"]["device-type"] = device_type
+    data["args"]["device-address"] = device_address
+
+    result = SendCommand(data)
+    print(result)
+
 
 #######################################################################
 #
@@ -433,6 +442,10 @@ if __name__ == "__main__":
     # Try a status request command
     StatusRequest()
 
+    # Test define device
+    define_device("test-device-1", "x10", "L2")
+    define_device("test-device-2", "tplink", "192.168.1.181")
+
     # Test the time requests
     # SetTime()
     # GetTime()
@@ -442,8 +455,8 @@ if __name__ == "__main__":
 
     # LoadActions()
 
-    print("Device 4 on 50")
-    DeviceOn("4", 50)
+    # print("Device 5 on 50")
+    # DeviceOn("5", 50)
     #
     # print "sleep 10"
     # time.sleep(10)
@@ -454,11 +467,11 @@ if __name__ == "__main__":
     # print "A7 dim 50"
     # DeviceDim("A7", 50)
     #
-    print("sleep 5")
-    time.sleep(5)
+    # print("sleep 5")
+    # time.sleep(5)
     #
-    print("Device 4 off")
-    DeviceOff("4", 0)
+    # print("Device 5 off")
+    # DeviceOff("5", 0)
 
     # print "sleep 10"
     # time.sleep(10)
