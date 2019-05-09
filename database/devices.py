@@ -53,6 +53,13 @@ class Devices:
         conn.close()
 
     @classmethod
+    def get_all_devices(cls):
+        conn = AtHomePowerlineServerDb.GetConnection()
+        c = AtHomePowerlineServerDb.GetCursor(conn)
+        rset = c.execute("SELECT * from Devices")
+        return cls.rows_to_dict_list(rset)
+
+    @classmethod
     def insert(cls, device_name, device_location, device_type, device_address, device_selected):
         """
         Insert a new device record
@@ -90,6 +97,18 @@ class Devices:
         c = AtHomePowerlineServerDb.GetCursor(conn)
         rset = c.execute("SELECT * from Devices where id=?", str(device_id))
         return cls.row_to_dict(rset.fetchone())
+
+    @classmethod
+    def rows_to_dict_list(cls, rows):
+        """
+        Convert a list of SQLite rows to a list of dicts
+        :param rows: SQLite row set to be converted
+        :return:
+        """
+        dl = []
+        for row in rows.fetchall():
+            dl.append(cls.row_to_dict(row))
+        return dl
 
     @classmethod
     def row_to_dict(cls, row):

@@ -416,6 +416,13 @@ def define_device(device_name, device_location, device_type, device_address, dev
     result = SendCommand(data)
     print(result)
 
+def query_devices():
+    data = CreateRequest("QueryDevices")
+    result = SendCommand(data)
+    if result:
+        for dev in result["devices"]:
+            print(json.dumps(dev, indent=4))
+
 
 #######################################################################
 #
@@ -445,8 +452,11 @@ if __name__ == "__main__":
     StatusRequest()
 
     # Test define device
-    define_device("test-device-1", "Test location for device 1", "x10", "L2", False)
-    define_device("test-device-2", "Test location for DEVICE 2", "tplink", "192.168.1.181", True)
+    # define_device("test-device-1", "Test location for device 1", "x10", "L2", False)
+    # define_device("test-device-2", "Test location for DEVICE 2", "tplink", "192.168.1.181", True)
+
+    # Test query devices
+    query_devices()
 
     # Test the time requests
     # SetTime()
