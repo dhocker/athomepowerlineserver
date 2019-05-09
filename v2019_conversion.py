@@ -67,8 +67,8 @@ def insert_device(conn, device_name, device_type, device_address):
     # Note that the current time is inserted as the update time. This is added to the
     # row as a convenient way to know when the record was inserted. It isn't used for
     # any other purpose.
-    c.execute("INSERT INTO Devices (name,type,address,updatetime) values (?,?,?,?)",
-              (device_name, device_type, device_address, datetime.datetime.now()))
+    c.execute("INSERT INTO Devices (name,location,type,address, selected,updatetime) values (?,?,?,?,?,?)",
+              (device_name, "", device_type, device_address, False, datetime.datetime.now()))
     id = c.lastrowid
     conn.commit()
     return id
@@ -139,11 +139,23 @@ def update_schema_first():
     tables = get_table_names(conn)
     if "Devices" not in tables:
         conn.execute(
-            "CREATE TABLE Devices (id integer PRIMARY KEY, name text, type text, address text, updatetime timestamp)")
+            "CREATE TABLE Devices (id integer PRIMARY KEY, name text, location text, \
+            type text, address text, selected integer, updatetime timestamp)")
         conn.commit()
         print("Devices table created")
     else:
         print("Devices table already exists")
+        device_cols = get_column_names(conn, "Devices")
+        if "location" not in device_cols:
+            print("Adding location column to Devices table")
+            c = get_cursor(conn)
+            c.execute("ALTER TABLE Devices ADD COLUMN location TEXT")
+            conn.commit()
+        if "selected" not in device_cols:
+            print("Adding selected column to Devices table")
+            c = get_cursor(conn)
+            c.execute("ALTER TABLE Devices ADD COLUMN selected INTEGER")
+            conn.commit()
 
     # Update schema version record
     c = get_cursor(conn)
