@@ -43,18 +43,13 @@ class AtHomePowerlineServerDb:
             logger.info("Created database file: %s",
                         Configuration.Configuration.GetDatabaseFilePath(cls.DatabaseFileName))
 
-    #######################################################################
-    # Create a new database
-    # There is no way to migrate a database. When schema changes are
-    # required, it is expected that the old database will be deleted
-    # and a new database created. Then, the timers and actions can
-    # be reloaded. This choice was made just to keep things simple.
-    # In the future, if something more sophisticated is warranted,
-    # it can be implemented at that time.
     @classmethod
     def CreateDatabase(cls):
-        # This actually creates the database if it does not exist
-        # Note that the return value is a connection object
+        """
+        Create an empty database
+        :return: None
+        """
+        # This actually creates the database file if it does not exist
         conn = cls.GetConnection()
 
         # Create tables (Sqlite3 specific)
@@ -64,16 +59,11 @@ class AtHomePowerlineServerDb:
         conn.commit()
 
         # Timers
-        conn.execute("CREATE TABLE Timers (name text PRIMARY KEY, deviceid integer, daymask text, \
-      starttriggermethod text, starttime timestamp, startoffset integer, \
-      startrandomize integer, startrandomizeamount integer, \
-      stoptriggermethod text, stoptime timestamp, stopoffset integer, \
-      stoprandomize integer, stoprandomizeamount integer, \
-      startaction text, stopaction text, security integer, updatetime timestamp)")
-
-        # Actions
-        conn.execute(
-            "CREATE TABLE Actions (name text PRIMARY KEY, command text, dimamount integer, args text, updatetime timestamp)")
+        conn.execute("CREATE TABLE Timers (id integer PRIMARY KEY, \
+                     name text, deviceid integer, daymask text, \
+                     triggermethod text, time timestamp, offset integer, \
+                     randomize integer, randomizeamount integer, \
+                     command text, dimamount integer, args text, updatetime timestamp)")
 
         # Devices
         # Note that by definition Sqlite treats the id columns as the ROWID. See https://www.sqlite.org/autoinc.html

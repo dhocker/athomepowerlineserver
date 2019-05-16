@@ -81,6 +81,14 @@ def get_device_record_for_hdc(conn, hdc):
     return None
 
 
+def get_action_record(conn, name):
+    c = get_cursor(conn)
+    rset = c.execute("SELECT * from Actions where name=?", (name,))
+    if rset:
+        return rset.fetchone()
+    return None
+
+
 def get_all_timers(conn):
     c = get_cursor(conn)
     rset = c.execute("SELECT * from Timers")
@@ -115,27 +123,7 @@ def get_table_names(conn):
     return tables
 
 
-def update_schema_first():
-    """
-    Because SQLite3 does not support deleting columns,
-    the schema must be updated in two passes. The first
-    pass adds new columns and tables. The second pass will
-    remove columns.
-    :return: None
-    """
-    conn = get_connection()
-
-    # If Timers does not have a deviceid column, add it
-    timer_cols = get_column_names(conn, "Timers")
-    if "deviceid" not in timer_cols:
-        print("Adding deviceid column to Timers table")
-        c = get_cursor(conn)
-        c.execute("ALTER TABLE Timers ADD COLUMN deviceid INTEGER")
-        conn.commit()
-    else:
-        print("deviceid column already in Timers table")
-
-    # Create Devices table if necessary
+def update_devices_table(conn):
     tables = get_table_names(conn)
     if "Devices" not in tables:
         conn.execute(
@@ -157,6 +145,29 @@ def update_schema_first():
             c.execute("ALTER TABLE Devices ADD COLUMN selected INTEGER")
             conn.commit()
 
+
+def update_schema_first():
+    """
+    Because SQLite3 does not support deleting columns,
+    the schema must be updated in two passes. The first
+    pass adds new columns and tables. The second pass will
+    remove columns.
+    :return: None
+    """
+    conn = get_connection()
+
+    # Create temp table for split of Timers table
+
+    # Each record is a single timer/action pair
+    conn.execute("CREATE TABLE temptimers (id integer PRIMARY KEY, \
+                 name text, deviceid integer, daymask text, \
+                 triggermethod text, time timestamp, offset integer, \
+                 randomize integer, randomizeamount integer, \
+                 command text, dimamount integer, args text, updatetime timestamp)")
+
+    # Create Devices table if necessary
+    update_devices_table(conn)
+
     # Update schema version record
     c = get_cursor(conn)
     c.execute("DELETE FROM SchemaVersion")
@@ -169,39 +180,13 @@ def update_schema_first():
 
 def update_schema_last():
     """
-    This is the second pass of the schema update. The housedevicecode column
-    of the Timers table is removed by creating a new table without that column.
-    The existing Timers records are copied to the new table, the old table
-    is dropped and the new table is renamed back to Timers. This is a lot of
-    work just to remove one column.
+    This is the second pass of the schema update.
     :return:
     """
     conn = get_connection()
 
-    timer_cols = get_column_names(conn, "Timers")
-    if "housedevicecode" in timer_cols:
-        print("Removing columns from Timers")
-        # Create a temp table with the version 4.0.0.0 schema for Timers
-        conn.execute("CREATE TABLE temptimers (name text PRIMARY KEY, deviceid integer, daymask text, \
-                    starttriggermethod text, starttime timestamp, startoffset integer, \
-                    startrandomize integer, startrandomizeamount integer, \
-                    stoptriggermethod text, stoptime timestamp, stopoffset integer, \
-                    stoprandomize integer, stoprandomizeamount integer, \
-                    startaction text, stopaction text, security integer, updatetime timestamp)")
-
-        # Copy records to temp table
-        conn.execute("INSERT INTO temptimers SELECT name, deviceid, daymask, \
-                    starttriggermethod, starttime, startoffset, \
-                    startrandomize, startrandomizeamount, \
-                    stoptriggermethod, stoptime, stopoffset, \
-                    stoprandomize, stoprandomizeamount, \
-                    startaction, stopaction, security, updatetime FROM Timers")
-
-        # Drop old table and rename temp table
-        conn.execute("DROP TABLE IF EXISTS Timers")
-        conn.execute("ALTER TABLE temptimers RENAME TO Timers")
-
-        conn.commit()
+    # Delete Actions table. No longer needed.
+    conn.execute("DROP TABLE IF EXISTS Actions")
 
     conn.close()
 
@@ -235,30 +220,66 @@ def create_devices():
     conn.close()
 
 
+def insert_temptimers_record(conn, name, deviceid, daymask, triggermethod, time, offset,
+                             randomize, randomizeamount, command, dimamount, args):
+    c = get_cursor(conn)
+    c.execute("INSERT INTO temptimers (name, deviceid, daymask, triggermethod, time, offset, \
+              randomize, randomizeamount, command, dimamount, args, updatetime) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
+              (name, deviceid, daymask, triggermethod, time, offset,
+              randomize, randomizeamount, command, dimamount, args,
+              datetime.datetime.now()))
+    conn.commit()
+
+
+def split_timers_record(conn, rec):
+    name = rec["name"]
+    hdc = rec["housedevicecode"].upper()
+    print("Splitting Timers record %s" % name)
+
+    # Skip house codes
+    if len(hdc) == 1:
+        print("Skipping house code %s for timer" % hdc, name)
+        return
+
+    # Find the device record. Only one record should be returned.
+    r = get_device_record_for_hdc(conn, hdc)
+    if r and len(r) >= 1:
+        deviceid = r[0]["id"]
+    else:
+        print("No device record found for %s" % hdc)
+        return
+
+    # Get start and stop action records
+    start_rec = get_action_record(conn, rec["startaction"])
+    stop_rec = get_action_record(conn, rec["stopaction"])
+
+    # Insert temptimer records, one for start and one for stop
+    # After this, the Actions table is no longer needed
+    insert_temptimers_record(conn, "start " + name, deviceid, rec["daymask"], rec["starttriggermethod"],
+                             rec["starttime"], rec["startoffset"], rec["startrandomize"],
+                             rec["startrandomizeamount"], start_rec["command"],
+                             start_rec["dimamount"], start_rec["args"])
+    insert_temptimers_record(conn, "stop " + name, deviceid, rec["daymask"], rec["stoptriggermethod"],
+                             rec["stoptime"], rec["stopoffset"], rec["stoprandomize"],
+                             rec["stoprandomizeamount"], stop_rec["command"],
+                             stop_rec["dimamount"], stop_rec["args"])
+
+
 def update_timers():
-    print("Updating Timers to use assigned device IDs")
+    # Split each record of old Timers table into 2 records in the temp Timers table
+    print("Splitting Timers table into start and stop records using device IDs")
 
     conn = get_connection()
 
-    # Set device ID for each timer
+    # Split each existing timer record into 2 new temp timer records
     timers = get_all_timers(conn)
     for t in timers:
-        name = t["name"]
-        hdc = t["housedevicecode"].upper()
-        print(name)
+        split_timers_record(conn, t)
 
-        # Skip house codes
-        if len(hdc) == 1:
-            print("Skipping house code %s" % hdc)
-            continue
-
-        # Find the device record. ONly one record should be returned.
-        r = get_device_record_for_hdc(conn, hdc)
-        if r and len(r) >= 1:
-            print("Updating Timer record %s" % name)
-            update_timer(conn, name, r[0]["id"])
-        else:
-            print("No device record found for %s" % hdc)
+    # Delete existing Timers table and rename temptimers table
+    conn.execute("DROP TABLE IF EXISTS Timers")
+    conn.execute("ALTER TABLE temptimers RENAME TO Timers")
+    conn.commit()
 
     conn.close()
 
