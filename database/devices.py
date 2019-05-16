@@ -87,6 +87,36 @@ class Devices:
         return id
 
     @classmethod
+    def update(cls, device_id, device_name, device_location, device_type, device_address, device_selected):
+        """
+        Update an existing device record
+        :param device_id: ID of existing device
+        :param device_name: name/tag/label for the device (human readable)
+        :param device_location: location of device in house
+        :param device_type: device type (e.g. x10, tplink, hs100, etc.)
+        :param device_address: x10 house-device-code or ip address or ...
+        :param device_selected: device is selected for "all selected" action
+        :return:
+        """
+        if not cls.is_valid_device_type(device_type):
+            return False
+
+        conn = AtHomePowerlineServerDb.GetConnection()
+        c = AtHomePowerlineServerDb.GetCursor(conn)
+        # SQL update safe...
+        # Note that the current time is inserted as the update time. This is added to the
+        # row as a convenient way to know when the record was inserted. It isn't used for
+        # any other purpose.
+        c.execute("UPDATE Devices SET " \
+                    "name=?,location=?,type=?,address=?,selected=?,updatetime=? WHERE id=?",
+                    (device_name, device_location, device_type, device_address, device_selected,
+                    datetime.datetime.now(), device_id)
+                  )
+        conn.commit()
+        conn.close()
+        return True
+
+    @classmethod
     def get_device_by_id(cls, device_id):
         """
         Return the dvice record for a given device

@@ -29,6 +29,7 @@ import commands.SetTime
 import commands.GetSunData
 import commands.define_device
 import commands.query_devices
+import commands.update_device
 
 logger = logging.getLogger("server")
 
@@ -56,7 +57,8 @@ class CommandHandler:
         "settime": commands.SetTime.SetTime,
         "getsundata": commands.GetSunData.GetSunData,
         "definedevice": commands.define_device.DefineDevice,
-        "querydevices": commands.query_devices.QueryDevices
+        "querydevices": commands.query_devices.QueryDevices,
+        "updatedevice": commands.update_device.UpdateDevice
     }
 
     def GetHandler(self, command):

@@ -416,6 +416,18 @@ def define_device(device_name, device_location, device_type, device_address, dev
     result = SendCommand(data)
     print(result)
 
+def update_device(device_id, device_name, device_location, device_type, device_address, device_selected):
+    data = CreateRequest("UpdateDevice")
+    data["args"]["device-id"] = device_id
+    data["args"]["device-name"] = device_name
+    data["args"]["device-location"] = device_location
+    data["args"]["device-type"] = device_type
+    data["args"]["device-address"] = device_address
+    data["args"]["device-selected"] = device_selected
+
+    result = SendCommand(data)
+    print(result)
+
 def query_devices():
     data = CreateRequest("QueryDevices")
     result = SendCommand(data)
@@ -455,8 +467,12 @@ if __name__ == "__main__":
     # define_device("test-device-1", "Test location for device 1", "x10", "L2", False)
     # define_device("test-device-2", "Test location for DEVICE 2", "tplink", "192.168.1.181", True)
 
+    # Test update device (device IDs from test defines)
+    update_device(19, "test-device-1", "Test address changed 2", "x10", "L3", False)
+    update_device(20, "test-device-222", "Test device name changed", "tplink", "192.168.1.181", True)
+
     # Test query devices
-    query_devices()
+    # query_devices()
 
     # Test the time requests
     # SetTime()
