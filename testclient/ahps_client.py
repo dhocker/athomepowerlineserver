@@ -360,50 +360,79 @@ def create_program(name, device_id, day_mask, start_trigger_method, start_time,
     return timer_program
 
 
-#######################################################################
-def LoadActions():
-    data = CreateRequest("LoadActions")
+def create_timer_program(name, device_id, day_mask, trigger_method, trigger_time,
+                   offset, action, randomize, randomize_amount, dimamount):
+    timer_program = {
+        "name": name,
+        "device-id": str(device_id),
+        "day-mask": day_mask,
+        "trigger-method": trigger_method,
+        "time": trigger_time.strftime("%H:%M"),
+        "offset": str(offset),
+        "action": action,
+        "randomize": True if randomize else False,
+        "randomize-amount": str(randomize_amount),
+        "dimamount": str(dimamount)
+    }
+    return timer_program
 
-    # For the LoadActions command, the args dictionary contains a single
-    # "actions" key/value pair. The value is a simple sequence/list of dict's where each dict
-    # defines an action.
-    data["args"]["actions"] = []
 
-    action1 = {
-        "name": "action-1",
-        "command": "on",
-        "dim-amount": 0}
+def define_program(name, device_id, delta_time_min, action):
 
-    action2 = {
-        "name": "action-2",
-        "command": "off",
-        "dim-amount": 0}
+    data = CreateRequest("DefineProgram")
 
-    action3 = {
-        "name": "action-3",
-        "command": "on",
-        "dim-amount": 0}
+    # To facilitate testing, we make the start/stop times a short distance from now
+    now = datetime.datetime.now()
+    # x minutes from now
+    td2 = datetime.timedelta(0, 0, 0, 0, delta_time_min)
+    on_time = now + td2
 
-    action4 = {
-        "name": "action-4",
-        "command": "off",
-        "dim-amount": 0}
+    program = create_timer_program(name,
+                             device_id,
+                             "mtwtfss",
+                             "clock-time",
+                             on_time,
+                             0,
+                             action,
+                             0,
+                             0,
+                             0)
 
-    data["args"]["actions"].append(action1)
-    data["args"]["actions"].append(action2)
-    data["args"]["actions"].append(action3)
-    data["args"]["actions"].append(action4)
+    # For the DefineProgram command, the args dictionary contains
+    # contains the program values
+    data["args"] = program
 
     return SendCommand(data)
 
 
-def GetSunData(for_isodate):
-    data = CreateRequest("GetSunData")
-    data["args"]["date"] = for_isodate
+def update_program(id, name, device_id, delta_time_min, action):
 
-    result = SendCommand(data)
+    data = CreateRequest("UpdateProgram")
 
-    return result
+    # To facilitate testing, we make the start/stop times a short distance from now
+    now = datetime.datetime.now()
+    # x minutes from now
+    td2 = datetime.timedelta(0, 0, 0, 0, delta_time_min)
+    on_time = now + td2
+
+    program = create_timer_program(name,
+                             device_id,
+                             "mtwtfss",
+                             "clock-time",
+                             on_time,
+                             0,
+                             action,
+                             0,
+                             0,
+                             0)
+    program["id"] = id
+
+    # For the DefineProgram command, the args dictionary contains
+    # contains the program values
+    data["args"] = program
+
+    return SendCommand(data)
+
 
 def define_device(device_name, device_location, device_type, device_address, device_selected):
     data = CreateRequest("DefineDevice")
@@ -468,8 +497,8 @@ if __name__ == "__main__":
     # define_device("test-device-2", "Test location for DEVICE 2", "tplink", "192.168.1.181", True)
 
     # Test update device (device IDs from test defines)
-    update_device(19, "test-device-1", "Test address changed 2", "x10", "L3", False)
-    update_device(20, "test-device-222", "Test device name changed", "tplink", "192.168.1.181", True)
+    # update_device(19, "test-device-1", "Test address changed 2", "x10", "L3", False)
+    # update_device(20, "test-device-222", "Test device name changed", "tplink", "192.168.1.181", True)
 
     # Test query devices
     # query_devices()
@@ -479,7 +508,11 @@ if __name__ == "__main__":
     # GetTime()
 
     # Try some timer programs
-    # LoadTimers()
+    # on in 2 min, off in 3 min
+    # define_program("Test program B1 on", 1, 2, "on")
+    # define_program("Test program B1 off", 1, 3, "off")
+    update_program(37, "Test program A11 on", 18, 2, "on")
+    update_program(38, "Test program A11 off", 18, 3, "off")
 
     # LoadActions()
 

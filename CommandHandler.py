@@ -30,6 +30,8 @@ import commands.GetSunData
 import commands.define_device
 import commands.query_devices
 import commands.update_device
+import commands.define_program
+import commands.update_program
 
 logger = logging.getLogger("server")
 
@@ -42,8 +44,6 @@ class CommandHandler:
     UnhandledException = 405
 
     COMMAND_HANDLER_LIST = {
-        "loadtimers": commands.LoadTimers.LoadTimers,
-        "loadactions": commands.LoadActions.LoadActions,
         "deviceon": commands.DeviceOn.DeviceOn,
         "on": commands.DeviceOn.DeviceOn,
         "deviceoff": commands.DeviceOff.DeviceOff,
@@ -58,7 +58,9 @@ class CommandHandler:
         "getsundata": commands.GetSunData.GetSunData,
         "definedevice": commands.define_device.DefineDevice,
         "querydevices": commands.query_devices.QueryDevices,
-        "updatedevice": commands.update_device.UpdateDevice
+        "updatedevice": commands.update_device.UpdateDevice,
+        "defineprogram": commands.define_program.DefineProgram,
+        "updateprogram": commands.update_program.UpdateProgram
     }
 
     def GetHandler(self, command):

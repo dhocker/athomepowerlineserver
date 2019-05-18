@@ -20,7 +20,6 @@ import logging
 import traceback
 import timers.TimerStore
 import timers.TimerProgram
-import database.Actions as Actions
 from database.devices import Devices
 import commands.ActionFactory as ActionFactory
 
@@ -83,7 +82,7 @@ class TimerServiceThread(threading.Thread):
                 self.RunTimerProgram(tp)
         except Exception as ex:
             logger.error("Exception caught while running timer programs")
-            logger.error(ex.message)
+            logger.error(ex)
             logger.debug(traceback.format_exc())
         finally:
             timers.TimerStore.TimerStore.ReleaseTimerProgramList()
@@ -95,11 +94,6 @@ class TimerServiceThread(threading.Thread):
         # The date in a timer program's on/off time has no meaning.
         # We use the time part of the datetime to mean the time TODAY.
         now = datetime.datetime.now()
-        # On/Off times for TODAY
-        today_starttime = datetime.datetime(now.year, now.month, now.day, tp.StartTime.hour, tp.StartTime.minute,
-                                            tp.StartTime.second)
-        today_stoptime = datetime.datetime(now.year, now.month, now.day, tp.StopTime.hour, tp.StopTime.minute,
-                                           tp.StopTime.second)
 
         # TODO Answer question about persisting event status in database (and resetting status at well defined times)
         # This will only be interesting if we want to manage events that may have occurred BEFORE
@@ -110,43 +104,25 @@ class TimerServiceThread(threading.Thread):
             # we consider the event triggered if the current date/time in hours and minutes matches the event time
             logger.debug(str(tp))
 
-            # TODO We need a factory approach to determining if the start or stop event has occurred
-
-            # Start event check
-            # if (not tp.StartEventRun) and (tp.IsStartEventTriggered()):
-            if tp.IsStartEventTriggered():
-                # Start event triggered. Reset Stop event.
-                tp.StartEventRun = True
-                tp.StopEventRun = False
-                logger.info("RunProgramTimers start event triggered: %s %s", tp.Name, tp.StartAction)
+            # Event check
+            if tp.IsEventTriggered():
+                # Event triggered
+                tp.EventRun = True
+                logger.info("TimerProgram event triggered: %s %s", tp.Name, tp.Action)
                 # Fire the action
-                self.RunTimerAction(tp.StartAction, tp.device_id)
-
-            # Stop event check
-            # if (not tp.StopEventRun) and (tp.IsStopEventTriggered()):
-            if tp.IsStopEventTriggered():
-                # Stop event triggered. Reset Start event.
-                tp.StopEventRun = True
-                tp.StartEventRun = False
-                logger.info("RunProgramTimers stop event triggered: %s %s", tp.Name, tp.StopAction)
-                # Fire the action
-                self.RunTimerAction(tp.StopAction, tp.device_id)
+                self.RunTimerAction(tp)
         else:
             logger.debug("%s is not enabled for the current weekday", tp.Name)
 
     ########################################################################
     # Run an action
-    def RunTimerAction(self, name, device_id):
-        rset = Actions.Actions.GetByName(name)
-        if rset is not None:
-            device_rec = Devices.get_device_by_id(device_id)
-            device_type = device_rec["type"]
-            device_name = device_rec["name"]
-            device_address = device_rec["address"]
-            logger.info("Executing action: %s %s %s", rset["command"], device_type, device_address)
-            ActionFactory.RunAction(rset["command"], device_id, device_type, device_name, device_address, int(rset["dimamount"]))
-        else:
-            logger.error("No Actions table record was found for: %s", name)
+    def RunTimerAction(self, tp):
+        device_rec = Devices.get_device_by_id(tp.device_id)
+        device_type = device_rec["type"]
+        device_name = device_rec["name"]
+        device_address = device_rec["address"]
+        logger.info("Executing action: %s %s %s", tp.Action, device_type, device_address)
+        ActionFactory.RunAction(tp.Action, tp.device_id, device_type, device_name, device_address, int(tp.Dimamount))
 
     ########################################################################
     # Test a date to see if its weekday is enabled

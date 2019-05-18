@@ -19,6 +19,7 @@ logger = logging.getLogger("server")
 
 
 #######################################################################
+# TODO Remove
 # Command handler for loading timer initiators
 class LoadTimers(commands.ServerCommand.ServerCommand):
 

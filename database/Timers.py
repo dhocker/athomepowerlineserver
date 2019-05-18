@@ -43,27 +43,53 @@ class Timers:
         conn = AtHomePowerlineServerDb.AtHomePowerlineServerDb.GetConnection()
         c = AtHomePowerlineServerDb.AtHomePowerlineServerDb.GetCursor(conn)
         rset = c.execute(
-            "SELECT Timers.*, Devices.id, Devices.type, Devices.address from Timers join Devices on Timers.deviceid=Devices.id")
+            "SELECT Timers.*, Devices.type, Devices.address from Timers join Devices on Timers.deviceid=Devices.id")
         return rset
 
     #######################################################################
     # Insert a record into the Timers table.
     # This is not exactly optimized, but we don't expect to be saving that many timer programs.
     @classmethod
-    def Insert(cls, name, device_id, day_mask,
-               start_trigger_method, start_time, start_offset, start_randomize, start_randomize_amount,
-               stop_trigger_method, stop_time, stop_offset, stop_randomize, stop_randomize_amount,
-               start_action, stop_action, security):
+    def insert(cls, name, device_id, day_mask,
+               trigger_method, program_time, offset, randomize, randomize_amount,
+               action, dimamount, security):
         conn = AtHomePowerlineServerDb.AtHomePowerlineServerDb.GetConnection()
         c = AtHomePowerlineServerDb.AtHomePowerlineServerDb.GetCursor(conn)
         # SQL insertion safe...
         # Note that the current time is inserted as the update time. This is added to the
         # row as a convenient way to know when the timer was stored. It isn't used for
         # any other purpose.
-        c.execute("INSERT INTO Timers values (?, ?, ?, ?, ?, ?, ?, ? ,?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        c.execute("INSERT INTO Timers (name,deviceid,daymask,triggermethod,time,offset,randomize,randomizeamount,command,dimamount,args,updatetime) " \
+                  "values (?, ?, ?, ?, ?, ?, ?, ? ,?, ?, ?, ?)",
                   (name, device_id, day_mask,
-                   start_trigger_method, start_time, start_offset, start_randomize, start_randomize_amount,
-                   stop_trigger_method, stop_time, stop_offset, stop_randomize, stop_randomize_amount,
-                   start_action, stop_action, security, datetime.datetime.now()))
+                   trigger_method, program_time, offset, randomize, randomize_amount,
+                   action, security, dimamount, datetime.datetime.now()))
+        conn.commit()
+
+        # Get id of inserted record
+        id = c.lastrowid
+
+        conn.close()
+        return id
+
+    @classmethod
+    def update(cls, id, name, device_id, day_mask,
+               trigger_method, program_time, offset, randomize, randomize_amount,
+               action, dimamount, security):
+        conn = AtHomePowerlineServerDb.AtHomePowerlineServerDb.GetConnection()
+        c = AtHomePowerlineServerDb.AtHomePowerlineServerDb.GetCursor(conn)
+        c.execute("UPDATE Timers SET name=?,deviceid=?,daymask=?,triggermethod=?,time=?,offset=?,randomize=?,randomizeamount=?,command=?,dimamount=?,args=?,updatetime=? " \
+                  "WHERE id=?",
+                  (name, device_id, day_mask,
+                   trigger_method, program_time, offset, randomize, randomize_amount,
+                   action, security, dimamount, datetime.datetime.now(), id))
+        conn.commit()
+        conn.close()
+
+    @classmethod
+    def delete(cls, id):
+        conn = AtHomePowerlineServerDb.AtHomePowerlineServerDb.GetConnection()
+        c = AtHomePowerlineServerDb.AtHomePowerlineServerDb.GetCursor(conn)
+        c.execute("DELETE FROM Timers WHERE id=?", (id))
         conn.commit()
         conn.close()

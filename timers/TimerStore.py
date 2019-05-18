@@ -57,38 +57,30 @@ class TimerStore:
 
             rset = Timers.Timers.GetAll()
             for r in rset:
+                id = r["id"]
                 name = r["name"]
-                device_id = r["id"]
+                device_id = r["deviceid"]
                 day_mask = r["daymask"]
-                start_trigger_method = r["starttriggermethod"]
+                trigger_method = r["triggermethod"]
                 # We really want the on/off times to be in datetime format, not string format
-                start_time = datetime.datetime.strptime(r["starttime"], "%Y-%m-%d %H:%M:%S")
-                start_offset = int(r["startoffset"])
-                start_randomize = True if r["startrandomize"] else False
-                start_randomize_amount = r["startrandomizeamount"]
-                stop_trigger_method = r["stoptriggermethod"]
-                stop_time = datetime.datetime.strptime(r["stoptime"], "%Y-%m-%d %H:%M:%S")
-                stop_offset = int(r["stopoffset"])
-                stop_randomize = True if r["stoprandomize"] else False
-                stop_randomize_amount = r["stoprandomizeamount"]
-                start_action = r["startaction"]
-                stop_action = r["stopaction"]
-                security = r["security"]
+                program_time = datetime.datetime.strptime(r["time"], "%Y-%m-%d %H:%M:%S")
+                offset = int(r["offset"])
+                randomize = True if r["randomize"] else False
+                randomize_amount = r["randomizeamount"]
+                action = r["command"]
+                dimamount = r["dimamount"]
                 # Note that we don't do anything with the lastupdate column
 
                 # Some debugging/tracing output
-                logger.info("%s %d %s Start: {%s %s %s %s %s %s} Stop: {%s %s %s %s %s %s}",
+                logger.info("%s %d %s Program: {%s %s %s %s %s %s %d}",
                             name, device_id, day_mask,
-                            start_trigger_method, start_time, start_offset, start_randomize, start_randomize_amount,
-                            start_action,
-                            stop_trigger_method, stop_time, stop_offset, stop_randomize, stop_randomize_amount,
-                            stop_action)
+                            trigger_method, program_time, offset, randomize, randomize_amount,
+                            action, dimamount)
 
                 # Add each timer program to the current list of programs
-                cls.AppendTimer(name, device_id, day_mask,
-                                start_trigger_method, start_time, start_offset, start_randomize, start_randomize_amount,
-                                stop_trigger_method, stop_time, stop_offset, stop_randomize, stop_randomize_amount,
-                                start_action, stop_action, security)
+                cls.AppendTimer(id, name, device_id, day_mask,
+                                trigger_method, program_time, offset, randomize, randomize_amount,
+                                action, dimamount)
 
             rset.close()
         finally:
@@ -110,30 +102,66 @@ class TimerStore:
                 # print tp.name, tp.device_type, tp.device_address, tp.DayMask, tp.StartTime, tp.StopTime, tp.Security
                 # print "Saving timer program:", tp.name
                 # It may be necessary to format on/off time to be certain that the format is held across save/load
-                # TODO Replace house-device-code with device id
-                Timers.Timers.Insert(tp.Name, tp.device_id, tp.DayMask,
-                                     tp.StartTriggerMethod, tp.StartTime, tp.StartOffset, tp.StartRandomize,
-                                     tp.StartRandomizeAmount,
-                                     tp.StopTriggerMethod, tp.StopTime, tp.StopOffset, tp.StopRandomize,
-                                     tp.StopRandomizeAmount,
-                                     tp.StartAction, tp.StopAction, tp.Security)
+                # Replace house-device-code with device id
+                Timers.Timers.insert(tp.Name, tp.device_id, tp.DayMask,
+                                     tp.TriggerMethod, tp.Time, tp.Offset, tp.Randomize,
+                                     tp.RandomizeAmount,
+                                     tp.Action, tp.Dimamount, tp.Security)
         finally:
             cls.ReleaseTimerProgramList()
 
     #######################################################################
     # Append a timer program to the end of the current list
     @classmethod
-    def AppendTimer(cls, name, device_id, day_mask,
-                    start_trigger_method, start_time, start_offset, start_randomize, start_randomize_amount,
-                    stop_trigger_method, stop_time, stop_offset, stop_randomize, stop_randomize_amount,
-                    start_action, stop_action, security=False):
-        tp = TimerProgram.TimerProgram(name, int(device_id), day_mask,
-                                       start_trigger_method, start_time, start_offset, start_randomize,
-                                       start_randomize_amount,
-                                       stop_trigger_method, stop_time, stop_offset, stop_randomize,
-                                       stop_randomize_amount,
-                                       start_action, stop_action, security)
+    def AppendTimer(cls, id, name, device_id, day_mask,
+                    trigger_method, program_time, offset, randomize, randomize_amount,
+                    action, dimamount, security=False):
+        tp = TimerProgram.TimerProgram(id, name, int(device_id), day_mask,
+                                       trigger_method, program_time, offset, randomize,
+                                       randomize_amount,
+                                       action, dimamount, security)
         cls.TimerProgramList.append(tp)
+
+    @classmethod
+    def UpdateTimer(cls, id, name, device_id, day_mask,
+                    trigger_method, program_time, offset, randomize, randomize_amount,
+                    action, dimamount, security=False):
+        """
+        Update an existing timer program entry
+        :param id:
+        :param name:
+        :param device_id:
+        :param day_mask:
+        :param trigger_method:
+        :param program_time:
+        :param offset:
+        :param randomize:
+        :param randomize_amount:
+        :param action:
+        :param dimamount:
+        :param security:
+        :return:
+        """
+        timer_list = cls.AcquireTimerProgramList()
+
+        try:
+            # Remove the existing program
+            try:
+                for t in timer_list:
+                    if t.id == id:
+                        timer_list.remove(t)
+                        break
+            except:
+                pass
+
+            # Add the updated program as a new program
+            tp = TimerProgram.TimerProgram(id, name, int(device_id), day_mask,
+                                           trigger_method, program_time, offset, randomize,
+                                           randomize_amount,
+                                           action, dimamount, security)
+            cls.TimerProgramList.append(tp)
+        finally:
+            cls.ReleaseTimerProgramList()
 
     #######################################################################
     # Reset the current program list
@@ -158,8 +186,11 @@ class TimerStore:
     @classmethod
     def DumpTimerProgramList(cls):
         logger.info("Timer Program List Dump")
-        for tp in cls.TimerProgramList:
-            logger.info("%s %d %s %s %s %s %s %s %s %s %s %s %s %s %s %s", tp.Name, tp.device_id, tp.DayMask,
-                        tp.StartTriggerMethod, tp.StartTime, tp.StartOffset, tp.StartRandomize, tp.StartRandomizeAmount,
-                        tp.StopTriggerMethod, tp.StopTime, tp.StopOffset, tp.StopRandomize, tp.StopRandomizeAmount,
-                        tp.StartAction, tp.StopAction, tp.Security)
+        try:
+            for tp in cls.TimerProgramList:
+                logger.debug("%d %s %d %s %s %s %d %d %d %s %d %d", tp.id, tp.Name, tp.device_id, tp.DayMask,
+                            tp.TriggerMethod, tp.Time, tp.Offset, tp.Randomize, tp.RandomizeAmount,
+                            tp.Action, tp.Dimamount, tp.Security)
+        except Exception as ex:
+            pass
+

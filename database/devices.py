@@ -125,7 +125,7 @@ class Devices:
         """
         conn = AtHomePowerlineServerDb.GetConnection()
         c = AtHomePowerlineServerDb.GetCursor(conn)
-        rset = c.execute("SELECT * from Devices where id=?", str(device_id))
+        rset = c.execute("SELECT * from Devices where id=:id", {"id": device_id})
         return cls.row_to_dict(rset.fetchone())
 
     @classmethod

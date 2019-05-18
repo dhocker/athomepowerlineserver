@@ -18,6 +18,7 @@ logger = logging.getLogger("server")
 
 
 #######################################################################
+# TODO Remove
 # Command handler for loading actions used by timer programs
 class LoadActions(ServerCommand.ServerCommand):
 
