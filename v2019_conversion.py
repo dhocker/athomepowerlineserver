@@ -156,6 +156,9 @@ def update_schema_first():
     """
     conn = get_connection()
 
+    # Create Devices table if necessary
+    update_devices_table(conn)
+
     # Create temp table for split of Timers table
 
     # Each record is a single timer/action pair
@@ -163,10 +166,8 @@ def update_schema_first():
                  name text, deviceid integer, daymask text, \
                  triggermethod text, time timestamp, offset integer, \
                  randomize integer, randomizeamount integer, \
-                 command text, dimamount integer, args text, updatetime timestamp)")
-
-    # Create Devices table if necessary
-    update_devices_table(conn)
+                 command text, dimamount integer, args text, updatetime timestamp, \
+                 FOREIGN KEY(deviceid) REFERENCES Devices(id))")
 
     # Update schema version record
     c = get_cursor(conn)
