@@ -15,11 +15,12 @@
 #
 
 import database.AtHomePowerlineServerDb as AtHomePowerlineServerDb
+from .base_table import BaseTable
 import datetime
 
 
 #######################################################################
-class Timers:
+class Timers(BaseTable):
 
     #######################################################################
     def __init__(self):
@@ -35,8 +36,6 @@ class Timers:
         conn.commit()
         conn.close()
 
-        #######################################################################
-
     # Return the set of all records in the Timers table
     @classmethod
     def GetAll(cls):
@@ -45,6 +44,14 @@ class Timers:
         rset = c.execute(
             "SELECT Timers.*, Devices.type, Devices.address from Timers join Devices on Timers.deviceid=Devices.id")
         return rset
+
+    @classmethod
+    def get_all_device_programs(cls, deviceid):
+        conn = AtHomePowerlineServerDb.AtHomePowerlineServerDb.GetConnection()
+        c = AtHomePowerlineServerDb.AtHomePowerlineServerDb.GetCursor(conn)
+        rset = c.execute(
+            "SELECT * FROM Timers WHERE deviceid=:deviceid", {"deviceid": deviceid})
+        return cls.rows_to_dict_list(rset)
 
     #######################################################################
     # Insert a record into the Timers table.

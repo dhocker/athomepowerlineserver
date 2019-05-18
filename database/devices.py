@@ -1,5 +1,5 @@
 #
-# Timers table model
+# Devices table model
 # Copyright © 2019  Dave Hocker
 #
 # This program is free software: you can redistribute it and/or modify
@@ -10,13 +10,14 @@
 #
 
 from database.AtHomePowerlineServerDb import AtHomePowerlineServerDb
+from .base_table import BaseTable
 import datetime
 import logging
 
 logger = logging.getLogger("server")
 
 
-class Devices:
+class Devices(BaseTable):
     TPLINK = "tplink"
     X10 = "x10"
     # All valid device types and the device type class they belong to
@@ -127,30 +128,6 @@ class Devices:
         c = AtHomePowerlineServerDb.GetCursor(conn)
         rset = c.execute("SELECT * from Devices where id=:id", {"id": device_id})
         return cls.row_to_dict(rset.fetchone())
-
-    @classmethod
-    def rows_to_dict_list(cls, rows):
-        """
-        Convert a list of SQLite rows to a list of dicts
-        :param rows: SQLite row set to be converted
-        :return:
-        """
-        dl = []
-        for row in rows.fetchall():
-            dl.append(cls.row_to_dict(row))
-        return dl
-
-    @classmethod
-    def row_to_dict(cls, row):
-        """
-        Convert an SQLite row set to a dict
-        :param row: the row set to be converted
-        :return: a dict containing all of the columns in the row set
-        """
-        d = {}
-        for key in row.keys():
-            d[key] = row[key]
-        return d
 
     @classmethod
     def is_valid_device_type(cls, device_type):

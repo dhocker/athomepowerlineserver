@@ -464,6 +464,13 @@ def query_devices():
         for dev in result["devices"]:
             print(json.dumps(dev, indent=4))
 
+def query_device_programs(device_id):
+    data = CreateRequest("QueryDevicePrograms")
+    data["args"]["device-id"] = device_id
+
+    result = SendCommand(data)
+    print(json.dumps(result, indent=4))
+
 
 #######################################################################
 #
@@ -511,8 +518,8 @@ if __name__ == "__main__":
     # on in 2 min, off in 3 min
     # define_program("Test program B1 on", 1, 2, "on")
     # define_program("Test program B1 off", 1, 3, "off")
-    update_program(37, "Test program A11 on", 18, 2, "on")
-    update_program(38, "Test program A11 off", 18, 3, "off")
+    # update_program(37, "Test program A11 on", 18, 2, "on")
+    # update_program(38, "Test program A11 off", 18, 3, "off")
 
     # LoadActions()
 
@@ -544,3 +551,6 @@ if __name__ == "__main__":
 
     # print "All lights off"
     # DeviceAllLightsOff("A")
+
+    query_device_programs(1)
+    query_device_programs(99)
