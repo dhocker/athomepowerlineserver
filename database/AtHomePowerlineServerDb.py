@@ -63,7 +63,8 @@ class AtHomePowerlineServerDb:
                      name text, deviceid integer, daymask text, \
                      triggermethod text, time timestamp, offset integer, \
                      randomize integer, randomizeamount integer, \
-                     command text, dimamount integer, args text, updatetime timestamp)")
+                     command text, dimamount integer, args text, updatetime timestamp), \
+                     FOREIGN KEY(deviceid) REFERENCES(Devices)")
 
         # Devices
         # Note that by definition Sqlite treats the id columns as the ROWID. See https://www.sqlite.org/autoinc.html
