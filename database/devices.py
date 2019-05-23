@@ -61,6 +61,13 @@ class Devices(BaseTable):
         return cls.rows_to_dict_list(rset)
 
     @classmethod
+    def get_device(cls, device_id):
+        conn = AtHomePowerlineServerDb.GetConnection()
+        c = AtHomePowerlineServerDb.GetCursor(conn)
+        rset = c.execute("SELECT * from Devices WHERE id=:deviceid", {"deviceid": device_id})
+        return cls.row_to_dict(rset.fetchone())
+
+    @classmethod
     def insert(cls, device_name, device_location, device_type, device_address, device_selected):
         """
         Insert a new device record

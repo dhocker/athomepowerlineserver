@@ -18,7 +18,13 @@ class QueryDevices(ServerCommand.ServerCommand):
     Command handler for querying for all devices
     """
     def Execute(self, request):
-        result = Devices.get_all_devices()
+        args = request["args"]
+        if "device-id" in args.keys():
+            result = Devices.get_device(int(args["device-id"]))
+            key = "device"
+        else:
+            result = Devices.get_all_devices()
+            key = "devices"
 
         # Generate a successful response
         response = self.CreateResponse(request["request"])
@@ -26,7 +32,7 @@ class QueryDevices(ServerCommand.ServerCommand):
 
         if result:
             r['result-code'] = 0
-            r['devices'] = result
+            r[key] = result
             r['message'] = "Success"
         else:
             # Probably invalid device type
