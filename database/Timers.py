@@ -53,6 +53,14 @@ class Timers(BaseTable):
             "SELECT * FROM Timers WHERE deviceid=:deviceid", {"deviceid": deviceid})
         return cls.rows_to_dict_list(rset)
 
+    @classmethod
+    def get_device_program(cls, programid):
+        conn = AtHomePowerlineServerDb.AtHomePowerlineServerDb.GetConnection()
+        c = AtHomePowerlineServerDb.AtHomePowerlineServerDb.GetCursor(conn)
+        rset = c.execute(
+            "SELECT * FROM Timers WHERE id=:programid", {"programid": programid})
+        return cls.row_to_dict(rset.fetchone())
+
     #######################################################################
     # Insert a record into the Timers table.
     # This is not exactly optimized, but we don't expect to be saving that many timer programs.

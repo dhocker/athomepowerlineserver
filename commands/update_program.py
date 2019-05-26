@@ -34,14 +34,19 @@ class UpdateProgram(ServerCommand):
         """
 
         # Pull all of the timer program values out of the dict entry
-        id = request["args"]["id"]
+        id = int(request["args"]["id"])
         name = request["args"]["name"]
-        device_id = request["args"]["device-id"]
+        device_id = int(request["args"]["device-id"])
         day_mask = request["args"]["day-mask"]
         trigger_method = request["args"]["trigger-method"]
-        trigger_time = datetime.datetime.strptime(request["args"]["time"], "%H:%M")
+        if len(request["args"]["time"]) == 5:
+            trigger_time = datetime.datetime.strptime(request["args"]["time"], "%H:%M")
+        elif len(request["args"]["time"]) == 8:
+            trigger_time = datetime.datetime.strptime(request["args"]["time"], "%H:%M:%S")
+        else:
+            trigger_time = datetime.datetime.strptime(request["args"]["time"][-8:], "%H:%M:%S")
         offset = int(request["args"]["offset"])
-        action = request["args"]["action"]
+        action = request["args"]["command"]
         randomize = True if int(request["args"]["randomize"]) else False
         randomize_amount = int(request["args"]["randomize-amount"])
         dimamount = int(request["args"]["dimamount"])
@@ -64,7 +69,7 @@ class UpdateProgram(ServerCommand):
         timers.TimerStore.TimerStore.DumpTimerProgramList()
 
         # Generate a successful response
-        response = UpdateProgram.CreateResponse("DefineTimer")
+        response = UpdateProgram.CreateResponse("UpdateProgram")
         r = response["X10Response"]
 
         # Return the timer program ID

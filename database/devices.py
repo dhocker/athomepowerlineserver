@@ -125,6 +125,15 @@ class Devices(BaseTable):
         return True
 
     @classmethod
+    def delete_device(cls, device_id):
+        conn = AtHomePowerlineServerDb.GetConnection()
+        c = AtHomePowerlineServerDb.GetCursor(conn)
+        c.execute("DELETE FROM Devices WHERE id=:deviceid", {"deviceid": device_id})
+        conn.commit()
+        conn.close()
+        return True
+
+    @classmethod
     def get_device_by_id(cls, device_id):
         """
         Return the dvice record for a given device

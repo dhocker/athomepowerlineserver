@@ -33,6 +33,8 @@ import commands.update_device
 import commands.define_program
 import commands.update_program
 import commands.query_device_programs
+import commands.query_device_program
+import commands.delete_device
 
 logger = logging.getLogger("server")
 
@@ -60,9 +62,11 @@ class CommandHandler:
         "definedevice": commands.define_device.DefineDevice,
         "querydevices": commands.query_devices.QueryDevices,
         "updatedevice": commands.update_device.UpdateDevice,
+        "deletedevice": commands.delete_device.DeleteDevice,
         "defineprogram": commands.define_program.DefineProgram,
         "updateprogram": commands.update_program.UpdateProgram,
-        "querydeviceprograms": commands.query_device_programs.QueryDevicePrograms
+        "querydeviceprograms": commands.query_device_programs.QueryDevicePrograms,
+        "querydeviceprogram": commands.query_device_program.QueryDeviceProgram
     }
 
     def GetHandler(self, command):
