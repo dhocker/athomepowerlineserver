@@ -39,12 +39,7 @@ class UpdateProgram(ServerCommand):
         device_id = int(request["args"]["device-id"])
         day_mask = request["args"]["day-mask"]
         trigger_method = request["args"]["trigger-method"]
-        if len(request["args"]["time"]) == 5:
-            trigger_time = datetime.datetime.strptime(request["args"]["time"], "%H:%M")
-        elif len(request["args"]["time"]) == 8:
-            trigger_time = datetime.datetime.strptime(request["args"]["time"], "%H:%M:%S")
-        else:
-            trigger_time = datetime.datetime.strptime(request["args"]["time"][-8:], "%H:%M:%S")
+        trigger_time = self.parse_time_str(request["args"]["time"])
         offset = int(request["args"]["offset"])
         action = request["args"]["command"]
         randomize = True if int(request["args"]["randomize"]) else False

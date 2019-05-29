@@ -105,6 +105,6 @@ class Timers(BaseTable):
     def delete(cls, id):
         conn = AtHomePowerlineServerDb.AtHomePowerlineServerDb.GetConnection()
         c = AtHomePowerlineServerDb.AtHomePowerlineServerDb.GetCursor(conn)
-        c.execute("DELETE FROM Timers WHERE id=?", (id))
+        c.execute("DELETE FROM Timers WHERE id=:id", {"id": id})
         conn.commit()
         conn.close()

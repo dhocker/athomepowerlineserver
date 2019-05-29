@@ -64,7 +64,7 @@ class AtHomePowerlineServerDb:
                      triggermethod text, time timestamp, offset integer, \
                      randomize integer, randomizeamount integer, \
                      command text, dimamount integer, args text, updatetime timestamp, \
-                     FOREIGN KEY(deviceid) REFERENCES Devices(id))")
+                     FOREIGN KEY(deviceid) REFERENCES Devices(id) ON DELETE CASCADE)")
 
         # Devices
         # Note that by definition Sqlite treats the id columns as the ROWID. See https://www.sqlite.org/autoinc.html
@@ -84,6 +84,9 @@ class AtHomePowerlineServerDb:
         conn.row_factory = sqlite3.Row
         # The default string type is unicode. This changes it to UTF-8.
         conn.text_factory = str
+        # Enable foreign keys for this connections
+        conn.execute("PRAGMA foreign_keys = ON")
+        conn.commit()
         return conn
 
     #######################################################################

@@ -46,9 +46,9 @@ class DefineProgram(ServerCommand):
         device_id = request["args"]["device-id"]
         day_mask = request["args"]["day-mask"]
         trigger_method = request["args"]["trigger-method"]
-        trigger_time = datetime.datetime.strptime(request["args"]["time"], "%H:%M")
+        trigger_time = self.parse_time_str(request["args"]["time"])
         offset = int(request["args"]["offset"])
-        action = request["args"]["action"]
+        action = request["args"]["command"]
         randomize = True if int(request["args"]["randomize"]) else False
         randomize_amount = int(request["args"]["randomize-amount"])
         dimamount = int(request["args"]["dimamount"])

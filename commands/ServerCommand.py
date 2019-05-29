@@ -58,3 +58,13 @@ class ServerCommand:
     @classmethod
     def get_device_for_id(cls, device_id):
         return Devices.get_device_by_id(device_id)
+
+    @classmethod
+    def parse_time_str(cls, time_string):
+        if len(time_string) == 5:
+            t = datetime.datetime.strptime(time_string, "%H:%M")
+        elif len(time_string) == 8:
+            t = datetime.datetime.strptime(time_string, "%H:%M:%S")
+        else:
+            t = datetime.datetime.strptime(time_string[-8:], "%H:%M:%S")
+        return t

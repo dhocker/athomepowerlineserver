@@ -167,7 +167,7 @@ def update_schema_first():
                  triggermethod text, time timestamp, offset integer, \
                  randomize integer, randomizeamount integer, \
                  command text, dimamount integer, args text, updatetime timestamp, \
-                 FOREIGN KEY(deviceid) REFERENCES Devices(id))")
+                 FOREIGN KEY(deviceid) REFERENCES Devices(id) ON DELETE CASCADE)")
 
     # Update schema version record
     c = get_cursor(conn)
