@@ -36,6 +36,6 @@ class DeviceOn(ServerCommand.ServerCommand):
             r['message'] = "Success"
         else:
             r['error'] = driver.LastError
-            r['message'] = "Failure"
+            r['message'] = driver.LastError
 
         return response

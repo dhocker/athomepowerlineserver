@@ -44,8 +44,16 @@ class TPLinkDriver(BaseDriverInterface):
         """
         logger.debug("DeviceOn for: %s %s %s %s", device_type, device_name_tag, ip_address, dim_amount)
         dev = self._create_smart_device(device_type, ip_address)
-        dev.turn_on()
-        del dev
+        try:
+            self.ClearLastError()
+            dev.turn_on()
+        except Exception as ex:
+            logger.error(str(ex))
+            self.LastError = str(ex)
+            self.LastErrorCode = 1
+            return False
+        finally:
+            del dev
         return True
 
     def DeviceOff(self, device_type, device_name_tag, ip_address, dim_amount):
@@ -59,8 +67,16 @@ class TPLinkDriver(BaseDriverInterface):
         """
         logger.debug("DeviceOff for: %s %s %s %s", device_type, device_name_tag, ip_address, dim_amount)
         dev = self._create_smart_device(device_type, ip_address)
-        dev.turn_off()
-        del dev
+        try:
+            self.ClearLastError()
+            dev.turn_off()
+        except Exception as ex:
+            logger.error(str(ex))
+            self.LastError = str(ex)
+            self.LastErrorCode = 1
+            return False
+        finally:
+            del dev
         return True
 
     def DeviceDim(self, device_type, device_name_tag, ip_address, dim_amount):
