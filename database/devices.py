@@ -57,7 +57,8 @@ class Devices(BaseTable):
     def get_all_devices(cls):
         conn = AtHomePowerlineServerDb.GetConnection()
         c = AtHomePowerlineServerDb.GetCursor(conn)
-        rset = c.execute("SELECT * from Devices")
+        # The results are sorted based on the most probable use
+        rset = c.execute("SELECT * from Devices ORDER BY location, name")
         return cls.rows_to_dict_list(rset)
 
     @classmethod
