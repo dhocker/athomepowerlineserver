@@ -35,6 +35,7 @@ class Timers(BaseTable):
         c.execute("DELETE FROM Timers")
         conn.commit()
         conn.close()
+        return True
 
     # Return the set of all records in the Timers table
     @classmethod
@@ -100,6 +101,7 @@ class Timers(BaseTable):
                    action, security, dimamount, datetime.datetime.now(), id))
         conn.commit()
         conn.close()
+        return True
 
     @classmethod
     def delete(cls, id):
@@ -108,3 +110,4 @@ class Timers(BaseTable):
         c.execute("DELETE FROM Timers WHERE id=:id", {"id": id})
         conn.commit()
         conn.close()
+        return True
