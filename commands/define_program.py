@@ -71,7 +71,7 @@ class DefineProgram(ServerCommand):
         timers.TimerStore.TimerStore.DumpTimerProgramList()
 
         # Generate a successful response
-        response = DefineProgram.CreateResponse("DefineTimer")
+        response = DefineProgram.CreateResponse("DefineProgram")
         r = response["X10Response"]
 
         # Return the timer program ID
