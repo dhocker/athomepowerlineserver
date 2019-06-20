@@ -1,6 +1,6 @@
 #
-# AtHomePowerlineServer - networked server for CM11/CM11A/XTB-232 X10 controllers
-# Copyright (C) 2014  Dave Hocker (email: AtHomeX10@gmail.com)
+# AtHomePowerlineServer - networked server for X10 and WiFi devices
+# Copyright © 2019 Dave Hocker (email: AtHomeX10@gmail.com)
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -8,82 +8,247 @@
 #
 # See the LICENSE file for more details.
 #
-
-#
-# Command line tool for AtHomePowerlineServer
-#
-# ahps.py [-s hostname|hostaddress] [-p portnumber] [-d dimamount] command house/device-code
-#
-# Commands and operands
-#   applianceon house-code
-#   applianceoff house-code
-#   lampoff house-code
-#   deviceoff house-code
-#   lampon house-code dim-amount
+# API module for the AtHomeServer
 #
 
-import testclient.ahps_client
-import argparse
-import sys
+import socket
+import json
 
-#######################################################################
-#
-# Main
-#
-if __name__ == "__main__":
-    # Show license advertisement
-    sys.path.append("../")
-    import disclaimer.Disclaimer
 
-    disclaimer.Disclaimer.DisplayDisclaimer()
+class ServerRequest:
+    def __init__(self, host="localhost", port=9999, verbose=True):
+        """
+        Create an instance of a server request
+        :param host:
+        :param port:
+        :param verbose:
+        """
+        self.host = host
+        self.port = port
+        self.verbose = verbose
 
-    # Turn off verbose result reporting in the client API
-    testclient.ahps_client.Verbose = False
+    @classmethod
+    def _create_request(cls, command):
+        """
+        Create a template of a request
+        :return:
+        """
+        request = {}
+        request["request"] = command
+        # The args parameter is an dictionary.
+        request["args"] = {}
+        return request
 
-    # import pdb; pdb.set_trace()
+    def _connect_to_server(self):
+        """
+        Open a socket to the server
+        Note that a socket can only be used for one request.
+        The server seems to close the socket at when it is
+        finished handling the request.
+        :return:
+        """
+        # Create a socket (SOCK_STREAM means a TCP socket)
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-    # Create an argument parser for the optional and positional arguments
-    parser = argparse.ArgumentParser(description="ahps - AtHomePowerlineServer command line utility")
-    parser.add_argument("command", help="X10 command: applianceon, lampon, applianceoff, lampoff, deviceoff")
-    parser.add_argument("housedevicecode", help="House device code (e.g. A7)")
-    parser.add_argument("-s", "--server", help="Host name or host address")
-    parser.add_argument("-p", "--port", type=int, help="Port number")
-    parser.add_argument("-d", "--dimamount", type=int, default=0,
-                        help="For lamp module commands, the dim amount. Default=0")
-    args = parser.parse_args()
+        try:
+            # Connect to server and check status
+            sock.connect((self.host, self.port))
+            return sock
+        except Exception as ex:
+            print("Unable to connect to server:", self.host, self.port)
+            print(str(ex))
 
-    # Local default is the localhost
-    testclient.ahps_client.Host = "localhost"
-    if args.server is not None:
-        testclient.ahps_client.Host = args.server
-    if args.port is not None:
-        testclient.ahps_client.Port = args.port
+        return None
 
-    # Try a status request command
-    response = testclient.ahps_client.StatusRequest()
-    # Make sure we received a good response
-    rc = response["result-code"]
-    if rc != 0:
-        print("StatusRequest failed with result-code ", rc)
-        exit()
+    @classmethod
+    def _read_json(cls, sock):
+        """
+        Read a JSON payload from a socket
+        :return:
+        """
+        depth = 0
+        json_data = ""
 
-    # Command parsing
-    cmd = args.command.lower()
-    response = None
-    if cmd == "applianceon":
-        response = testclient.ahps_client.DeviceOn(args.housedevicecode, 0)
-    elif cmd == "lampon":
-        response = testclient.ahps_client.DeviceOn(args.housedevicecode, args.dimamount)
-    elif cmd == "applianceoff" or cmd == "deviceoff":
-        response = testclient.ahps_client.DeviceOff(args.housedevicecode, 0)
-    elif cmd == "lampoff":
-        response = testclient.ahps_client.DeviceOff(args.housedevicecode, args.dimamount)
-    else:
-        print("Unrecognized command: ", cmd)
-        parser.print_help()
+        while (True):
+            c = sock.recv(1).decode()
+            json_data += c
 
-    # Report results
-    if response is not None:
-        print("Result code: ", response["result-code"])
-    else:
-        print("Command did not return a response")
+            if (c == "{"):
+                depth += 1
+            if (c == "}"):
+                depth -= 1
+                if (depth == 0):
+                    return json_data
+
+    def _display_response(self, response):
+        """
+        Display a formatted response on the console
+        :return:
+        """
+        json_response = json.loads(response)
+        jr = json_response["X10Response"]
+        print("Response for request:", jr["request"])
+        if self.verbose:
+            print(json.dumps(json_response, indent=2))
+        else:
+            print("  result-code:", jr["result-code"])
+            print("  message:", jr["message"])
+
+    def _send_command(self, data):
+        """
+        Send a command to the server
+        :param data: A dict containing the request definition.
+        It will be serialized to a JSON payload.
+        :return: Returns the response as a dict.
+        """
+        # Convert the payload structure into json text.
+        # Effectively this serializes the payload.
+        json_data = json.JSONEncoder().encode(data).encode()
+
+        # Create a socket connection to the server
+        sock = self._connect_to_server()
+        if sock is None:
+            return None
+
+        # send status request to server
+        try:
+            print("Sending request:", data["request"])
+            if self.verbose:
+                print(json.dumps(data, indent=2))
+            sock.sendall(json_data)
+
+            # Receive data from the server and shut down
+            json_data = self._read_json(sock)
+
+            # print "Sent:     {}".format(data)
+            # print "Received: {}".format(json_data)
+            self._display_response(json_data)
+        except Exception as ex:
+            print(str(ex))
+            json_data = None
+        finally:
+            sock.close()
+
+        return json.loads(json_data)["X10Response"]
+
+    def status_request(self):
+        request = self._create_request("StatusRequest")
+        return self._send_command(request)
+
+    def open_request(self, request):
+        """
+        An open server request. The argument is a dict
+        containing the entire request. This is a "raw"
+        interface to the server.
+        :param request: request
+        :return:
+        """
+        result = self._send_command(request)
+        return result
+
+    def device_on(self, device_id, dimamount):
+        """
+
+        :param device_id:
+        :param dimamount:
+        :return:
+        """
+        data = self._create_request("On")
+        data["args"]["device-id"] = device_id
+        data["args"]["dim-amount"] = dimamount
+
+        return self._send_command(data)
+
+    def device_off(self, device_id, dimamount):
+        """
+
+        :param device_id:
+        :param dimamount:
+        :return:
+        """
+        data = self._create_request("Off")
+        data["args"]["device-id"] = device_id
+        data["args"]["dim-amount"] = dimamount
+
+        return self._send_command(data)
+
+    def device_dim(self, device_id, dimamount):
+        """
+
+        :param device_id:
+        :param dimamount:
+        :return:
+        """
+        data = self._create_request("Dim")
+        data["args"]["device-id"] = device_id
+        data["args"]["dim-amount"] = dimamount
+
+        return self._send_command(data)
+
+    def device_bright(self, device_id, brightamount):
+        """
+
+        :param device_id:
+        :param brightamount:
+        :return:
+        """
+        data = self._create_request("Bright")
+        data["args"]["device-id"] = device_id
+        data["args"]["bright-amount"] = brightamount
+
+        return self._send_command(data)
+
+    def define_program(self, program):
+        data = self._create_request("DefineProgram")
+        data["args"] = program
+
+        return self._send_command(data)
+
+    def update_program(self, program):
+        data = self._create_request("UpdateProgram")
+        data["args"] = program
+
+        return self._send_command(data)
+
+    def delete_program(self, program_id):
+        data = self._create_request("DeleteDeviceProgram")
+        data["args"]["program-id"] = program_id
+
+        return self._send_command(data)
+
+    def define_device(self, device):
+        data = self._create_request("DefineDevice")
+        data["args"] = device
+
+        return self._send_command(data)
+
+    def update_device(self, device):
+        data = self._create_request("UpdateDevice")
+        data["args"] = device
+
+        return self._send_command(data)
+
+    def delete_device(self, device_id):
+        data = self._create_request("DeleteDevice")
+        data["args"]["device-id"] = device_id
+
+        return self._send_command(data)
+
+    def query_device(self, device_id):
+        data = self._create_request("QueryDevices")
+        data["args"]["device-id"] = device_id
+        return self._send_command(data)
+
+    def query_devices(self):
+        data = self._create_request("QueryDevices")
+        return self._send_command(data)
+
+    def query_device_programs(self, device_id):
+        data = self._create_request("QueryDevicePrograms")
+        data["args"]["device-id"] = device_id
+        return self._send_command(data)
+
+    def query_device_program(self, program_id):
+        data = self._create_request("QueryDeviceProgram")
+        data["args"]["program-id"] = program_id
+        return self._send_command(data)

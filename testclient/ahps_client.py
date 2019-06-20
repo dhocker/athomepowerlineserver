@@ -1,6 +1,6 @@
 #
-# AtHomePowerlineServer - networked server for CM11/CM11A/XTB-232 X10 controllers
-# Copyright (C) 2014  Dave Hocker (email: AtHomeX10@gmail.com)
+# AtHomePowerlineServer - networked server for X10 and WiFi devices
+# Copyright © 2014, 2019  Dave Hocker (email: AtHomeX10@gmail.com)
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -10,547 +10,470 @@
 #
 
 #
-# Test client for AtHomePowerlineServer
+# Test client for AtHomePowerlineServer and ahps API module
 #
-# ahps_client.py [-s hostname|hostaddress] [-p portnumber]
+# python3 ahps_client.py [-s hostname|hostaddress] [-p portnumber] [-v | -q] request [arguments]
 #
 
-import socket
 import sys
 import json
-import datetime
-import time
 from optparse import OptionParser
-
-# Host and Port can be overriden by the -s and -p command line options
-# Host, Port = "localHost", 9999
-Host, Port = "localhost", 9999
-# Host, Port = "192.168.1.111", 9999
-Verbose = True
+sys.path.append("./")
+sys.path.append("../")
+from testclient.ahps import ServerRequest
 
 
-# ahps_client
-# Sends and receives JSON formatted payloads
-
-#######################################################################
-# Create an empty server request
-# This is the safe way to create an empty request.
-# The json module seems to be a bit finicky about the
-# format of strings that it converts.
-def CreateRequest(command):
-    request = {}
-    request["request"] = command
-    # The args parameter is an dictionary.
-    request["args"] = {}
-    return request
+# Default global settings
+host = "localhost"
+port = 9999
+verbose = True
 
 
-#######################################################################
-# Open a socket to the server 
-# Note that a socket can only be used for one request.
-# The server seems to close the socket at when it is
-# finished handling the request. 
-def ConnectToServer(Host):
-    # Create a socket (SOCK_STREAM means a TCP socket)
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+def _required_keys(dict_to_test, keys):
+    """
+    Test a dict for a list of required keys. Extra keys are ignored.
+    :param dict_to_test:
+    :param keys: list of keys that must be present
+    :return: True if all keys are present
+    """
+    for key in keys:
+        if key not in dict_to_test.keys():
+            raise KeyError("Required key missing: " + key)
+    return True
 
+
+def _open_request(request_args):
+    """
+    An open server request. The argument is a JSON file
+    containing the entire request. This is the "raw" interface.
+    :param request_args: request request_file.json
+    :return:
+    """
     try:
-        # Connect to server and check status
-        sock.connect((Host, Port))
-        return sock
+        fh = open(args[1], "r")
+        dev_json = json.load(fh)
+        fh.close()
     except Exception as ex:
-        print("Unable to connect to server:", Host, Port)
         print(str(ex))
-
-    return None
-
-
-#######################################################################
-# Read a JSON payload from a socket
-def ReadJson(sock):
-    depth = 0
-    json_data = ""
-
-    while (True):
-        c = sock.recv(1).decode()
-        json_data += c
-
-        if (c == "{"):
-            depth += 1
-        if (c == "}"):
-            depth -= 1
-            if (depth == 0):
-                return json_data
-
-
-#######################################################################
-# Display a formatted response on the console        
-def DisplayResponse(response):
-    if Verbose:
-        jr = json.loads(response)["X10Response"]
-
-        print("Response for request:", jr["request"])
-
-        # Loop through all of the entries in the response dict
-        for k, v in jr.items():
-            if k != "request":
-                print(" ", k, ":", v)
-        print()
-
-
-#######################################################################
-# Send a command to the server
-def SendCommand(data):
-    # Convert the payload structure into json text.
-    # Effectively this serializes the payload.
-    # print "raw json:", data
-    json_data = json.JSONEncoder().encode(data).encode()
-
-    # Create a socket connection to the server
-    sock = ConnectToServer(Host)
-    if sock is None:
         return None
 
-    # send status request to server
-    try:
-        print("Sending request:", json_data)
-        sock.sendall(json_data)
-
-        # Receive data from the server and shut down
-        json_data = ReadJson(sock)
-
-        # print "Sent:     {}".format(data)
-        # print "Received: {}".format(json_data)
-        DisplayResponse(json_data)
-    except Exception as ex:
-        print(str(ex))
-        json_data = None
-    finally:
-        sock.close()
-
-    return json.loads(json_data)["X10Response"]
+    request = ServerRequest(host=host, port=port, verbose=verbose)
+    result = request.open_request(dev_json)
+    return result
 
 
-#######################################################################
-# Test the Get Time command
-def GetTime():
-    #
-    data = CreateRequest("GetTime")
-
-    return SendCommand(data)
+def _device_on(request_args):
+    request = ServerRequest(host=host, port=port, verbose=verbose)
+    return request.device_on(request_args[1], request_args[2])
 
 
-#######################################################################
-# Test the Set Time command
-def SetTime():
-    #
-    data = CreateRequest("SetTime")
-
-    return SendCommand(data)
+def _device_off(request_args):
+    request = ServerRequest(host=host, port=port, verbose=verbose)
+    return request.device_off(request_args[1], request_args[2])
 
 
-#######################################################################
-# Test the Device On command        
-def DeviceOn(house_device_code, dim_amount):
-    #
-    data = CreateRequest("On")
-    data["args"]["device-id"] = house_device_code
-    data["args"]["dim-amount"] = dim_amount
-
-    return SendCommand(data)
+def _device_dim(request_args):
+    request = ServerRequest(host=host, port=port, verbose=verbose)
+    return request.device_dim(request_args[1], request_args[2])
 
 
-#######################################################################
-# Test the Device Off command        
-def DeviceOff(house_device_code, dim_amount):
-    #
-    data = CreateRequest("Off")
-    data["args"]["device-id"] = house_device_code
-    data["args"]["dim-amount"] = dim_amount
-
-    return SendCommand(data)
+def _device_bright(request_args):
+    request = ServerRequest(host=host, port=port, verbose=verbose)
+    return request.device_bright(request_args[1], request_args[2])
 
 
-#######################################################################
-# Test the Device Dim command
-def DeviceDim(house_device_code, dim_amount):
-    #
-    data = CreateRequest("Dim")
-    data["args"]["house-device-code"] = house_device_code
-    data["args"]["dim-amount"] = dim_amount
-
-    return SendCommand(data)
-
-
-#######################################################################
-# Test the Device Bright command
-def DeviceBright(house_device_code, bright_amount):
-    #
-    data = CreateRequest("Bright")
-    data["args"]["house-device-code"] = house_device_code
-    data["args"]["bright-amount"] = bright_amount
-
-    return SendCommand(data)
-
-
-#######################################################################
-# Test the Device All Units Off command
-def DeviceAllUnitsOff(house_code):
-    #
-    data = CreateRequest("AllUnitsOff")
-    data["args"]["house-code"] = house_code
-
-    return SendCommand(data)
-
-
-#######################################################################
-# Test the Device All Light Off command
-def DeviceAllLightsOff(house_code):
-    #
-    data = CreateRequest("AllLightsOff")
-    data["args"]["house-code"] = house_code
-
-    return SendCommand(data)
-
-
-#######################################################################
-# Test the status request command        
-def StatusRequest():
+def _status_request(request_args):
     # This DOES NOT work. Why?
     # data = "{ \"command\": \"StatusRequest\", \"args\": {\"a\": 1} }"
 
     # This DOES work. Why?
-    data = CreateRequest("StatusRequest")
-
-    return SendCommand(data)
-
-
-#######################################################################
-def LoadTimers():
-    # JSON formatted payload to be sent to the AtHomePowerlineServer
-    # data = \
-    # '{ \
-    # "command": "LoadTimers",  \
-    # "args": { \
-    # "house-device-code": "a1", \
-    # "start-time": "18:00", \
-    # "stop-time": "22:00", \
-    # "day-mask": "mtwtfss" \
-    # } \
-    # }'
-
-    data = CreateRequest("LoadTimers")
-
-    # For the LoadTimers command, the args dictionary contains a single
-    # "programs" key/value pair. The value is a simple sequence/list of dict's where each dict
-    # defines a timer initiator program.
-    data["args"]["programs"] = []
-
-    # To facilitate testing, we make the start and stop times a short distance from now
-    now = datetime.datetime.now()
-    # 2 minutes from now
-    td2 = datetime.timedelta(0, 0, 0, 0, 2)
-    # 4 minutes from now
-    td4 = datetime.timedelta(0, 0, 0, 0, 4)
-    on_time = now + td2
-    off_time = now + td4
-    on_time_str = on_time.strftime("%H:%M")
-    off_time_str = off_time.strftime("%H:%M")
-
-    """
-    name, device_id, day_mask, start_trigger_method, start_time,
-                     start_offset, stop_trigger_method, stop_time, stop_offset,
-                     start_action, stop_action, start_randomize, start_randomize_amount,
-                     stop_randomize, stop_randomize_amount
-    """
-
-    program = create_program("program-a1",
-                             1,
-                             "mtwtfss",
-                             "clock-time",
-                             on_time,
-                             0,
-                             "clock-time",
-                             off_time,
-                             0,
-                             "action-1",
-                             "action-2",
-                             0,
-                             0,
-                             0,
-                             0)
-
-    program2 = create_program("program-c16",
-                              2,
-                              "mtwtfss",
-                              "clock-time",
-                              on_time,
-                              0,
-                              "clock-time",
-                              off_time,
-                              0,
-                              "action-1",
-                              "action-2",
-                              0,
-                              0,
-                              0,
-                              0)
-
-    program3 = create_program("program-a3",
-                              3,
-                              "mtwtfss",
-                              "clock-time",
-                              on_time,
-                              0,
-                              "clock-time",
-                              off_time,
-                              0,
-                              "action-3",
-                              "action-4",
-                              0,
-                              0,
-                              0,
-                              0)
-
-    program4 = create_program("program-a4",
-                              3,
-                              "mtwtf--",
-                              "clock-time",
-                              on_time,
-                              0,
-                              "clock-time",
-                              off_time,
-                              0,
-                              "action-undefined",
-                              "action-undefined",
-                              0,
-                              0,
-                              0,
-                              0)
-
-    data["args"]["programs"].append(program)
-    data["args"]["programs"].append(program2)
-    data["args"]["programs"].append(program3)
-    data["args"]["programs"].append(program4)
-
-    return SendCommand(data)
+    request = ServerRequest(host=host, port=port, verbose=verbose)
+    return request.status_request()
 
 
-def create_program(name, device_id, day_mask, start_trigger_method, start_time,
-                   start_offset, stop_trigger_method, stop_time, stop_offset,
-                   start_action, stop_action, start_randomize, start_randomize_amount,
-                   stop_randomize, stop_randomize_amount):
+def _create_timer_program(program):
     timer_program = {
-        "name": name,
-        "device-id": str(device_id),
-        "day-mask": day_mask,
-        "start-trigger-method": start_trigger_method,
-        "start-time": start_time.strftime("%H:%M"),
-        "start-time-offset": str(start_offset),
-        "stop-trigger-method": stop_trigger_method,
-        "stop-time": stop_time.strftime("%H:%M"),
-        "stop-time-offset": str(stop_offset),
-        "start-action": start_action,
-        "stop-action": stop_action,
-        "start-randomize": True if start_randomize else False,
-        "start-randomize-amount": str(start_randomize_amount),
-        "stop-randomize": True if stop_randomize else False,
-        "stop-randomize-amount": str(stop_randomize_amount)
+        "name": program["name"],
+        "device-id": str(program["device-id"]),
+        "day-mask": program["day-mask"],
+        "trigger-method": program["trigger-method"],
+        "time": program["time"],
+        "offset": str(program["offset"]),
+        "command": program["command"],
+        "randomize": True if program["randomize"] else False,
+        "randomize-amount": str(program["randomize-amount"]),
+        "dimamount": str(program["dimamount"])
     }
     return timer_program
 
 
-def create_timer_program(name, device_id, day_mask, trigger_method, trigger_time,
-                   offset, action, randomize, randomize_amount, dimamount):
-    timer_program = {
-        "name": name,
-        "device-id": str(device_id),
-        "day-mask": day_mask,
-        "trigger-method": trigger_method,
-        "time": trigger_time.strftime("%H:%M"),
-        "offset": str(offset),
-        "action": action,
-        "randomize": True if randomize else False,
-        "randomize-amount": str(randomize_amount),
-        "dimamount": str(dimamount)
-    }
-    return timer_program
+def _define_program(request_args):
+    dd_required_keys = [
+        "name",
+        "device-id",
+        "day-mask",
+        "trigger-method",
+        "time",
+        "offset",
+        "command",
+        "randomize",
+        "randomize-amount",
+        "dimamount"
+    ]
+    try:
+        fh = open(args[1], "r")
+        dev_json = json.load(fh)
+        fh.close()
+        # Test for required keys
+        _required_keys(dev_json, dd_required_keys)
+    except Exception as ex:
+        print(str(ex))
+        return None
+
+    request = ServerRequest(host=host, port=port, verbose=verbose)
+    return request.define_program(_create_timer_program(dev_json))
 
 
-def define_program(name, device_id, delta_time_min, action):
+def _update_program(request_args):
+    dd_required_keys = [
+        "id",
+        "name",
+        "device-id",
+        "day-mask",
+        "trigger-method",
+        "time",
+        "offset",
+        "command",
+        "randomize",
+        "randomize-amount",
+        "dimamount"
+    ]
+    try:
+        fh = open(args[1], "r")
+        dev_json = json.load(fh)
+        fh.close()
+        # Test for required keys
+        _required_keys(dev_json, dd_required_keys)
+    except Exception as ex:
+        print(str(ex))
+        return None
 
-    data = CreateRequest("DefineProgram")
+    program = _create_timer_program(dev_json)
+    program["id"] = dev_json["id"]
 
-    # To facilitate testing, we make the start/stop times a short distance from now
-    now = datetime.datetime.now()
-    # x minutes from now
-    td2 = datetime.timedelta(0, 0, 0, 0, delta_time_min)
-    on_time = now + td2
-
-    program = create_timer_program(name,
-                             device_id,
-                             "mtwtfss",
-                             "clock-time",
-                             on_time,
-                             0,
-                             action,
-                             0,
-                             0,
-                             0)
-
-    # For the DefineProgram command, the args dictionary contains
-    # contains the program values
-    data["args"] = program
-
-    return SendCommand(data)
-
-
-def update_program(id, name, device_id, delta_time_min, action):
-
-    data = CreateRequest("UpdateProgram")
-
-    # To facilitate testing, we make the start/stop times a short distance from now
-    now = datetime.datetime.now()
-    # x minutes from now
-    td2 = datetime.timedelta(0, 0, 0, 0, delta_time_min)
-    on_time = now + td2
-
-    program = create_timer_program(name,
-                             device_id,
-                             "mtwtfss",
-                             "clock-time",
-                             on_time,
-                             0,
-                             action,
-                             0,
-                             0,
-                             0)
-    program["id"] = id
-
-    # For the DefineProgram command, the args dictionary contains
-    # contains the program values
-    data["args"] = program
-
-    return SendCommand(data)
+    request = ServerRequest(host=host, port=port, verbose=verbose)
+    return request.update_program(program)
 
 
-def define_device(device_name, device_location, device_type, device_address, device_selected):
-    data = CreateRequest("DefineDevice")
-    data["args"]["device-name"] = device_name
-    data["args"]["device-location"] = device_location
-    data["args"]["device-type"] = device_type
-    data["args"]["device-address"] = device_address
-    data["args"]["device-selected"] = device_selected
-
-    result = SendCommand(data)
-    print(result)
-
-def update_device(device_id, device_name, device_location, device_type, device_address, device_selected):
-    data = CreateRequest("UpdateDevice")
-    data["args"]["device-id"] = device_id
-    data["args"]["device-name"] = device_name
-    data["args"]["device-location"] = device_location
-    data["args"]["device-type"] = device_type
-    data["args"]["device-address"] = device_address
-    data["args"]["device-selected"] = device_selected
-
-    result = SendCommand(data)
-    print(result)
-
-def query_devices():
-    data = CreateRequest("QueryDevices")
-    result = SendCommand(data)
-    if result:
-        for dev in result["devices"]:
-            print(json.dumps(dev, indent=4))
-
-def query_device_programs(device_id):
-    data = CreateRequest("QueryDevicePrograms")
-    data["args"]["device-id"] = device_id
-
-    result = SendCommand(data)
-    print(json.dumps(result, indent=4))
+def _delete_program(request_args):
+    """
+    Delete a device program by program ID
+    :param request_args:
+    :return:
+    """
+    request = ServerRequest(host=host, port=port, verbose=verbose)
+    return request.delete_program(request_args[1])
 
 
-#######################################################################
-#
-# Main
-#
+def _define_device(request_args):
+    dd_required_keys = [
+        "device-name",
+        "device-location",
+        "device-type",
+        "device-address",
+        "device-selected"
+    ]
+    try:
+        fh = open(args[1], "r")
+        dev_json = json.load(fh)
+        fh.close()
+        # Test for required keys
+        _required_keys(dev_json, dd_required_keys)
+    except Exception as ex:
+        print(str(ex))
+        return None
+
+    device = {}
+    device["device-name"] = dev_json["device-name"]
+    device["device-location"] = dev_json["device-location"]
+    device["device-type"] = dev_json["device-type"]
+    device["device-address"] = dev_json["device-address"]
+    device["device-selected"] = dev_json["device-selected"]
+
+    request = ServerRequest(host=host, port=port, verbose=verbose)
+    return request.define_device(device)
+
+
+def _update_device(request_args):
+    dd_required_keys = [
+        "device-id",
+        "device-name",
+        "device-location",
+        "device-type",
+        "device-address",
+        "device-selected"
+    ]
+    try:
+        fh = open(args[1], "r")
+        dev_json = json.load(fh)
+        # Test for required keys
+        _required_keys(dev_json, dd_required_keys)
+        fh.close()
+    except Exception as ex:
+        print(str(ex))
+        return None
+
+    device = {}
+    device["device-id"] = dev_json["device-id"]
+    device["device-name"] = dev_json["device-name"]
+    device["device-location"] = dev_json["device-location"]
+    device["device-type"] = dev_json["device-type"]
+    device["device-address"] = dev_json["device-address"]
+    device["device-selected"] = dev_json["device-selected"]
+
+    request = ServerRequest(host=host, port=port, verbose=verbose)
+    return request.update_device(device)
+
+
+def _delete_device(request_args):
+    request = ServerRequest(host=host, port=port, verbose=verbose)
+    return request.delete_device(request_args[1])
+
+
+def _query_devices(request_args):
+    """
+    Query for all devices
+    :param request_args:
+    :return:
+    """
+    request = ServerRequest(host=host, port=port, verbose=verbose)
+    if len(request_args) == 2:
+        return request.query_device(request_args[1])
+    return request.query_devices()
+
+
+def _query_device_programs(request_args):
+    """
+    Query for all programs for a device ID
+    :param request_args:
+    :return:
+    """
+    request = ServerRequest(host=host, port=port, verbose=verbose)
+    return request.query_device_programs(request_args[1])
+
+
+def _query_device_program(request_args):
+    """
+    Query for a device progam by its program ID
+    :param request_args:
+    :return:
+    """
+    request = ServerRequest(host=host, port=port, verbose=verbose)
+    return request.query_device_program(request_args[1])
+
+
+def _request_help(request_args):
+    """
+    help request
+    :param request_args:
+    :return:
+    """
+    print("Help - Request List")
+    print("Legend")
+    print("  All request names are case insensitive")
+    print("  device-id is the unique identifier for a device")
+    print("  program-id is the unique identifier for a program")
+    print("  <filename.json> is a JSON formatted file")
+    print()
+
+    if request_args[1].lower() in ["*", "all"]:
+        for key in request_list.keys():
+            r = request_list[key]
+            print(key)
+            print("  Description:", r["description"])
+            print("  Syntax:", r["syntax"])
+    elif request_args[1].lower() in request_list.keys():
+        r = request_list[request_args[1]]
+        print(request_args[1])
+        print("  Description:", r["description"])
+        print("  Syntax:", r["syntax"])
+    else:
+        print(request_args[1], "is not a valid request")
+
+
+"""
+List of all supported requests
+
+handler: the function that handles the request
+argcount: the number of required request arguments including the request
+"""
+request_list = {
+    "help": {
+        "description": "Help for one or all requests",
+        "syntax": "help [requestname | all]",
+        "handler": _request_help,
+        "argcount": 2
+    },
+    "statusrequest": {
+        "description": "Returns the status of the server",
+        "syntax": "StatusRequest",
+        "handler": _status_request,
+        "argcount": 1
+    },
+    "request": {
+        "description": "A raw request in JSON format",
+        "syntax": "request <request_file.json>",
+        "handler": _open_request,
+        "argcount": 2
+    },
+    "on": {
+        "description": "Turn a device on",
+        "syntax": "on device-id",
+        "handler": _device_on,
+        "argcount": 3
+    },
+    "deviceon": {
+        "description": "Turn a device one",
+        "syntax": "deviceon device-id",
+        "handler": _device_on,
+        "argcount": 3
+    },
+    "off": {
+        "description": "Turn a device off",
+        "syntax": "off device-id",
+        "handler": _device_off,
+        "argcount": 3
+    },
+    "deviceoff": {
+        "description": "Turn a device off",
+        "syntax": "deviceoff device-id",
+        "handler": _device_off,
+        "argcount": 3
+    },
+    "definedevice": {
+        "description": "Define a new device using a JSON formatted input file",
+        "syntax": "definedevice <new_device.json>",
+        "handler": _define_device,
+        "argcount": 2
+    },
+    "updatedevice": {
+        "description": "Update a device definition using a JSON formatted input file",
+        "syntax": "updatedevice <update_device.json>",
+        "handler": _update_device,
+        "argcount": 2
+    },
+    "deletedevice": {
+        "description": "Delete a device by ID",
+        "syntax": "deletedevice device-id",
+        "handler": _delete_device,
+        "argcount": 2
+    },
+    "querydevices": {
+        "description": "List all devices with details",
+        "syntax": "querydevices",
+        "handler": _query_devices,
+        "argcount": 1
+    },
+    "querydevice": {
+        "description": "List a device by ID",
+        "syntax": "querydevice device-id",
+        "handler": _query_devices,
+        "argcount": 2
+    },
+    "querydeviceprograms": {
+        "description": "List all programs for a device ID",
+        "syntax": "querydeviceprograms device-id",
+        "handler": _query_device_programs,
+        "argcount": 2
+    },
+    "querydeviceprogram": {
+        "description": "List program details for a program ID",
+        "syntax": "querydeviceprogram program-id",
+        "handler": _query_device_program,
+        "argcount": 2
+    },
+    "queryprograms": {
+        "description": "List all programs for a device ID",
+        "syntax": "queryprograms device-id",
+        "handler": _query_device_programs,
+        "argcount": 2
+    },
+    "queryprogram": {
+        "description": "List program details for a program ID",
+        "syntax": "queryprogram program-id",
+        "handler": _query_device_program,
+        "argcount": 2
+    },
+    "defineprogram": {
+        "description": "Define a new program",
+        "syntax": "defineprogram <new_device.json>",
+        "handler": _define_program,
+        "argcount": 2
+    },
+    "updateprogram": {
+        "description": "Update a program",
+        "syntax": "updateprogram <update_device.json>",
+        "handler": _update_program,
+        "argcount": 2
+    },
+    "deletedeviceprogram": {
+        "description": "Delete a program by its program ID",
+        "syntax": "deletedeviceprogram program-id",
+        "handler": _delete_program,
+        "argcount": 2
+    },
+    "deleteprogram": {
+        "description": "Delete a program by its program ID",
+        "syntax": "deleteprogram program-id",
+        "handler": _delete_program,
+        "argcount": 2
+    },
+}
+
+
+def _get_request_handler(request_args):
+    request = request_args[0].lower()
+    if request in request_list.keys():
+        if len(request_args) == request_list[request]["argcount"]:
+            return request_list[request]
+        else:
+            print("Wrong number of request arguments")
+            print(request_args)
+            print("%d arguments required (including request), %d provided" % (request_list[request]["argcount"], len(request_args)))
+    else:
+        print("Unknown request:", args[0])
+
+    return None
+
+
+"""
+AtHomePowerlineServer Client
+
+python ahps_client.py [-s SERVER] [-p PORT] [-v | -q] request [request...argument(s)]
+
+request
+"""
 if __name__ == "__main__":
     # Show license advertisement
-    sys.path.append("../")
     import disclaimer.Disclaimer
 
     disclaimer.Disclaimer.DisplayDisclaimer()
 
     # import pdb; pdb.set_trace()
 
-    parser = OptionParser()
-    parser.add_option("-s")
-    parser.add_option("-p")
+    parser = OptionParser(usage="usage: %prog [options] request [arguments]")
+    parser.add_option("-s", "--server", help="Server name or address")
+    parser.add_option("-p", "--port", type="int", help="TCP port number for server")
+    parser.add_option("-v", "--verbose", action="store_true", dest="verbose", default=True, help="Verbose logging")
+    parser.add_option("-q", "--quiet", action="store_false", dest="verbose", help="Quiet/minimal logging")
     (options, args) = parser.parse_args()
-    # print options
 
-    if options.s is not None:
-        Host = options.s
-    if options.p is not None:
-        Port = int(options.p)
+    if options.server is not None:
+        host = options.server
+    if options.port is not None:
+        port = int(options.port)
+    verbose = options.verbose
 
-    # Try a status request command
-    StatusRequest()
-
-    # Test define device
-    # define_device("test-device-1", "Test location for device 1", "x10", "L2", False)
-    # define_device("test-device-2", "Test location for DEVICE 2", "tplink", "192.168.1.181", True)
-
-    # Test update device (device IDs from test defines)
-    # update_device(19, "test-device-1", "Test address changed 2", "x10", "L3", False)
-    # update_device(20, "test-device-222", "Test device name changed", "tplink", "192.168.1.181", True)
-
-    # Test query devices
-    # query_devices()
-
-    # Test the time requests
-    # SetTime()
-    # GetTime()
-
-    # Try some timer programs
-    # on in 2 min, off in 3 min
-    # define_program("Test program B1 on", 1, 2, "on")
-    # define_program("Test program B1 off", 1, 3, "off")
-    # update_program(37, "Test program A11 on", 18, 2, "on")
-    # update_program(38, "Test program A11 off", 18, 3, "off")
-
-    # LoadActions()
-
-    # print("Device 5 on 50")
-    # DeviceOn("5", 50)
-    #
-    # print "sleep 10"
-    # time.sleep(10)
-    #
-    # print("A7 bright 50")
-    # DeviceBright("a7", 50)
-    #
-    # print "A7 dim 50"
-    # DeviceDim("A7", 50)
-    #
-    # print("sleep 5")
-    # time.sleep(5)
-    #
-    # print("Device 5 off")
-    # DeviceOff("5", 0)
-
-    # print "sleep 10"
-    # time.sleep(10)
-
-    # print("All units off A")
-    # DeviceAllUnitsOff("A")
-    # print "All units off P"
-    # DeviceAllUnitsOff("P")
-
-    # print "All lights off"
-    # DeviceAllLightsOff("A")
-
-    query_device_programs(1)
-    query_device_programs(99)
+    handler = _get_request_handler(args)
+    if handler:
+        handler["handler"](args)
