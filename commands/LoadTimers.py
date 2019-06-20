@@ -78,11 +78,10 @@ class LoadTimers(commands.ServerCommand.ServerCommand):
         timers.TimerStore.TimerStore.SaveTimerProgramList()
 
         # Generate a successful response
-        response = LoadTimers.CreateResponse("LoadTimers")
-        r = response["X10Response"]
+        r = LoadTimers.CreateResponse("LoadTimers")
 
         r['result-code'] = 0
         # r['error'] = "Command not implemented"
         r['message'] = "Success"
 
-        return response
+        return r

@@ -85,11 +85,10 @@ class ServerRequest:
         Display a formatted response on the console
         :return:
         """
-        json_response = json.loads(response)
-        jr = json_response["X10Response"]
+        jr = json.loads(response)
         print("Response for request:", jr["request"])
         if self.verbose:
-            print(json.dumps(json_response, indent=2))
+            print(json.dumps(jr, indent=2))
         else:
             print("  result-code:", jr["result-code"])
             print("  message:", jr["message"])
@@ -129,7 +128,7 @@ class ServerRequest:
         finally:
             sock.close()
 
-        return json.loads(json_data)["X10Response"]
+        return json.loads(json_data)
 
     def status_request(self):
         request = self._create_request("StatusRequest")

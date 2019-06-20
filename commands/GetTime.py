@@ -28,8 +28,7 @@ class GetTime(ServerCommand.ServerCommand):
     # Execute the GetTime command.
     def Execute(self, request):
         # Generate a successful response
-        response = GetTime.CreateResponse(request["request"])
-        r = response["X10Response"]
+        r = GetTime.CreateResponse(request["request"])
 
         # Success
         r['result-code'] = 0
@@ -37,4 +36,4 @@ class GetTime(ServerCommand.ServerCommand):
         # Since the standard response already has a date-time value,
         # we don't have to do anything else
 
-        return response
+        return r

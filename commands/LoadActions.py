@@ -31,8 +31,7 @@ class LoadActions(ServerCommand.ServerCommand):
         database.Actions.Actions.DeleteAll()
 
         # Generate a starting response
-        response = LoadActions.CreateResponse("LoadAction")
-        r = response["X10Response"]
+        r = LoadActions.CreateResponse("LoadAction")
 
         for action in request["args"]["actions"]:
             # Pull all of the timer program values out of the dict entry
@@ -48,7 +47,7 @@ class LoadActions(ServerCommand.ServerCommand):
                 r['result-code'] = 1
                 r['error'] = "Actions insert failed. Is the name unique?"
                 r['message'] = "Failure"
-                return response
+                return r
 
         # Debugging...
         database.Actions.Actions.DumpActions()
@@ -58,4 +57,4 @@ class LoadActions(ServerCommand.ServerCommand):
         # r['error'] = "Command not implemented"
         r['message'] = "Success"
 
-        return response
+        return r

@@ -22,8 +22,7 @@ class DeleteDeviceProgram(ServerCommand.ServerCommand):
         result = Timers.delete(int(args["program-id"]))
 
         # Generate a successful response
-        response = self.CreateResponse(request["request"])
-        r = response["X10Response"]
+        r = self.CreateResponse(request["request"])
 
         if result:
             r['result-code'] = 0
@@ -36,4 +35,4 @@ class DeleteDeviceProgram(ServerCommand.ServerCommand):
             r['error'] = 1
             r['message'] = "Failure"
 
-        return response
+        return r

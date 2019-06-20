@@ -30,8 +30,7 @@ class DefineDevice(ServerCommand.ServerCommand):
         result = Devices.insert(device_name, device_location, device_type, device_address, device_selected)
 
         # Generate a successful response
-        response = self.CreateResponse(request["request"])
-        r = response["X10Response"]
+        r = self.CreateResponse(request["request"])
 
         if result >= 0:
             r['result-code'] = 0
@@ -43,4 +42,4 @@ class DefineDevice(ServerCommand.ServerCommand):
             r['error'] = 1
             r['message'] = "Failure"
 
-        return response
+        return r

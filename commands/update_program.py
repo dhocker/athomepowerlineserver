@@ -64,11 +64,10 @@ class UpdateProgram(ServerCommand):
         timers.TimerStore.TimerStore.DumpTimerProgramList()
 
         # Generate a successful response
-        response = UpdateProgram.CreateResponse("UpdateProgram")
-        r = response["X10Response"]
+        r = UpdateProgram.CreateResponse("UpdateProgram")
 
         # Return the timer program ID
         r['result-code'] = 0
         r['message'] = "Success"
 
-        return response
+        return r

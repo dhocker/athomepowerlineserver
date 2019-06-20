@@ -29,8 +29,7 @@ class DeviceAllUnitsOff(ServerCommand.ServerCommand):
         result = drivers.X10ControllerAdapter.X10ControllerAdapter.DeviceAllUnitsOff(request["args"]["house-code"])
 
         # Generate a successful response
-        response = DeviceAllUnitsOff.CreateResponse(request["request"])
-        r = response["X10Response"]
+        r = DeviceAllUnitsOff.CreateResponse(request["request"])
 
         r['result-code'] = drivers.X10ControllerAdapter.X10ControllerAdapter.GetLastErrorCode()
         if result:
@@ -40,4 +39,4 @@ class DeviceAllUnitsOff(ServerCommand.ServerCommand):
             r['error'] = drivers.X10ControllerAdapter.X10ControllerAdapter.GetLastError()
             r['message'] = "Failure"
 
-        return response
+        return r

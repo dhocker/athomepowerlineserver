@@ -94,7 +94,7 @@ class CommandHandler:
         handler = self.GetHandler(request["request"])
         if handler is not None:
             response = handler.Execute(request)
-            response['X10Response']['call-sequence'] = CommandHandler.call_sequence
+            response['call-sequence'] = CommandHandler.call_sequence
         else:
             logger.error("No handler for command: %s", request["request"])
             response = CommandHandler.CreateErrorResponse(request["request"], CommandHandler.NotImplemented,
@@ -106,10 +106,9 @@ class CommandHandler:
 
     @classmethod
     def CreateErrorResponse(cls, request_command, result_code, error_msg, extra_data):
-        response = commands.ServerCommand.ServerCommand.CreateResponse(request_command)
-        r = response['X10Response']
+        r = commands.ServerCommand.ServerCommand.CreateResponse(request_command)
         r['result-code'] = result_code
         r['error'] = error_msg
         r['call-sequence'] = cls.call_sequence
         r['data'] = extra_data
-        return response
+        return r

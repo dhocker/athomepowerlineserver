@@ -20,9 +20,8 @@ class StatusRequest(ServerCommand.ServerCommand):
   # You might think we have to call the controller to get its
   # status, but it is not clear that is necessary.
   def Execute(self, request):
-      response = StatusRequest.CreateResponse("StatusRequest")
-      r = response["X10Response"]
-      
+      r = StatusRequest.CreateResponse("StatusRequest")
+
       tod = datetime.datetime.now()
       
       r['result-code'] = 0
@@ -32,4 +31,4 @@ class StatusRequest(ServerCommand.ServerCommand):
       r['firmware-revision'] = '0.0.0.0'
       r['message'] = "Success"
 
-      return response
+      return r

@@ -26,8 +26,7 @@ class GetSunData(ServerCommand.ServerCommand):
     # Execute the GetTime command.
     def Execute(self, request):
         # Generate a response
-        response = GetSunData.CreateResponse("GetSunData")
-        r = response["X10Response"]
+        r = GetSunData.CreateResponse("GetSunData")
         r['data'] = {}
 
         # Date should be in ISO format: YYYY-MM-DD
@@ -47,4 +46,4 @@ class GetSunData(ServerCommand.ServerCommand):
         r['result-code'] = 0
         r['message'] = "Success"
 
-        return response
+        return r

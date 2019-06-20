@@ -27,11 +27,10 @@ class SetTime(ServerCommand.ServerCommand):
     # Execute the GetTime command.
     def Execute(self, request):
         # Generate a successful response
-        response = SetTime.CreateResponse(request["request"])
-        r = response["X10Response"]
+        r = SetTime.CreateResponse(request["request"])
 
         # Success
         r['result-code'] = 0
         r['message'] = "Success"
 
-        return response
+        return r

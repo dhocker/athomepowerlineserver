@@ -32,8 +32,7 @@ class UpdateDevice(ServerCommand.ServerCommand):
                                 device_address, device_selected)
 
         # Generate a successful response
-        response = self.CreateResponse(request["request"])
-        r = response["X10Response"]
+        r = self.CreateResponse(request["request"])
 
         if result:
             r['result-code'] = 0
@@ -45,4 +44,4 @@ class UpdateDevice(ServerCommand.ServerCommand):
             r['error'] = 1
             r['message'] = "Failure"
 
-        return response
+        return r

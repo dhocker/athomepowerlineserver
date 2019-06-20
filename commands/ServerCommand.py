@@ -24,25 +24,23 @@ from drivers.device_driver_manager import DeviceDriverManager
 class ServerCommand:
 
     def Execute(self, request):
-        response = self.CreateResponse()
-        r = response["X10Response"]
+        r = self.CreateResponse()
         r['result-code'] = 404
         r['error'] = "Command not recognized"
         r['date-time'] = str(datetime.datetime.now())
         r['message'] = "none"
 
-        return response
+        return r
 
     # Create an empty response instance
     @classmethod
     def CreateResponse(cls, command):
-        response = {"X10Response": {}}
-        r = response["X10Response"]
+        r = {}
         r['request'] = command
         r['date-time'] = str(datetime.datetime.now())
         r['server'] = "{0}/AtHomePowerlineServer".format(socket.gethostname())
         r['server-version'] = Version.GetVersion()
-        return response
+        return r
 
     @classmethod
     def get_driver_for_id(cls, device_id):

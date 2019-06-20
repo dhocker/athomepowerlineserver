@@ -32,8 +32,7 @@ class DeviceOff(ServerCommand.ServerCommand):
         result = driver.DeviceOff(device["type"], device["name"], device["address"], dim_amount)
 
         # Generate a successful response
-        response = self.CreateResponse(request["request"])
-        r = response["X10Response"]
+        r = self.CreateResponse(request["request"])
 
         r['result-code'] = driver.LastErrorCode
         if result:
@@ -43,4 +42,4 @@ class DeviceOff(ServerCommand.ServerCommand):
             r['error'] = driver.LastError
             r['message'] = driver.LastError
 
-        return response
+        return r

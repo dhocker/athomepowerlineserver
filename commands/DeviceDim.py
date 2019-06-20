@@ -36,8 +36,7 @@ class DeviceDim(ServerCommand.ServerCommand):
         result = drivers.X10ControllerAdapter.X10ControllerAdapter.DeviceDim(house_device_code, dim_amount)
 
         # Generate a successful response
-        response = DeviceDim.CreateResponse(request["request"])
-        r = response["X10Response"]
+        r = DeviceDim.CreateResponse(request["request"])
 
         r['result-code'] = drivers.X10ControllerAdapter.X10ControllerAdapter.GetLastErrorCode()
         if result:
@@ -47,4 +46,4 @@ class DeviceDim(ServerCommand.ServerCommand):
             r['error'] = drivers.X10ControllerAdapter.X10ControllerAdapter.GetLastError()
             r['message'] = "Failure"
 
-        return response
+        return r

@@ -22,8 +22,7 @@ class DeleteDevice(ServerCommand.ServerCommand):
         result = Devices.delete_device(int(args["device-id"]))
 
         # Generate a successful response
-        response = self.CreateResponse(request["request"])
-        r = response["X10Response"]
+        r = self.CreateResponse(request["request"])
 
         if result:
             r['result-code'] = 0
@@ -35,4 +34,4 @@ class DeleteDevice(ServerCommand.ServerCommand):
             r['error'] = 1
             r['message'] = "Failure"
 
-        return response
+        return r

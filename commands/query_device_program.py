@@ -22,8 +22,7 @@ class QueryDeviceProgram(ServerCommand.ServerCommand):
         result = Timers.get_device_program(programid)
 
         # Generate a successful response
-        response = self.CreateResponse(request["request"])
-        r = response["X10Response"]
+        r = self.CreateResponse(request["request"])
 
         if result:
             r['result-code'] = 0
@@ -35,4 +34,4 @@ class QueryDeviceProgram(ServerCommand.ServerCommand):
             r['programs'] = []
             r['message'] = "No records found"
 
-        return response
+        return r

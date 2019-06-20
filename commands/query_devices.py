@@ -27,8 +27,7 @@ class QueryDevices(ServerCommand.ServerCommand):
             key = "devices"
 
         # Generate a successful response
-        response = self.CreateResponse(request["request"])
-        r = response["X10Response"]
+        r = self.CreateResponse(request["request"])
 
         if result:
             r['result-code'] = 0
@@ -40,4 +39,4 @@ class QueryDevices(ServerCommand.ServerCommand):
             r['error'] = 1
             r['message'] = "Failure"
 
-        return response
+        return r
