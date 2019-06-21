@@ -1,5 +1,5 @@
 #
-# AtHomePowerlineServer - networked server for X10 and WiFi devices
+# AtHOmeAPI - networked server for X10 and WiFi devices
 # Copyright © 2019 Dave Hocker (email: AtHomeX10@gmail.com)
 #
 # This program is free software: you can redistribute it and/or modify

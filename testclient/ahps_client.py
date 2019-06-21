@@ -20,7 +20,8 @@ import json
 from optparse import OptionParser
 sys.path.append("./")
 sys.path.append("../")
-from testclient.ahps import ServerRequest
+# from testclient.ahps import ServerRequest
+from athomeapi import ServerRequest
 
 
 # Default global settings
