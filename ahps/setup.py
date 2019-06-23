@@ -1,7 +1,7 @@
 # coding: utf-8
 #
 # AtHomeServer API
-# Copyright ©  20189 Dave Hocker (email: AtHomeX10@gmail.com)
+# Copyright ©  2019 Dave Hocker (email: AtHomeX10@gmail.com)
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,8 +19,8 @@
 # python setup.py sdist
 #
 # To install distribution in current venv:
-#   pip install -U dist/athomesocketserver-x.y.z.tar.gz
-# where x.y.z is the version number (e.g. 1.0.0)
+#   workon venv
+#   python setup.py install
 #
 
 import os
