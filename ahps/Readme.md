@@ -145,6 +145,85 @@ result
 }
 ```
 
+**define_program(program)**
+```python
+program = {
+    "name": "Program name",
+    "device-id": "29",
+    "day-mask": "MTWTFSS",
+    "trigger-method": "sunset",
+    "time": "12:00:00",
+    "offset": "-60",
+    "command": "on",
+    "randomize": False,
+    "randomize-amount": "0",
+    "dimamount": "0"
+}
+request.define_program(program)
+```
+result
+```json
+{
+    "request": "DefineDevice",
+    "date-time": "2019-06-22 14:28:53.208809",
+    "server": "PerryM2/AtHomePowerlineServer",
+    "server-version": "2019.0.0.1",
+    "result-code": 0,
+    "id": 99,
+    "message": "Success",
+    "call-sequence": 3
+}
+```
+
+**update_program(program)**
+```python
+program = {
+    "name": "Program name",
+    "device-id": "29",
+    "day-mask": "MTWTFSS",
+    "trigger-method": "sunset",
+    "time": "12:00:00",
+    "offset": "-60",
+    "command": "on",
+    "randomize": False,
+    "randomize-amount": "0",
+    "dimamount": "0",
+    "id": 99
+}
+request.define_program(program)
+```
+result
+```json
+{
+    "request": "DefineDevice",
+    "date-time": "2019-06-22 14:28:53.208809",
+    "server": "PerryM2/AtHomePowerlineServer",
+    "server-version": "2019.0.0.1",
+    "result-code": 0,
+    "id": 99,
+    "message": "Success",
+    "call-sequence": 3
+}
+```
+
+**delete_program(program_id)**
+```python
+result = request.delete_program(99)
+```
+result
+```json
+{
+  "request": "DeleteDeviceProgram",
+  "date-time": "2019-06-25 08:54:19.782413",
+  "server": "PerryM2/AtHomePowerlineServer",
+  "server-version": "2019.0.0.1",
+  "result-code": 0,
+  "program-id": "99",
+  "message": "Success",
+  "call-sequence": 4
+}
+```
+
 **open_request(request_json)**
 
 Use to send a customized raw JSON request. Refer to 
