@@ -68,6 +68,7 @@ class UpdateProgram(ServerCommand):
 
         # Return the timer program ID
         r['result-code'] = 0
+        r['id'] = id
         r['message'] = "Success"
 
         return r
