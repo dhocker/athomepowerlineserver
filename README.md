@@ -892,6 +892,7 @@ They are loaded at server start up.
     "server": "PerryM2/AtHomePowerlineServer",
     "server-version": "2019.0.0.1",
     "result-code": 0,
+    "id": 49,
     "message": "Success",
     "call-sequence": 4
 }
