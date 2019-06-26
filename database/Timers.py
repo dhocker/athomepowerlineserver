@@ -100,8 +100,9 @@ class Timers(BaseTable):
                    trigger_method, program_time, offset, randomize, randomize_amount,
                    action, security, dimamount, datetime.datetime.now(), id))
         conn.commit()
+        change_count = conn.total_changes
         conn.close()
-        return True
+        return change_count
 
     @classmethod
     def delete(cls, id):
@@ -109,5 +110,6 @@ class Timers(BaseTable):
         c = AtHomePowerlineServerDb.AtHomePowerlineServerDb.GetCursor(conn)
         c.execute("DELETE FROM Timers WHERE id=:id", {"id": id})
         conn.commit()
+        change_count = conn.total_changes
         conn.close()
-        return True
+        return change_count

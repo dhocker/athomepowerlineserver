@@ -122,8 +122,9 @@ class Devices(BaseTable):
                     datetime.datetime.now(), device_id)
                   )
         conn.commit()
+        change_count = conn.total_changes
         conn.close()
-        return True
+        return change_count
 
     @classmethod
     def delete_device(cls, device_id):
@@ -131,8 +132,9 @@ class Devices(BaseTable):
         c = AtHomePowerlineServerDb.GetCursor(conn)
         c.execute("DELETE FROM Devices WHERE id=:deviceid", {"deviceid": device_id})
         conn.commit()
+        change_count = conn.total_changes
         conn.close()
-        return True
+        return change_count
 
     @classmethod
     def get_device_by_id(cls, device_id):
