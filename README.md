@@ -300,7 +300,7 @@ template.
 </table>
 
 ### Example
-```json
+```
 {
   "Configuration":
   {
@@ -400,7 +400,7 @@ any number of key/value pairs to the standard content. The standard
 content is shown here.
 
 JSON Format with standard content:
-```json
+```
 {
     “request”: “StatusRequest”,
     “server”: “AtHomePowerlineServer”,
@@ -510,14 +510,14 @@ Readme.md file in the athomeserver/ahps directory.
 The StatusRequest is useful as a server handshake.
 
 #### Request
-```json
+```
 {
     “request”: “StatusRequest”,
     “args”: {}
 }
 ```
 #### Response
-```json
+```
 {
   "request": "StatusRequest",
   "date-time": "2019-06-25 16:30:18.080467",
@@ -537,14 +537,14 @@ Returns information about defined devices.
 
 #### Request
 For all devices
-```json
+```
 {
     “request”: “QueryDevices”,
     “args”: {}
 }
 ```
 For a single device
-```json
+```
 {
     "request": "QueryDevices",
     "args": {
@@ -554,7 +554,7 @@ For a single device
 ```
 #### Response
 For all devices
-```json
+```
 {
     "request": "QueryDevices",
     "date-time": "2019-06-23 13:03:21.244097",
@@ -586,7 +586,7 @@ For all devices
 }
 ```
 For a single device
-```json
+```
 {
     "request": "QueryDevices",
     "date-time": "2019-06-23 13:06:45.587844",
@@ -612,7 +612,7 @@ For a single device
 Used to add a new device.
 
 #### Request
-```json
+```
 {
     "request": "DefineDevice",
     "args": {
@@ -634,7 +634,7 @@ Used to add a new device.
 | device-selected | 0 or 1 | Marks the device as in the selected group. |
 
 #### Response
-```json
+```
 {
     "request": "DefineDevice",
     "date-time": "2019-06-22 14:28:53.208809",
@@ -651,7 +651,7 @@ Used to add a new device.
 Used to update the definition of an existing device.
 
 #### Request
-```json
+```
 {
     "request": "UpdateDevice",
     "args": {
@@ -675,7 +675,7 @@ Used to update the definition of an existing device.
 | device-selected | 0 or 1 | Marks the device as in the selected group. |
 
 #### Response
-```json
+```
 {
     "request": "UpdateDevice",
     "date-time": "2019-06-22 14:39:32.071068",
@@ -691,7 +691,7 @@ Used to update the definition of an existing device.
 ### DeleteDevice
 
 #### Request
-```json
+```
 {
     "request": "DeleteDevice",
     "args": {
@@ -700,7 +700,7 @@ Used to update the definition of an existing device.
 }
 ```
 #### Response
-```json
+```
 {
     "request": "DeleteDevice",
     "date-time": "2019-06-23 13:18:24.745503",
@@ -749,7 +749,7 @@ Timer programs are persisted in a Sqlite3 database in the Timers table.
 They are loaded at server start up.
 
 #### Request
-```json
+```
 {
     "request": "DefineProgram",
     "args": {
@@ -847,7 +847,7 @@ They are loaded at server start up.
 </table>
 
 #### Response
-```json
+```
     {
         "request": "DefineProgram",
         "date-time": "2019-06-23 11:19:12.893782",
@@ -864,7 +864,7 @@ They are loaded at server start up.
 ### UpdateProgram
 
 #### Request
-```json
+```
 {
     "request": "UpdateProgram",
     "args": {
@@ -885,7 +885,7 @@ They are loaded at server start up.
 1. The id property is the program ID.
 2. The device-id property defines the subject of the timer program.
 #### Response
-```json
+```
 {
     "request": "UpdateProgram",
     "date-time": "2019-06-23 13:11:55.589249",
@@ -900,7 +900,7 @@ They are loaded at server start up.
 ### DeleteDeviceProgram
 
 #### Request
-```json
+```
 {
   "request": "DeleteDeviceProgram",
   "args": {
@@ -909,7 +909,7 @@ They are loaded at server start up.
 }
 ```
 #### Response
-```json
+```
 {
   "request": "DeleteDeviceProgram",
   "date-time": "2019-06-25 08:54:19.782413",
@@ -925,7 +925,7 @@ They are loaded at server start up.
 ### QueryDevicePrograms
 
 #### Request
-```json
+```
 {
   "request": "QueryDevicePrograms",
   "args": {
@@ -934,7 +934,7 @@ They are loaded at server start up.
 }
 ```
 #### Response
-```json
+```
 {
   "request": "QueryDevicePrograms",
   "date-time": "2019-06-25 17:05:17.160553",
@@ -982,7 +982,7 @@ They are loaded at server start up.
 Query a single device program using its progra ID.
 
 #### Request
-```json
+```
 {
   "request": "QueryDeviceProgram",
   "args": {
@@ -991,7 +991,7 @@ Query a single device program using its progra ID.
 }
 ```
 #### Response
-```json
+```
 {
   "request": "QueryDeviceProgram",
   "date-time": "2019-06-25 17:06:54.607671",
@@ -1024,7 +1024,7 @@ The On request is an immediate request that specifies a device to be
 turned on.
 
 #### Request
-```json
+```
 {
     "request": "On",
     "args": {
@@ -1043,7 +1043,7 @@ turned on.
 #### Response
 
 The On request returns a standard response.
-```json
+```
 {
     "request": "On",
     "date-time": "2019-06-22 14:12:14.983421",
@@ -1062,7 +1062,7 @@ turned off.
 
 
 #### Request
-```json
+```
 {
     "request": "Off",
     "args": {
@@ -1080,7 +1080,7 @@ turned off.
 #### Response
 
 The Off request returns a standard response.
-```json
+```
 {
     "request": "Off",
     "date-time": "2019-06-22 14:17:46.370052",
