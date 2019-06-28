@@ -3,7 +3,7 @@
 ### Install AtHomePowerlineServerD.sh as a daemon
 
 # Installation steps
-sudo cp AtHomePowerlineServerD.sh /etc/init.d/athomeledD.sh
+sudo cp AtHomePowerlineServerD.sh /etc/init.d/AtHomePowerlineServerD.sh
 sudo chmod +x /etc/init.d/AtHomePowerlineServerD.sh
 sudo update-rc.d AtHomePowerlineServerD.sh defaults
 
