@@ -122,19 +122,19 @@ source /usr/local/bin/virtualenvwrapper.sh
 This will set up virtualenvwrapper.
 
 Clone the repository from GitHub. Under Raspbian the
-recommended location for cloning is /home/pi/rpi/athomeserver. Using
+recommended location for cloning is /home/pi/rpi/athomepowerlineserver. Using
 this directory name will minimize the changes you will need to make
 to the init.d script.
 
 ```bash
 cd ~/rpi
-git clone https://github.com/dhocker/athomepowerlineserver.git athomeserver
-cd athomeserver
+git clone https://github.com/dhocker/athomepowerlineserver.git
+cd athomepowerlineserver
 ```
 
-Create a virtual environment named athomeserver:
+Create a virtual environment named athomepowerlineserver3:
 ```bash
-mkvirtualenv -p python3 -r requirements.txt athomeserver
+mkvirtualenv -p python3 -r requirements.txt athomepowerlineserver3
 ```
 
 Copy the file sample AtHomePowerlineServer.example.conf to
@@ -158,6 +158,23 @@ copied/moved file will belong to root. Otherwise, you will have to
 “chown” the copied file to root ownership. If this a new install,
 AtHomePowerlineServer will create the database when needed.
 
+You will likely want to run the server as a daemon. If that is the case, you
+can install the server as a daemon by running
+
+```bash
+./installD.sh
+```
+
+Should you want to remove the server from daemon status, run
+
+```bash
+./uninstallD.sh
+```
+
+If you want to stop, restart or start the server as a daemon, use the
+**stopD.sh, restartD.sh or startD.sh** scripts. These are shortcuts that
+avoid long command lines.
+
 ## Files and Their Location
 
 There are two key files:
@@ -178,7 +195,7 @@ kept in traditional locations.
 | ------------- | ----------------------------------------------------------------------------------------------- |
 | File          | File Path                                                                                       |
 | Configuration | \<home\>/AtHomePowerlineServer.conf or /etc/AtHomePowerlineServer.conf                          |
-| Database      | \<DatabasePath\>/AtHomePowerlineServer.sqlite3. /var/local/athomeserver is a reasonable choice. |
+| Database      | \<DatabasePath\>/AtHomePowerlineServer.sqlite3. /var/local/athomepowerlineserver is a reasonable choice. |
 | Logfile       | \<Logfile\> entry in AtHomePowerlineServer.conf                                                 |
 
 \<home\> is the path to AtHomePowerlineServer.py file.
@@ -482,7 +499,7 @@ server console or the server log to determine why your request failed.
 
 ## AtHomeAPI Module
 The easiest way to access the server is to use the AtHomeAPI module. Check out the
-Readme.md file in the athomeserver/ahps directory.
+Readme.md file in the athomepowerlineserver/ahps directory.
 
 ## Requests
 
