@@ -36,6 +36,8 @@ import commands.query_device_programs
 import commands.query_device_program
 import commands.delete_device
 import commands.delete_device_program
+import commands.all_selected_devices_on
+import commands.all_selected_devices_off
 
 logger = logging.getLogger("server")
 
@@ -68,7 +70,9 @@ class CommandHandler:
         "updateprogram": commands.update_program.UpdateProgram,
         "deletedeviceprogram": commands.delete_device_program.DeleteDeviceProgram,
         "querydeviceprograms": commands.query_device_programs.QueryDevicePrograms,
-        "querydeviceprogram": commands.query_device_program.QueryDeviceProgram
+        "querydeviceprogram": commands.query_device_program.QueryDeviceProgram,
+        "allselecteddeviceson": commands.all_selected_devices_on.AllSelectedDevicesOn,
+        "allselecteddevicesoff": commands.all_selected_devices_off.AllSelectedDevicesOff
     }
 
     def GetHandler(self, command):
