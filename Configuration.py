@@ -197,9 +197,9 @@ class Configuration():
         """
         Returns the full path to the SQLite database file
         """
+        dbpath = Configuration.DatabasePath()
         if Configuration.IsLinux():
             # return "/var/local/athomepowerlineserver/{0}".format(file_name)
-            dbpath = Configuration.DatabasePath()
             if dbpath == "":
                 return file_name
             else:
@@ -207,6 +207,9 @@ class Configuration():
                     dbpath += "/"
                 return "{0}{1}".format(dbpath, file_name)
         elif Configuration.IsWindows():
-            return "{0}\\AtHomePowerlineServer\\{1}".format(os.environ["LOCALAPPDATA"], file_name)
+            if dbpath:
+                return "{0}\\{1}".format(dbpath, file_name)
+            else:
+                pass
 
         return file_name
