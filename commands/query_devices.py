@@ -29,7 +29,7 @@ class QueryDevices(ServerCommand.ServerCommand):
         # Generate a successful response
         r = self.CreateResponse(request["request"])
 
-        if result:
+        if result or len(result) >= 0:
             r['result-code'] = 0
             r[key] = result
             r['message'] = "Success"
