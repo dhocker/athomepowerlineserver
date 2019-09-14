@@ -44,17 +44,9 @@ class TPLinkDriver(BaseDriverInterface):
         """
         logger.debug("DeviceOn for: %s %s %s %s", device_type, device_name_tag, ip_address, dim_amount)
         dev = self._create_smart_device(device_type, ip_address)
-        try:
-            self.ClearLastError()
-            dev.turn_on()
-        except Exception as ex:
-            logger.error(str(ex))
-            self.LastError = str(ex)
-            self.LastErrorCode = 1
-            return False
-        finally:
-            del dev
-        return True
+        result = self._exec_device_function(dev.turn_on)
+        del dev
+        return result
 
     def DeviceOff(self, device_type, device_name_tag, ip_address, dim_amount):
         """
@@ -67,17 +59,9 @@ class TPLinkDriver(BaseDriverInterface):
         """
         logger.debug("DeviceOff for: %s %s %s %s", device_type, device_name_tag, ip_address, dim_amount)
         dev = self._create_smart_device(device_type, ip_address)
-        try:
-            self.ClearLastError()
-            dev.turn_off()
-        except Exception as ex:
-            logger.error(str(ex))
-            self.LastError = str(ex)
-            self.LastErrorCode = 1
-            return False
-        finally:
-            del dev
-        return True
+        result = self._exec_device_function(dev.turn_off)
+        del dev
+        return result
 
     def DeviceDim(self, device_type, device_name_tag, ip_address, dim_amount):
         logger.debug("DeviceDim for: %s %s", ip_address, dim_amount)
@@ -101,6 +85,26 @@ class TPLinkDriver(BaseDriverInterface):
 
     def SetTime(self, time_value):
         pass
+
+    def _exec_device_function(self, device_function, retries=5):
+        """
+        Execute a device function with retries
+        :param device_function: The function to be executed
+        :param retries: The maximum number of attempts
+        :return:
+        """
+        self.ClearLastError()
+        for r in range(retries):
+            try:
+                device_function()
+                return True
+            except Exception as ex:
+                logger.error("Retry %d", r)
+                logger.error(str(ex))
+                self.LastError = str(ex)
+                self.LastErrorCode = 1
+
+        return False
 
     TPLINK_DEVICE_LIST = {
         "tplink": SmartPlug,
