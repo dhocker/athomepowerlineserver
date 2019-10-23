@@ -122,19 +122,19 @@ source /usr/local/bin/virtualenvwrapper.sh
 This will set up virtualenvwrapper.
 
 Clone the repository from GitHub. Under Raspbian the
-recommended location for cloning is /home/pi/rpi/athomepowerlineserver. Using
+recommended location for cloning is /home/pi/rpi/athomeserver. Using
 this directory name will minimize the changes you will need to make
 to the init.d script.
 
 ```bash
 cd ~/rpi
-git clone https://github.com/dhocker/athomepowerlineserver.git
-cd athomepowerlineserver
+git clone https://github.com/dhocker/athomepowerlineserver.git athomeserver
+cd athomeserver
 ```
 
-Create a virtual environment named athomepowerlineserver3:
+Create a virtual environment named athomeserver:
 ```bash
-mkvirtualenv -p python3 -r requirements.txt athomepowerlineserver3
+mkvirtualenv -p python3 -r requirements.txt athomeserver
 ```
 
 Copy the file sample AtHomePowerlineServer.example.conf to
@@ -158,23 +158,6 @@ copied/moved file will belong to root. Otherwise, you will have to
 “chown” the copied file to root ownership. If this a new install,
 AtHomePowerlineServer will create the database when needed.
 
-You will likely want to run the server as a daemon. If that is the case, you
-can install the server as a daemon by running
-
-```bash
-./installD.sh
-```
-
-Should you want to remove the server from daemon status, run
-
-```bash
-./uninstallD.sh
-```
-
-If you want to stop, restart or start the server as a daemon, use the
-**stopD.sh, restartD.sh or startD.sh** scripts. These are shortcuts that
-avoid long command lines.
-
 ## Files and Their Location
 
 There are two key files:
@@ -195,7 +178,7 @@ kept in traditional locations.
 | ------------- | ----------------------------------------------------------------------------------------------- |
 | File          | File Path                                                                                       |
 | Configuration | \<home\>/AtHomePowerlineServer.conf or /etc/AtHomePowerlineServer.conf                          |
-| Database      | \<DatabasePath\>/AtHomePowerlineServer.sqlite3. /var/local/athomepowerlineserver is a reasonable choice. |
+| Database      | \<DatabasePath\>/AtHomePowerlineServer.sqlite3. /var/local/athomeserver is a reasonable choice. |
 | Logfile       | \<Logfile\> entry in AtHomePowerlineServer.conf                                                 |
 
 \<home\> is the path to AtHomePowerlineServer.py file.
@@ -317,7 +300,7 @@ template.
 </table>
 
 ### Example
-```
+```json
 {
   "Configuration":
   {
@@ -417,7 +400,7 @@ any number of key/value pairs to the standard content. The standard
 content is shown here.
 
 JSON Format with standard content:
-```
+```json
 {
     “request”: “StatusRequest”,
     “server”: “AtHomePowerlineServer”,
@@ -499,7 +482,7 @@ server console or the server log to determine why your request failed.
 
 ## AtHomeAPI Module
 The easiest way to access the server is to use the AtHomeAPI module. Check out the
-Readme.md file in the athomepowerlineserver/ahps directory.
+Readme.md file in the athomeserver/ahps directory.
 
 ## Requests
 
@@ -527,14 +510,14 @@ Readme.md file in the athomepowerlineserver/ahps directory.
 The StatusRequest is useful as a server handshake.
 
 #### Request
-```
+```json
 {
     “request”: “StatusRequest”,
     “args”: {}
 }
 ```
 #### Response
-```
+```json
 {
   "request": "StatusRequest",
   "date-time": "2019-06-25 16:30:18.080467",
@@ -554,14 +537,14 @@ Returns information about defined devices.
 
 #### Request
 For all devices
-```
+```json
 {
     “request”: “QueryDevices”,
     “args”: {}
 }
 ```
 For a single device
-```
+```json
 {
     "request": "QueryDevices",
     "args": {
@@ -571,7 +554,7 @@ For a single device
 ```
 #### Response
 For all devices
-```
+```json
 {
     "request": "QueryDevices",
     "date-time": "2019-06-23 13:03:21.244097",
@@ -603,7 +586,7 @@ For all devices
 }
 ```
 For a single device
-```
+```json
 {
     "request": "QueryDevices",
     "date-time": "2019-06-23 13:06:45.587844",
@@ -629,7 +612,7 @@ For a single device
 Used to add a new device.
 
 #### Request
-```
+```json
 {
     "request": "DefineDevice",
     "args": {
@@ -651,7 +634,7 @@ Used to add a new device.
 | device-selected | 0 or 1 | Marks the device as in the selected group. |
 
 #### Response
-```
+```json
 {
     "request": "DefineDevice",
     "date-time": "2019-06-22 14:28:53.208809",
@@ -668,7 +651,7 @@ Used to add a new device.
 Used to update the definition of an existing device.
 
 #### Request
-```
+```json
 {
     "request": "UpdateDevice",
     "args": {
@@ -692,7 +675,7 @@ Used to update the definition of an existing device.
 | device-selected | 0 or 1 | Marks the device as in the selected group. |
 
 #### Response
-```
+```json
 {
     "request": "UpdateDevice",
     "date-time": "2019-06-22 14:39:32.071068",
@@ -708,7 +691,7 @@ Used to update the definition of an existing device.
 ### DeleteDevice
 
 #### Request
-```
+```json
 {
     "request": "DeleteDevice",
     "args": {
@@ -717,7 +700,7 @@ Used to update the definition of an existing device.
 }
 ```
 #### Response
-```
+```json
 {
     "request": "DeleteDevice",
     "date-time": "2019-06-23 13:18:24.745503",
@@ -766,7 +749,7 @@ Timer programs are persisted in a Sqlite3 database in the Timers table.
 They are loaded at server start up.
 
 #### Request
-```
+```json
 {
     "request": "DefineProgram",
     "args": {
@@ -864,7 +847,7 @@ They are loaded at server start up.
 </table>
 
 #### Response
-```
+```json
     {
         "request": "DefineProgram",
         "date-time": "2019-06-23 11:19:12.893782",
@@ -881,7 +864,7 @@ They are loaded at server start up.
 ### UpdateProgram
 
 #### Request
-```
+```json
 {
     "request": "UpdateProgram",
     "args": {
@@ -902,14 +885,13 @@ They are loaded at server start up.
 1. The id property is the program ID.
 2. The device-id property defines the subject of the timer program.
 #### Response
-```
+```json
 {
     "request": "UpdateProgram",
     "date-time": "2019-06-23 13:11:55.589249",
     "server": "PerryM2/AtHomePowerlineServer",
     "server-version": "2019.0.0.1",
     "result-code": 0,
-    "id": 49,
     "message": "Success",
     "call-sequence": 4
 }
@@ -918,7 +900,7 @@ They are loaded at server start up.
 ### DeleteDeviceProgram
 
 #### Request
-```
+```json
 {
   "request": "DeleteDeviceProgram",
   "args": {
@@ -927,7 +909,7 @@ They are loaded at server start up.
 }
 ```
 #### Response
-```
+```json
 {
   "request": "DeleteDeviceProgram",
   "date-time": "2019-06-25 08:54:19.782413",
@@ -943,7 +925,7 @@ They are loaded at server start up.
 ### QueryDevicePrograms
 
 #### Request
-```
+```json
 {
   "request": "QueryDevicePrograms",
   "args": {
@@ -952,7 +934,7 @@ They are loaded at server start up.
 }
 ```
 #### Response
-```
+```json
 {
   "request": "QueryDevicePrograms",
   "date-time": "2019-06-25 17:05:17.160553",
@@ -997,10 +979,10 @@ They are loaded at server start up.
 ```
 
 ### QueryDeviceProgram
-Query a single device program using its progra ID.
+Query a single device program using its program ID.
 
 #### Request
-```
+```json
 {
   "request": "QueryDeviceProgram",
   "args": {
@@ -1009,7 +991,7 @@ Query a single device program using its progra ID.
 }
 ```
 #### Response
-```
+```json
 {
   "request": "QueryDeviceProgram",
   "date-time": "2019-06-25 17:06:54.607671",
@@ -1042,7 +1024,7 @@ The On request is an immediate request that specifies a device to be
 turned on.
 
 #### Request
-```
+```json
 {
     "request": "On",
     "args": {
@@ -1061,7 +1043,7 @@ turned on.
 #### Response
 
 The On request returns a standard response.
-```
+```json
 {
     "request": "On",
     "date-time": "2019-06-22 14:12:14.983421",
@@ -1080,7 +1062,7 @@ turned off.
 
 
 #### Request
-```
+```json
 {
     "request": "Off",
     "args": {
@@ -1098,7 +1080,7 @@ turned off.
 #### Response
 
 The Off request returns a standard response.
-```
+```json
 {
     "request": "Off",
     "date-time": "2019-06-22 14:17:46.370052",
@@ -1130,3 +1112,4 @@ AtHomePowerlineServer. It can be found on GitHub at
 1.  [CM11A Protocol](http://jvde.us/info/CM11A_protocol.txt)
 2.  [XTB-232](http://jvde.us//xtb/XTB-232_description.htm)
 3.  [Raspberry Pi](http://www.raspberrypi.org/)
+4.  [TPLink Python Library](https://github.com/GadgetReactor/pyHS100)
