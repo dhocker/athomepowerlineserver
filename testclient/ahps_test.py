@@ -17,7 +17,7 @@
 
 import sys
 import time
-import ahps_client
+from athomeapi import ServerRequest
 from optparse import OptionParser
 
 #######################################################################
@@ -34,8 +34,8 @@ if __name__ == "__main__":
     # import pdb; pdb.set_trace()
 
     parser = OptionParser()
-    parser.add_option("-s")
-    parser.add_option("-p")
+    parser.add_option("-s", default="localhost")
+    parser.add_option("-p", default=9999)
     (options, args) = parser.parse_args()
     # print options
 
@@ -45,7 +45,8 @@ if __name__ == "__main__":
         Port = int(options.p)
 
     # Try a status request command
-    ahps_client.StatusRequest()
+    ahps_client = ServerRequest(host=Host, port=Port)
+    ahps_client.status_request()
 
     # Test the time requests
     # SetTime()
@@ -56,14 +57,14 @@ if __name__ == "__main__":
 
     # LoadActions()
 
-    print("A7 on 50")
-    ahps_client.DeviceOn("A7", 50)
+    print("Device 2 on 50")
+    ahps_client.device_on(2, 50)
     #
     print("sleep 10")
     time.sleep(10)
     #
-    print("A7 bright 50")
-    ahps_client.DeviceBright("a7", 50)
+    # print("Device 2 bright 50")
+    # ahps_client.device_bright(2, 50)
     #
     # print "A7 dim 50"
     # ahps_client.DeviceDim("A7", 50)
@@ -74,11 +75,11 @@ if __name__ == "__main__":
     # print "A7 off"
     # ahps_client.DeviceOff("A7", 0)
 
-    print("sleep 10")
-    time.sleep(10)
+    # print("sleep 10")
+    # time.sleep(10)
 
-    print("All units off A")
-    ahps_client.DeviceAllUnitsOff("A")
+    # print("All units off A")
+    # ahps_client.DeviceAllUnitsOff("A")
     # print "All units off P"
     # ahps_client.DeviceAllUnitsOff("P")
 

@@ -14,26 +14,35 @@
 #
 
 import drivers.X10ControllerAdapter
+from drivers.device_driver_manager import DeviceDriverManager
 import logging
 
 logger = logging.getLogger("server")
 
-def RunAction(command, house_device_code, dim_amount):
-  # Cases for command
-  if command == "on":
-    drivers.X10ControllerAdapter.X10ControllerAdapter.DeviceOn(house_device_code, dim_amount)
-  elif command == "off":
-    drivers.X10ControllerAdapter.X10ControllerAdapter.DeviceOff(house_device_code, dim_amount)
-  elif command == "dim":
-    drivers.X10ControllerAdapter.X10ControllerAdapter.DeviceDim(house_device_code, dim_amount)
-  elif (command == "bright") or (command == "brighten"):
-    # The dim_amount is really a bright_amount
-    drivers.X10ControllerAdapter.X10ControllerAdapter.DeviceBright(house_device_code, dim_amount)
-  elif command == "allunitsoff":
-    drivers.X10ControllerAdapter.X10ControllerAdapter.DeviceAllUnitsOff(house_device_code[0:1])
-  elif command == "alllightsoff":
-    drivers.X10ControllerAdapter.X10ControllerAdapter.DeviceAllLightsOff(house_device_code[0:1])
-  elif command == "alllightson":
-    drivers.X10ControllerAdapter.X10ControllerAdapter.DeviceAllLightsOn(house_device_code[0:1])
-  else:
+
+def RunAction(command, device_id, device_type, device_name, device_address, dim_amount):
+    if command.startswith("all"):
+        run_all_units_action(command, device_id, device_type, device_address)
+    else:
+        driver = DeviceDriverManager.get_driver(device_type)
+        # Cases for command
+        if command == "on":
+            driver.DeviceOn(device_type, device_name, device_address, dim_amount)
+        elif command == "off":
+            driver.DeviceOff(device_type, device_name, device_address, dim_amount)
+        elif command == "dim":
+            driver.DeviceDim(device_type, device_name, device_address, dim_amount)
+        elif (command == "bright") or (command == "brighten"):
+            # The dim_amount is really a bright_amount
+            driver.DeviceBright(device_type, device_name, device_address, dim_amount)
+
+
+def run_all_units_action(command, device_id, device_type, device_address):
+    # TODO This has to be abstracted based on device type/name
+    # if command == "allunitsoff":
+    #     driver.DeviceAllUnitsOff(device_type, device_address[0:1])
+    # elif command == "alllightsoff":
+    #     driver.DeviceAllLightsOff(device_type, device_address[0:1])
+    # elif command == "alllightson":
+    #     driver.DeviceAllLightsOn(device_type, device_address[0:1])
     pass

@@ -17,26 +17,52 @@
 import datetime
 import socket
 import Version
+from database.devices import Devices
+from drivers.device_driver_manager import DeviceDriverManager
+
 
 class ServerCommand:
 
-  def Execute(self, request):
-    response = CreateResponse()
-    r = response["X10Response"]
-    r['result-code'] = 404
-    r['error'] = "Command not recognized"
-    r['date-time'] = str(datetime.datetime.now())
-    r['message'] = "none"
+    def Execute(self, request):
+        r = self.CreateResponse()
+        r['result-code'] = 404
+        r['error'] = "Command not recognized"
+        r['date-time'] = str(datetime.datetime.now())
+        r['message'] = "none"
 
-    return response
-    
-  # Create an empty response instance    
-  @classmethod
-  def CreateResponse(cls, command):
-    response = {"X10Response": {}}
-    r = response["X10Response"]    
-    r['request'] = command
-    r['date-time'] = str(datetime.datetime.now())
-    r['server'] = "{0}/AtHomePowerlineServer".format(socket.gethostname())
-    r['server-version'] = Version.GetVersion()
-    return response
+        return r
+
+    # Create an empty response instance
+    @classmethod
+    def CreateResponse(cls, command):
+        r = {}
+        r['request'] = command
+        r['date-time'] = str(datetime.datetime.now())
+        r['server'] = "{0}/AtHomePowerlineServer".format(socket.gethostname())
+        r['server-version'] = Version.GetVersion()
+        return r
+
+    @classmethod
+    def get_driver_for_id(cls, device_id):
+        r = Devices.get_device_by_id(device_id)
+        driver = DeviceDriverManager.get_driver(r["type"])
+        return driver
+
+    @classmethod
+    def get_address_for_id(cls, device_id):
+        r = Devices.get_device_by_id(device_id)
+        return r["address"]
+
+    @classmethod
+    def get_device_for_id(cls, device_id):
+        return Devices.get_device_by_id(device_id)
+
+    @classmethod
+    def parse_time_str(cls, time_string):
+        if len(time_string) == 5:
+            t = datetime.datetime.strptime(time_string, "%H:%M")
+        elif len(time_string) == 8:
+            t = datetime.datetime.strptime(time_string, "%H:%M:%S")
+        else:
+            t = datetime.datetime.strptime(time_string[-8:], "%H:%M:%S")
+        return t

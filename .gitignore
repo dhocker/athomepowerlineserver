@@ -3,6 +3,7 @@
 *.conf
 AtHomePowerlineServer.log*
 *.sqlite3
+*.sqbpro
 Thumbs.db
 *.odg
 *.odt#
@@ -10,3 +11,4 @@ Thumbs.db
 .idea/
 athomepowerlineserver/
 .DS_Store
+.vscode

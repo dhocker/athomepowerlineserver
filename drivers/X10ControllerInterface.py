@@ -10,6 +10,7 @@
 #
 
 #
+# DEPRECATED in v2019 redesign
 # Defines the interface contract for an X10 controller driver.
 # Uses the abstract base class.
 #

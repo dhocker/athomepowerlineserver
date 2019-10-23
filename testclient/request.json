@@ -1,0 +1,7 @@
+{
+  "description": "An example of a raw request",
+  "request": "QueryDevices",
+  "args": {
+    "device-id": 2
+  }
+}

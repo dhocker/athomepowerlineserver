@@ -1,0 +1,8 @@
+{
+  "description": "Define device test case",
+  "device-name": "Device under test",
+  "device-location": "Unknown test location",
+  "device-type": "tplink",
+  "device-address": "192.168.1.234",
+  "device-selected": 0
+}
