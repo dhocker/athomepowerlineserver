@@ -21,7 +21,7 @@ from optparse import OptionParser
 sys.path.append("./")
 sys.path.append("../")
 # from testclient.ahps import ServerRequest
-from athomeapi import ServerRequest
+from ahps.athomeapi import ServerRequest
 
 
 # Default global settings
@@ -329,25 +329,25 @@ request_list = {
     },
     "on": {
         "description": "Turn a device on",
-        "syntax": "on device-id",
+        "syntax": "on device-id dim-amount",
         "handler": _device_on,
         "argcount": 3
     },
     "deviceon": {
         "description": "Turn a device one",
-        "syntax": "deviceon device-id",
+        "syntax": "deviceon device-id dim-amount",
         "handler": _device_on,
         "argcount": 3
     },
     "off": {
         "description": "Turn a device off",
-        "syntax": "off device-id",
+        "syntax": "off device-id dim-amount",
         "handler": _device_off,
         "argcount": 3
     },
     "deviceoff": {
         "description": "Turn a device off",
-        "syntax": "deviceoff device-id",
+        "syntax": "deviceoff device-id dim-amount",
         "handler": _device_off,
         "argcount": 3
     },
