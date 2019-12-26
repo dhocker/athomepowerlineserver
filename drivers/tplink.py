@@ -10,7 +10,7 @@
 #
 
 from .base_driver_interface import BaseDriverInterface
-from pyHS100 import SmartPlug, SmartBulb, SmartStrip
+from pyHS100 import SmartPlug, SmartBulb, SmartStrip, Discover
 import logging
 
 logger = logging.getLogger("server")
@@ -82,6 +82,25 @@ class TPLinkDriver(BaseDriverInterface):
     def DeviceAllLightsOn(self, house_code):
         logger.debug("DeviceAllLightsOn for: %s", house_code)
         return True
+
+    def GetAvailableDevices(self):
+        """
+        Get all known available TPLink/Kasa devices.
+        Reference: https://github.com/GadgetReactor/pyHS100
+        :return: Returns a dict where the key is the device IP address
+        and the value is the human readable name of the device.
+        """
+        try:
+            result = {}
+            # This can take a few seconds
+            for ip, plug in Discover.discover().items():
+                result[ip] = plug.alias
+        except Exception as ex:
+            logger.error("An exception occurred while trying to enumerate available TPLink/Kasa devices")
+            logger.error(str(ex))
+            result = {}
+
+        return result
 
     def SetTime(self, time_value):
         pass

@@ -1,5 +1,5 @@
 #
-# Query for all defined devices
+# Query for all available devices of a given type
 # Copyright © 2019  Dave Hocker
 #
 # This program is free software: you can redistribute it and/or modify
@@ -10,28 +10,25 @@
 #
 
 import commands.ServerCommand as ServerCommand
-from database.devices import Devices
+from drivers.device_driver_manager import DeviceDriverManager
 
-
-class QueryDevices(ServerCommand.ServerCommand):
+class QueryAvailableDevices(ServerCommand.ServerCommand):
     """
-    Command handler for querying for all devices
+    Command handler for querying for all available devices
     """
     def Execute(self, request):
         args = request["args"]
-        if "device-id" in args.keys():
-            result = Devices.get_device(int(args["device-id"]))
-            key = "device"
-        else:
-            result = Devices.get_all_devices()
-            key = "devices"
+        result = {}
+        if "type" in args.keys():
+            driver = DeviceDriverManager.get_driver(args['type'])
+            result = driver.GetAvailableDevices()
 
         # Generate a successful response
         r = self.CreateResponse(request["request"])
 
         if result or len(result) >= 0:
             r['result-code'] = 0
-            r[key] = result
+            r['devices'] = result
             r['message'] = "Success"
         else:
             # Probably invalid device type

@@ -66,6 +66,16 @@ class BaseDriverInterface:
     def DeviceAllLightsOn(self, house_code):
         pass
 
+    def GetAvailableDevices(self):
+        """
+        Get all known available devices of a given type. Not every device can be discovered.
+        For example TPLink/Kasa devices can be discovered, but X10 devices
+        cannot be discovered.
+        :return: Returns a dict where the key is the major device identifier or address
+        and the value is the human readable name of the device.
+        """
+        return {}
+
     # TODO Consider defining this as SetCurrentTime taking no parameters.
     # Set the controller time to the current, local time.
     def SetTime(self, time_value):
