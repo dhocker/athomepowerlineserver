@@ -1,0 +1,290 @@
+#
+# Meross WiFi device driver
+# Copyright © 2020  Dave Hocker
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# See the LICENSE file for more details.
+#
+# Supported devices (currently only channel 0)
+#   MSS110 mini-plug https://www.meross.com/product/2/article/
+#
+# Untested devices that may work (on/off only)
+#   MSL120 Smart WiFi LED Bulb with Color Changing (no color support)
+#   MSS210 Smart WiFi Plug
+#   MSS310 Smart WiFi Plug with Energy Monitor
+#   MSS425E Smart WiFi Surge Protector (channel 0 only)
+#
+# TODO Potential design changes
+#   Support multiple channel devices (e.g. multi-outlet surge protector)
+#   Support color changing bulbs (e.g. MSL120)
+
+# Reference: https://github.com/albertogeniola/MerossIot
+from meross_iot.manager import MerossManager
+# from meross_iot.meross_event import MerossEventType
+from meross_iot.cloud.devices.light_bulbs import GenericBulb
+from meross_iot.cloud.devices.power_plugs import GenericPlug
+import logging
+from .base_driver_interface import BaseDriverInterface
+from Configuration import Configuration
+
+logger = logging.getLogger("server")
+
+
+class MerossDriver(BaseDriverInterface):
+    MEROSS_ERROR = 7
+
+    def __init__(self):
+        super().__init__()
+        # Initiates the Meross Cloud Manager. This is in charge of handling the communication with the remote endpoint
+        self._manager = MerossManager(meross_email=Configuration.MerossEmail(),
+                                      meross_password=Configuration.MerossPassword())
+        logger.info("Meross driver initialized")
+
+    # Open the device
+    def Open(self):
+        # Register event handlers for the manager...(this does not appear to be required)
+        # manager.register_event_handler(event_handler)
+        # Starts the manager
+        self.ClearLastError()
+        try:
+            self._manager.start()
+            logger.info("Meross driver opened")
+            return True
+        except Exception as ex:
+            logger.error("Exeception during manager.start()")
+            logger.error(str(ex))
+            self.LastErrorCode = MerossDriver.MEROSS_ERROR
+            self.LastError = str(ex)
+        return False
+
+    # Close the device
+    def Close(self):
+        self.ClearLastError()
+        try:
+            self._manager.stop()
+            logger.info("Meross driver closed")
+            return True
+        except Exception as ex:
+            logger.error("Exeception during manager.stop()")
+            logger.error(str(ex))
+            self.LastErrorCode = MerossDriver.MEROSS_ERROR
+            self.LastError = str(ex)
+        return False
+
+    def DeviceOn(self, device_type, device_name_tag, house_device_code, dim_amount):
+        """
+        Turn device on
+        :param device_type: the device's type (e.g. x10, hs100, smartplug, etc.)
+        :param device_name_tag: human readable name of device
+        :param house_device_code: the UUID of the Meross device
+        :param dim_amount: a percent 0 to 100
+        :return:
+        """
+        # TODO How to support multi-channel Meross devices
+        self.ClearLastError()
+        try:
+            device = self._manager.get_device_by_uuid(house_device_code)
+            if isinstance(device, GenericPlug):
+                device.turn_on_channel(0)
+            elif isinstance(device, GenericBulb):
+                device.turn_on()
+            else:
+                logger.error("Unrecognized Meross device type: %s (%s)", device_name_tag, house_device_code)
+                self.LastErrorCode = MerossDriver.MEROSS_ERROR
+                self.LastError = "Unrecognized Meross device type"
+                return False
+            logger.debug("DeviceOn for: %s (%s) %s", device_name_tag, house_device_code, dim_amount)
+            return True
+        except Exception as ex:
+            logger.error("Exeception during DeviceOn for: %s (%s) %s", device_name_tag, house_device_code, dim_amount)
+            logger.error(str(ex))
+            self.LastErrorCode = MerossDriver.MEROSS_ERROR
+            self.LastError = str(ex)
+        return False
+
+    def DeviceOff(self, device_type, device_name_tag, house_device_code, dim_amount):
+        """
+        Turn device off
+        :param device_type: the device's type (e.g. x10, hs100, smartplug, etc.)
+        :param device_name_tag: human readable name of device
+        :param house_device_code: the UUID of the Meross device
+        :param dim_amount: a percent 0 to 100
+        :return:
+        """
+        # TODO How to support multi-channel Meross devices
+        self.ClearLastError()
+        try:
+            device = self._manager.get_device_by_uuid(house_device_code)
+            if isinstance(device, GenericPlug):
+                device.turn_off_channel(0)
+            elif isinstance(device, GenericBulb):
+                device.turn_off()
+            else:
+                logger.error("Unrecognized Meross device type: %s (%s)", device_name_tag, house_device_code)
+                self.LastErrorCode = MerossDriver.MEROSS_ERROR
+                self.LastError = "Unrecognized Meross device type"
+                return False
+            logger.debug("DeviceOff for: %s (%s) %s", device_name_tag, house_device_code, dim_amount)
+            return True
+        except Exception as ex:
+            logger.error("Exeception during DeviceOff for: %s (%s) %s", device_name_tag, house_device_code, dim_amount)
+            logger.error(str(ex))
+            self.LastErrorCode = MerossDriver.MEROSS_ERROR
+            self.LastError = str(ex)
+        return False
+
+    def DeviceDim(self, device_type, device_name_tag, house_device_code, dim_amount):
+        """
+        Dim device
+        :param device_type: the device's type (e.g. x10, hs100, smartplug, etc.)
+        :param device_name_tag: human readable name of device
+        :param house_device_code: address of the device, depending on device type
+        :param dim_amount: a percent 0 to 100
+        :return:
+        """
+        logger.debug("DeviceDim for: %s %s", house_device_code, dim_amount)
+        return True
+
+    def DeviceBright(self, device_type, device_name_tag, house_device_code, bright_amount):
+        """
+        Turn device on
+        :param device_type: the device's type (e.g. x10, hs100, smartplug, etc.)
+        :param device_name_tag: human readable name of device
+        :param house_device_code: address of the device, depending on device type
+        :param bright_amount: a percent 0 to 100
+        :return:
+        """
+        logger.debug("DeviceBright for: %s %s", house_device_code, bright_amount)
+        return True
+
+    def DeviceAllUnitsOff(self, house_code):
+        """
+        Turn all units off. Not implemented by all device types.
+        :param house_code:
+        :return:
+        """
+        logger.debug("DeviceAllUnitsOff for: %s", house_code)
+        return True
+
+    def DeviceAllLightsOff(self, house_code):
+        """
+        Turn all lights off. Not implemented by all device types.
+        :param house_code:
+        :return:
+        """
+        logger.debug("DeviceAllLightsOff for: %s", house_code)
+        return True
+
+    def DeviceAllLightsOn(self, house_code):
+        """
+        Turn all lights on. Not implemented by all device types
+        :param house_code:
+        :return:
+        """
+        logger.debug("DeviceAllLightsOn for: %s", house_code)
+        return True
+
+    def GetAvailableDevices(self):
+        """
+        Get all known available devices for supported types.
+        :return: Returns a dict where the key is the device UUID
+        and the value is the human readable name of the device.
+        """
+        available_devices = {}
+        try:
+            plugs = self._manager.get_devices_by_kind(GenericPlug)
+            for p in plugs:
+                channels = len(p.get_channels())
+                device_label = "{0} [{1} channel(s)]".format(p.name, channels)
+                available_devices[p.uuid] = device_label
+
+            bulbs = self._manager.get_devices_by_kind(GenericBulb)
+            for b in bulbs:
+                available_devices[b.uuid] = b.name
+        except Exception as ex:
+            logger.error("Exeception enumerating available devices")
+            logger.error(str(ex))
+            self.LastErrorCode = 1
+            self.LastError = str(ex)
+
+        return available_devices
+
+    #######################################################################
+    # Set the controller time to the current, local time.
+    def SetTime(self, time_value):
+        pass
+
+
+"""
+if __name__ == '__main__':
+    EMAIL = "athomex10@gmail.com"
+    PASSWORD = "@hoMex10$$"
+
+    def event_handler(eventobj):
+        if eventobj.event_type == MerossEventType.DEVICE_ONLINE_STATUS:
+            print("Device online status changed: %s went %s" % (eventobj.device.name, eventobj.status))
+            pass
+
+        elif eventobj.event_type == MerossEventType.DEVICE_SWITCH_STATUS:
+            print("Switch state changed: Device %s (channel %d) went %s" % (eventobj.device.name, eventobj.channel_id,
+                                                                            eventobj.switch_state))
+        elif eventobj.event_type == MerossEventType.CLIENT_CONNECTION:
+            print("MQTT connection state changed: client went %s" % eventobj.status)
+
+            # TODO: Give example of reconnection?
+
+        elif eventobj.event_type == MerossEventType.GARAGE_DOOR_STATUS:
+            print("Garage door is now %s" % eventobj.door_state)
+
+        else:
+            print("Unknown event!")
+
+
+    # Initiates the Meross Cloud Manager. This is in charge of handling the communication with the remote endpoint
+    manager = MerossManager(meross_email=EMAIL, meross_password=PASSWORD)
+
+    # Register event handlers for the manager...
+    manager.register_event_handler(event_handler)
+
+    # Starts the manager
+    manager.start()
+
+    # You can retrieve the device you are looking for in various ways:
+    # By kind
+    # bulbs = manager.get_devices_by_kind(GenericBulb)
+    plugs = manager.get_devices_by_kind(GenericPlug)
+    # door_openers = manager.get_devices_by_kind(GenericGarageDoorOpener)
+    # all_devices = manager.get_supported_devices()
+
+    # Print some basic specs about the discovered devices
+    # print("All the bulbs I found:")
+    # for b in bulbs:
+    #     print(b)
+
+    print("All the plugs found:")
+    for p in plugs:
+        print(dir(p))
+        if not p.online:
+            print("The plug %s seems to be offline. Cannot test..." % p.name)
+            continue
+
+        print("Let's play with smart plug %s" % p.name)
+
+        channels = len(p.get_channels())
+        print("The plug %s supports %d channels." % (p.name, channels))
+
+        print("Turning on channel %d of %s" % (0, p.name))
+        p.turn_on_channel(0)
+
+        time.sleep(1)
+
+        print("Turning off channel %d of %s" % (0, p.name))
+        p.turn_off_channel(0)
+
+        time.sleep(1)
+
+    print("Done")
+"""

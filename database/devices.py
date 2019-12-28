@@ -19,6 +19,7 @@ logger = logging.getLogger("server")
 
 class Devices(BaseTable):
     TPLINK = "tplink"
+    MEROSS = "meross"
     X10 = "x10"
     # All valid device types and the device type class they belong to
     VALID_DEVICE_LIST = {
@@ -36,7 +37,9 @@ class Devices(BaseTable):
         "hs220": TPLINK,
         "smartplug": TPLINK,
         "smartswitch": TPLINK,
-        "smartbulb": TPLINK
+        "smartbulb": TPLINK,
+        "meross": MEROSS,
+        "mss110": MEROSS
     }
 
     #######################################################################

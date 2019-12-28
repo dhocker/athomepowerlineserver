@@ -11,3 +11,4 @@ PyYAML
 requests
 urllib3
 pyHS100
+meross-iot

@@ -176,6 +176,16 @@ class Configuration():
 
     ######################################################################
     @classmethod
+    def MerossEmail(cls):
+        return cls.get_config_var("MerossEmail")
+
+    ######################################################################
+    @classmethod
+    def MerossPassword(cls):
+        return cls.get_config_var("MerossPassword")
+
+    ######################################################################
+    @classmethod
     def GetConfigurationFilePath(cls):
         """
         Returns the full path to the configuration file

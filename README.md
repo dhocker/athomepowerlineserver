@@ -1,11 +1,6 @@
 # AtHomePowerlineServer
 
-Copyright © 2014, 2019 Dave Hocker (<AtHomeX10@gmail.com>)
-
-This program is free software: you can redistribute it and/or modify it
-under the terms of the GNU General Public License as published by the
-Free Software Foundation, version 3 of the License. See the LICENSE file
-for more details.
+Copyright © 2014, 2020 Dave Hocker (<AtHomeX10@gmail.com>)
 
 # Overview
 
@@ -30,7 +25,7 @@ Windows).
 
 Second, the communication mechanism to the AtHomePowerlineServer is
 TCP/IP (over Ethernet). A light weight system like the Raspberry Pi
-supports many WiFi USB interfaces and some versions of the RPi have
+supports many WiFi USB interfaces and the later versions of the RPi have
 integrated WiFi interfaces (e.g. RPi 3, RPi 4, RPi Zero W).
 This further improves the freedom of
 location for the X10 controller. In the past, the distance between a PC
@@ -40,7 +35,8 @@ limitation is effectively eliminated. See Illustraion 1.
 
 Recently, the server was extended to support a new class of WiFi based
 switches and lights. This provides support for a number of TPLink/Kasa
-WiFi devices.
+WiFi devices and Meross WiFi devices. These WiFi devices are less expensive
+than X10 modules and they are easier to position.
 
 Finally, the AtHomePowerlineServer application is open source. Anyone
 can fork it and build upon it.
@@ -59,8 +55,9 @@ capabilities of the CM11/CM11A. The CM11 has initiators and actions.
 Devices are by definition X10 modules. Initiatators define start and stop
 timers. Actions describe X10 commands. 
 
-AtHomePowerlineServer has devices and timer programs. A device is an X10 module
-or a TPLink/Kasa WiFi device. A timer program defines a trigger and a 
+AtHomePowerlineServer has devices and timer programs. A device is an X10
+module, a TPLink/Kasa WiFi device or a Meross WiFi device.
+A timer program defines a trigger and a
 command/action to be executed when the trigger fires. Commands are logcial
 actions like On and Off. Essentially, AtHomePowerlineServer is independent
 of the actual hardware devices.
@@ -76,6 +73,14 @@ for the full text of the license.
 The server was originally written completely in Python 2.7 but has since
 been converted to Python 3 (3.5 or later). The source
 code can be found on [GitHub](https://github.com/dhocker/athomepowerlineserver.git).
+
+# Attribution
+This project depends on the following Python packages.
+Many thanks to these contributors.
+
+[TPLink Python Library](https://github.com/GadgetReactor/pyHS100) by GadgetReactor.
+
+[Meross Python Library](https://github.com/albertogeniola/MerossIot) by Alberto Geniola.
 
 # Supported Devices
 ## X10
@@ -98,9 +103,20 @@ code can be found on [GitHub](https://github.com/dhocker/athomepowerlineserver.g
 ### [Smart Bulbs](https://www.kasasmart.com/us/products/smart-lighting)
 * LB130
 
+## Meross Devices
+[WiFi Devices](https://www.meross.com/)
+
+Currently, only channel 0 is supported.
+
+## WiFi Plugs
+* MSS110
+* MSS210 (untested)
+## WiFi Bulbs
+* MSL120 (untested, on/off only)
+
 # Installation
 
-## Basic Steps for Raspian
+## Basic Steps for Raspbian
 
 Open a terminal window and install prerequisites.
 
@@ -217,18 +233,19 @@ template.
     </colgroup>
     <tbody>
         <tr class="odd">
-            <td>Parameter</td>
+            <td>Parameter/Key</td>
             <td>Description</td>
         </tr>
         <tr class="even">
             <td>Drivers</td>
             <td>
             <p>
-                Maps devices to drivers. Currently, there are 3 available drivers.
+                Maps devices to drivers. Currently, there are 4 available drivers.
                 <ul>
                     <li>Dummy – A simulated controller. This is good for testing your installation.</li>
                     <li>XTB232 - The XTB-232 controller from JV Digital Engineering. Also works for CM11/CM11A.</li>
                     <li>TPLink – Covers most TPLink/Kasa smart devices.</li>
+                    <li>Meross – Covers Meross WiFi devices.</li>
                 </ul>
             </p>
             <p>
@@ -249,6 +266,8 @@ template.
                     <li>smartplug</li>
                     <li>smartswitch</li>
                     <li>smartbulb</li>
+                    <li>Meross</li>
+                    <li>MSS110</li>
                 </ul>
                 See example below.
             </p>
@@ -296,6 +315,14 @@ template.
             <td>Longitude</td>
             <td>The longitude of the installation.</td>
         </tr>
+        <tr class="even">
+            <td>MerossEmail</td>
+            <td>The email you used to set up your Meross account.</td>
+        </tr>
+        <tr class="odd">
+            <td>Meross Password</td>
+            <td>The password to your Meross account. See notes below discussing security.</td>
+        </tr>
     </tbody>
 </table>
 
@@ -316,6 +343,8 @@ template.
         "SmartPlug": "TPLink",
         "SmartSwitch": "TPLink",
         "SmartBulb": "TPLink",
+        "Meross": "Meross",
+        "MSS110": "Meross",
         "CustomDevice": "Dummy"
     },
     "ComPort": "/dev/tty.usbserial",
@@ -326,16 +355,25 @@ template.
     "DatabasePath": "",
     "City": "Houston",
     "Latitude": "29.9947",
-    "Longitude": "-95.6675"
+    "Longitude": "-95.6675",
+    "MerossEmail": "your Meross email",
+    "MerossPassword": "your Meross account password"
    }
 }
 ```
 
-### Note
+### Notes
+If your are using Meross devices, you should set the permissions of the
+configuration file to limit access. At a minimum, you should disallow
+any access by "everyone". Under Linux, you should at least chmod the
+file to permissions something like 640 or even the more restrictive 600.
+Under Windows, you should remove "Everyone" from the file's permissions.
+
 If you are using the [At Home Control](https://github.com/dhocker/athomefrb)
-client, you will find that it only supports
-X10 and TPLink device drivers. The X10 driver will work with all X10 devices
-and the TPLink driver will work with most TPLink/Kasa devices.
+web client, you will find that it only supports
+X10, TPLink and Meross device drivers. The X10 driver will work with all
+X10 devices, the TPLink driver will work with most TPLink/Kasa devices and
+the Meross driver will work with Meross WiFi plugs and bulbs.
 
 ## Running the Server
 
@@ -353,25 +391,30 @@ sudo python AtHomePowerlineServer.py
 This technique will set up AtHomePowerlineServer so that it
 automatically starts when Raspbian boots up.
 
-Change the AtHomePowerlineServerD.sh script according to where you
+Change the AtHomePowerlineServerD.sh script as needed.
+* Where you
 have cloned the source code (approximately line 24). If you cloned
 the source code into the recommended location no changes should be
 required.
+* The path to your virtual environment.
 
-Copy the edited AtHomePowerlineServerD.sh file to /etc/init.d
-
-Run: sudo update-rc.d AtHomePowerlineServerD.sh defaults
-
-Reboot or run:
+Run:
 ```bash
-sudo /etc/init.d/AtHomePowerlineServerD.sh start
-or
-sudo service AtHomePowerlineServerD.sh start
+installD.sh
 ```
+
+If you want to uninstall the daemon run:
+```bash
+uninstallD.sh
+```
+
 ### Windows
 
 AtHomePowerlineServer can be run as an ordinary Python application.
-Change into the home directory and run: python AtHomePowerlineServer.py
+Change into the home directory and run:
+```
+python AtHomePowerlineServer.py
+```
 
 # Programming: The TCP/IP Protocol
 
@@ -404,7 +447,7 @@ JSON Format with standard content:
 {
     “request”: “StatusRequest”,
     “server”: “AtHomePowerlineServer”,
-    “server-version”: “1.0.0.0”,
+    “server-version”: “2020.0.0.1”,
     “result-code”: 0,
     “date-time”: “2014-01-29 11:04:06.093000”,
     “error”: “Error description”,
@@ -436,7 +479,7 @@ JSON Format with standard content:
         </tr>
         <tr class="even">
             <td>server-version</td>
-            <td>2019.0.0.1</td>
+            <td>2020.0.0.1</td>
             <td>The version of the responding server.</td>
         </tr>
         <tr class="odd">
@@ -502,6 +545,7 @@ Readme.md file in the athomeserver/ahps directory.
 - DeleteDeviceProgram
 - QueryDevicePrograms
 - QueryDeviceProgram
+- QueryAvailableDevices
 
 (1) Not currently implemented
 
@@ -629,8 +673,8 @@ Used to add a new device.
 |:---|:---|:---|
 | device-name | string | The human readable name of the device |
 | device-location | string | The human readable description of where the device is located |
-| device-type | x10 or tplink | The type of device |
-| device-address | X10 or IP address | For an X10 device, the house-device-code (A1-L16). For a TPLink device, an IP address. |
+| device-type | x10, tplink, or meross | The type of device |
+| device-address | X10, IP address, UUID | For an X10 device, the house-device-code (A1-L16). For a TPLink device, an IP address. For a Meross device, a UUID. |
 | device-selected | 0 or 1 | Marks the device as in the selected group. |
 
 #### Response
@@ -639,7 +683,7 @@ Used to add a new device.
     "request": "DefineDevice",
     "date-time": "2019-06-22 14:28:53.208809",
     "server": "PerryM2/AtHomePowerlineServer",
-    "server-version": "2019.0.0.1",
+    "server-version": "2020.0.0.1",
     "result-code": 0,
     "device-id": 26,
     "message": "Success",
@@ -670,8 +714,8 @@ Used to update the definition of an existing device.
 | device-id | integer | The device ID of the device to be updated. |
 | device-name | string | The human readable name of the device |
 | device-location | string | The human readable description of where the device is located |
-| device-type | x10 or tplink | The type of device |
-| device-address | X10 or IP address | For an X10 device, the house-device-code (A1-L16). For a TPLink device, an IP address. |
+| device-type | x10, tplink, or meross | The type of device |
+| device-address | X10, IP address, UUID | For an X10 device, the house-device-code (A1-L16). For a TPLink device, an IP address. For a Meross device, a UUID. |
 | device-selected | 0 or 1 | Marks the device as in the selected group. |
 
 #### Response
@@ -1034,11 +1078,10 @@ turned on.
 }
 ```
 
-| | | |
-|-|-|-|
-| args Key | Value(s) | Description |
+| args Key | Value | Description |
+| --- | --- | --- |
 | device-id | n | Identifies the device to be turned on.|
-| dim-amount        | nn       | Dim amount expressed as a percent. Must be a value in the range 0-100. The server will convert this value into a something more meaningful to the actual device. |
+| dim-amount | nn | Dim amount expressed as a percent. Must be a value in the range 0-100. The server will convert this value into a something more meaningful to the actual device. |
 
 #### Response
 
@@ -1071,11 +1114,11 @@ turned off.
     }
 }
 ```
-| | | |
-|-|-|-|
-| args Key | Value(s) | Description |
+
+| args Key | Value | Description |
+|---|---|---|
 | device-id | n | Identifies the device to be turned off.|
-| dim-amount        | nn       | Dim amount expressed as a percent. Must be a value in the range 0-100. The server will convert this value into a something more meaningful to the actual device. |
+| dim-amount | nn | Dim amount expressed as a percent. Must be a value in the range 0-100. The server will convert this value into a something more meaningful to the actual device. |
 
 #### Response
 
@@ -1091,6 +1134,44 @@ The Off request returns a standard response.
     "call-sequence": 2
 }
 ```
+
+### QueryAvailableDevices
+
+Returns a list of available devices for a given device type.
+Be aware that only TPLink/Kasa
+and Meross devices can be discovered using this command.
+X10 modules cannot be discovered.
+
+#### Request
+```json
+{
+    “request”: “QueryAvailableDevices”,
+    “args”: {
+      "type": "tplink"
+    }
+}
+```
+Valid types are tplink and meross.
+#### Response
+```json
+{
+    "request": "QueryAvailableDevices",
+    "date-time": "2019-06-23 13:03:21.244097",
+    "server": "PerryM2/AtHomePowerlineServer",
+    "server-version": "2020.0.0.1",
+    "result-code": 0,
+    "devices": {
+      "address1": "name1",
+      "address2": "name2"
+    }
+}
+```
+
+| Device Type | Address | Example |
+| --- | --- | --- |
+| x10 | house-device-code | e.g. A1, G16 |
+| tplink | IP address | 192.168.1.78 |
+| meross | UUID | 1907226943690825185048e1e901c0b7 |
 
 # Client Examples
 
@@ -1113,3 +1194,4 @@ AtHomePowerlineServer. It can be found on GitHub at
 2.  [XTB-232](http://jvde.us//xtb/XTB-232_description.htm)
 3.  [Raspberry Pi](http://www.raspberrypi.org/)
 4.  [TPLink Python Library](https://github.com/GadgetReactor/pyHS100)
+5.  [Meross Python Library](https://github.com/albertogeniola/MerossIot)
