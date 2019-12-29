@@ -1188,6 +1188,20 @@ AtHome Control is an open source web server based application that works with
 AtHomePowerlineServer. It can be found on GitHub at
 <https://github.com/dhocker/athomefrb>.
 
+# Appendix
+## Device Identifiers
+The devices supported by AtHome Control use significantly different
+identifiers.
+### X10 Modules
+X10 modules are identified by an address consists of a letter (A to L) and a
+number (from 1 to 16). Thus the range of X10 addresses is A1 to L16.
+### TPLink/Kasa Devices
+TPLink devices are identifier by their IP address. This address is
+assigned to the device during configuration.
+### Meross Devices
+Meross devices are identified by a UUID. While the UUID looks like a
+GUID, it does not seem to be a valid one. The UUID is 32 hex characters
+without any hyphens. Example: 1907220924955625185048e1e901d533
 # References
 
 1.  [CM11A Protocol](http://jvde.us/info/CM11A_protocol.txt)
