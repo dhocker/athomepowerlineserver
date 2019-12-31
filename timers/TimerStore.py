@@ -142,24 +142,33 @@ class TimerStore:
         :param security:
         :return:
         """
+        cls.remove_timer(id)
+
         timer_list = cls.AcquireTimerProgramList()
 
         try:
-            # Remove the existing program
-            try:
-                for t in timer_list:
-                    if t.id == id:
-                        timer_list.remove(t)
-                        break
-            except:
-                pass
-
             # Add the updated program as a new program
             tp = TimerProgram.TimerProgram(id, name, int(device_id), day_mask,
                                            trigger_method, program_time, offset, randomize,
                                            randomize_amount,
                                            action, dimamount, security)
             cls.TimerProgramList.append(tp)
+        finally:
+            cls.ReleaseTimerProgramList()
+
+    @classmethod
+    def remove_timer(cls, device_id):
+        timer_list = cls.AcquireTimerProgramList()
+
+        # Remove the existing program
+        try:
+            for t in timer_list:
+                if t.id == device_id:
+                    timer_list.remove(t)
+                    logger.info("Timer Program %d removed from timer list", device_id)
+                    break
+        except Exception as ex:
+            logger.error(str(ex))
         finally:
             cls.ReleaseTimerProgramList()
 

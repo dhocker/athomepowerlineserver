@@ -11,6 +11,7 @@
 
 import commands.ServerCommand as ServerCommand
 from database.devices import Devices
+from timers.TimerStore import TimerStore
 
 
 class DeleteDevice(ServerCommand.ServerCommand):
@@ -20,6 +21,10 @@ class DeleteDevice(ServerCommand.ServerCommand):
     def Execute(self, request):
         args = request["args"]
         result = Devices.delete_device(int(args["device-id"]))
+
+        # Deleting a device may cause a cascading delete of timer programs
+        # Therefore, we need to reload the in-memory cache
+        TimerStore.LoadTimerProgramList()
 
         # Generate a successful response
         r = self.CreateResponse(request["request"])
