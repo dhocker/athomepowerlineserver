@@ -27,6 +27,7 @@ from meross_iot.manager import MerossManager
 from meross_iot.cloud.devices.light_bulbs import GenericBulb
 from meross_iot.cloud.devices.power_plugs import GenericPlug
 import logging
+import time
 from .base_driver_interface import BaseDriverInterface
 from Configuration import Configuration
 
@@ -39,9 +40,19 @@ class MerossDriver(BaseDriverInterface):
     def __init__(self):
         super().__init__()
         # Initiates the Meross Cloud Manager. This is in charge of handling the communication with the remote endpoint
-        self._manager = MerossManager(meross_email=Configuration.MerossEmail(),
-                                      meross_password=Configuration.MerossPassword())
-        logger.info("Meross driver initialized")
+        for retry in range(0, 10):
+            try:
+                self._manager = MerossManager(meross_email=Configuration.MerossEmail(),
+                                              meross_password=Configuration.MerossPassword())
+                logger.info("Meross driver initialized")
+                return
+            except Exception as ex:
+                logger.error("Unhandled exception attempting to create a MerossManager instance")
+                logger.error(str(ex))
+                # Wait incrementally longer for network to settle
+                time.sleep(float(retry + 1))
+
+        logger.error("After 10 retries, unable to create MerossManager instance")
 
     # Open the device
     def Open(self):
