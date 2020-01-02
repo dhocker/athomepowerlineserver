@@ -39,20 +39,23 @@ class MerossDriver(BaseDriverInterface):
 
     def __init__(self):
         super().__init__()
-        # Initiates the Meross Cloud Manager. This is in charge of handling the communication with the remote endpoint
-        for retry in range(0, 10):
+        # Initiates the Meross Cloud Manager. This is in charge of handling the communication with the remote endpoint.
+        # There is an inordinate amount of retry code here. But, the Meross-iot package seems
+        # go through a number of network errors when the server is started as part of a fresh boot-up.
+        # There's probably a race condition where the network is not completely up.
+        for retry in range(1, 11):
             try:
-                logger.debug("Attempting to create MerossManager instance")
+                logger.debug("Attempt %d to create a MerossManager instance", retry)
                 self._manager = MerossManager(meross_email=Configuration.MerossEmail(),
                                               meross_password=Configuration.MerossPassword())
                 logger.info("Meross driver initialized")
                 return
             except Exception as ex:
                 logger.error("Unhandled exception attempting to create a MerossManager instance")
-                logger.error(ex)
+                logger.error("Exception type is %s", type(ex))
                 # Wait incrementally longer for network to settle
-                logger.debug("Waiting %d seconds to retry", retry + 1)
-                time.sleep(float(retry + 1))
+                logger.debug("Waiting %d second(s) to retry", retry)
+                time.sleep(float(retry))
 
         logger.error("After 10 retries, unable to create MerossManager instance")
 
