@@ -42,14 +42,16 @@ class MerossDriver(BaseDriverInterface):
         # Initiates the Meross Cloud Manager. This is in charge of handling the communication with the remote endpoint
         for retry in range(0, 10):
             try:
+                logger.debug("Attempting to create MerossManager instance")
                 self._manager = MerossManager(meross_email=Configuration.MerossEmail(),
                                               meross_password=Configuration.MerossPassword())
                 logger.info("Meross driver initialized")
                 return
             except Exception as ex:
                 logger.error("Unhandled exception attempting to create a MerossManager instance")
-                logger.error(str(ex))
+                logger.error(ex)
                 # Wait incrementally longer for network to settle
+                logger.debug("Waiting %d seconds to retry", retry + 1)
                 time.sleep(float(retry + 1))
 
         logger.error("After 10 retries, unable to create MerossManager instance")
