@@ -211,6 +211,12 @@ class MerossDriver(BaseDriverInterface):
         """
         available_devices = {}
         try:
+            # Update known devices. If devices are added to the Meross
+            # cloud, they may not show up if the last start() was 
+            # executed before the device(s) were added.
+            self._manager.stop()
+            self._manager.start()
+
             plugs = self._manager.get_devices_by_kind(GenericPlug)
             for p in plugs:
                 channels = len(p.get_channels())
