@@ -219,13 +219,11 @@ class MerossDriver(BaseDriverInterface):
 
             plugs = self._manager.get_devices_by_kind(GenericPlug)
             for p in plugs:
-                channels = len(p.get_channels())
-                device_label = "{0} [{1} channel(s)]".format(p.name, channels)
-                available_devices[p.uuid] = device_label
+                available_devices[p.uuid] = self._build_device_details(p)
 
             bulbs = self._manager.get_devices_by_kind(GenericBulb)
             for b in bulbs:
-                available_devices[b.uuid] = b.name
+                available_devices[b.uuid] = self._build_device_details(b)
         except Exception as ex:
             logger.error("Exeception enumerating available devices")
             logger.error(str(ex))
@@ -238,6 +236,43 @@ class MerossDriver(BaseDriverInterface):
     # Set the controller time to the current, local time.
     def SetTime(self, time_value):
         pass
+
+    def _build_device_details(self, dd):
+        """
+        Build a device details dictionary for a device
+        :param dd: GenericPlug, GenericBulb, etc.
+        :return: Details dict
+        """
+        attrs = {"manufacturer": "Meross"}
+        attrs["online"] = dd.online
+        if isinstance(dd, GenericPlug):
+            attrs["type"] = "Plug"
+            channels = len(dd.get_channels())
+            attrs["channels"] = channels
+            device_label = "{0} [{1} channel(s)]".format(dd.name, channels)
+            attrs["label"] = device_label
+            attrs["usb"] = dd.get_usb_channel_index() is not None
+        elif isinstance(dd, GenericBulb):
+            attrs["type"] = "Bulb"
+            attrs["channels"] = 0
+            device_label = dd.name
+            attrs["label"] = device_label
+            attrs["usb"] = False
+            if dd.online:
+                # These attributes are only available if the device is online
+                attrs["rgb"] = dd.is_rgb()
+                attrs["temperature"] = dd.is_light_temperature()
+                attrs["luminance"] = dd.supports_luminance()
+            else:
+                attrs["rgb"] = False
+                attrs["temperature"] = False
+                attrs["luminance"] = False
+        else:
+            attrs["type"] = "Unknown"
+            device_label = dd.name
+
+
+        return attrs
 
 
 """

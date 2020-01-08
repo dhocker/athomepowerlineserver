@@ -93,8 +93,18 @@ class TPLinkDriver(BaseDriverInterface):
         try:
             result = {}
             # This can take a few seconds
-            for ip, plug in Discover.discover().items():
-                result[ip] = plug.alias
+            for ip, dev in Discover.discover().items():
+                attrs = {"manufacturer": "TPLink/Kasa"}
+                attrs["label"] = dev.alias
+                if isinstance(dev, SmartPlug):
+                    attrs["type"] = "Plug"
+                elif isinstance(dev, SmartBulb):
+                    attrs["type"] = "Bulb"
+                elif isinstance(dev, SmartStrip):
+                    attrs["type"] = "Strip"
+                else:
+                    attrs["type"] = "Unknown"
+                result[ip] = attrs
         except Exception as ex:
             logger.error("An exception occurred while trying to enumerate available TPLink/Kasa devices")
             logger.error(str(ex))
