@@ -66,7 +66,7 @@ class MerossDriver(BaseDriverInterface):
         # Starts the manager
         self.ClearLastError()
         try:
-            # self._manager.start()
+            self._manager.start()
             logger.info("Meross driver opened")
             return True
         except Exception as ex:
@@ -80,7 +80,7 @@ class MerossDriver(BaseDriverInterface):
     def Close(self):
         self.ClearLastError()
         try:
-            # self._manager.stop()
+            self._manager.stop()
             logger.info("Meross driver closed")
             return True
         except Exception as ex:
@@ -102,7 +102,6 @@ class MerossDriver(BaseDriverInterface):
         # TODO How to support multi-channel Meross devices
         self.ClearLastError()
         try:
-            self._manager.start()
             device = self._manager.get_device_by_uuid(house_device_code)
             if isinstance(device, GenericPlug):
                 device.turn_on_channel(0)
@@ -121,7 +120,8 @@ class MerossDriver(BaseDriverInterface):
             self.LastErrorCode = MerossDriver.MEROSS_ERROR
             self.LastError = str(ex)
         finally:
-            self._manager.stop()
+            pass
+
         return False
 
     def DeviceOff(self, device_type, device_name_tag, house_device_code, dim_amount):
@@ -136,7 +136,6 @@ class MerossDriver(BaseDriverInterface):
         # TODO How to support multi-channel Meross devices
         self.ClearLastError()
         try:
-            self._manager.start()
             device = self._manager.get_device_by_uuid(house_device_code)
             if isinstance(device, GenericPlug):
                 device.turn_off_channel(0)
@@ -155,7 +154,8 @@ class MerossDriver(BaseDriverInterface):
             self.LastErrorCode = MerossDriver.MEROSS_ERROR
             self.LastError = str(ex)
         finally:
-            self._manager.stop()
+            pass
+
         return False
 
     def DeviceDim(self, device_type, device_name_tag, house_device_code, dim_amount):
@@ -220,6 +220,7 @@ class MerossDriver(BaseDriverInterface):
             # Update known devices. If devices are added to the Meross
             # cloud, they may not show up if the last start() was 
             # executed before the device(s) were added.
+            self._manager.stop()
             self._manager.start()
 
             plugs = self._manager.get_devices_by_kind(GenericPlug)
@@ -235,7 +236,7 @@ class MerossDriver(BaseDriverInterface):
             self.LastErrorCode = 1
             self.LastError = str(ex)
         finally:
-            self._manager.stop()
+            pass
 
         return available_devices
 
