@@ -36,6 +36,7 @@ logger = logging.getLogger("server")
 
 class MerossDriver(BaseDriverInterface):
     MEROSS_ERROR = 7
+    RETRY_COUNT = 5
 
     def __init__(self):
         super().__init__()
@@ -101,26 +102,30 @@ class MerossDriver(BaseDriverInterface):
         """
         # TODO How to support multi-channel Meross devices
         self.ClearLastError()
-        try:
-            device = self._manager.get_device_by_uuid(house_device_code)
-            if isinstance(device, GenericPlug):
-                device.turn_on_channel(0)
-            elif isinstance(device, GenericBulb):
-                device.turn_on()
-            else:
-                logger.error("Unrecognized Meross device type: %s (%s)", device_name_tag, house_device_code)
+        for retry in range(MerossDriver.RETRY_COUNT):
+            try:
+                device = self._manager.get_device_by_uuid(house_device_code)
+                if isinstance(device, GenericPlug):
+                    device.turn_on_channel(0)
+                elif isinstance(device, GenericBulb):
+                    device.turn_on()
+                else:
+                    logger.error("Unrecognized Meross device type: %s (%s)", device_name_tag, house_device_code)
+                    self.LastErrorCode = MerossDriver.MEROSS_ERROR
+                    self.LastError = "Unrecognized Meross device type"
+                    return False
+                logger.debug("DeviceOn for: %s (%s) %s", device_name_tag, house_device_code, dim_amount)
+                return True
+            except Exception as ex:
+                logger.error("Exeception during DeviceOn for: %s (%s) %s", device_name_tag, house_device_code, dim_amount)
+                logger.error(str(ex))
                 self.LastErrorCode = MerossDriver.MEROSS_ERROR
-                self.LastError = "Unrecognized Meross device type"
-                return False
-            logger.debug("DeviceOn for: %s (%s) %s", device_name_tag, house_device_code, dim_amount)
-            return True
-        except Exception as ex:
-            logger.error("Exeception during DeviceOn for: %s (%s) %s", device_name_tag, house_device_code, dim_amount)
-            logger.error(str(ex))
-            self.LastErrorCode = MerossDriver.MEROSS_ERROR
-            self.LastError = str(ex)
-        finally:
-            pass
+                self.LastError = str(ex)
+                # Restart the Meross manager
+                self._manager.stop()
+                self._manager.start()
+            finally:
+                pass
 
         return False
 
@@ -135,26 +140,30 @@ class MerossDriver(BaseDriverInterface):
         """
         # TODO How to support multi-channel Meross devices
         self.ClearLastError()
-        try:
-            device = self._manager.get_device_by_uuid(house_device_code)
-            if isinstance(device, GenericPlug):
-                device.turn_off_channel(0)
-            elif isinstance(device, GenericBulb):
-                device.turn_off()
-            else:
-                logger.error("Unrecognized Meross device type: %s (%s)", device_name_tag, house_device_code)
+        for retry in range(MerossDriver.RETRY_COUNT):
+            try:
+                device = self._manager.get_device_by_uuid(house_device_code)
+                if isinstance(device, GenericPlug):
+                    device.turn_off_channel(0)
+                elif isinstance(device, GenericBulb):
+                    device.turn_off()
+                else:
+                    logger.error("Unrecognized Meross device type: %s (%s)", device_name_tag, house_device_code)
+                    self.LastErrorCode = MerossDriver.MEROSS_ERROR
+                    self.LastError = "Unrecognized Meross device type"
+                    return False
+                logger.debug("DeviceOff for: %s (%s) %s", device_name_tag, house_device_code, dim_amount)
+                return True
+            except Exception as ex:
+                logger.error("Exeception during DeviceOff for: %s (%s) %s", device_name_tag, house_device_code, dim_amount)
+                logger.error(str(ex))
                 self.LastErrorCode = MerossDriver.MEROSS_ERROR
-                self.LastError = "Unrecognized Meross device type"
-                return False
-            logger.debug("DeviceOff for: %s (%s) %s", device_name_tag, house_device_code, dim_amount)
-            return True
-        except Exception as ex:
-            logger.error("Exeception during DeviceOff for: %s (%s) %s", device_name_tag, house_device_code, dim_amount)
-            logger.error(str(ex))
-            self.LastErrorCode = MerossDriver.MEROSS_ERROR
-            self.LastError = str(ex)
-        finally:
-            pass
+                self.LastError = str(ex)
+                # Restart the Meross manager
+                self._manager.stop()
+                self._manager.start()
+            finally:
+                pass
 
         return False
 
