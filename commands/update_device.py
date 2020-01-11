@@ -10,7 +10,7 @@
 #
 
 import commands.ServerCommand as ServerCommand
-from database.devices import Devices
+from database.managed_devices import ManagedDevices
 
 
 class UpdateDevice(ServerCommand.ServerCommand):
@@ -28,8 +28,8 @@ class UpdateDevice(ServerCommand.ServerCommand):
         # TODO Consider a unique check on the name
         # TODO Cases based on type for address validation?
 
-        result = Devices.update(device_id, device_name, device_location, device_type,
-                                device_address, device_selected)
+        result = ManagedDevices.update(device_id, device_name, device_location, device_type,
+                                       device_address, device_selected)
 
         # Generate a successful response
         r = self.CreateResponse(request["request"])

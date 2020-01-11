@@ -10,7 +10,7 @@
 #
 
 import commands.ServerCommand as ServerCommand
-from database.devices import Devices
+from database.managed_devices import ManagedDevices
 
 
 class QueryDevices(ServerCommand.ServerCommand):
@@ -20,10 +20,10 @@ class QueryDevices(ServerCommand.ServerCommand):
     def Execute(self, request):
         args = request["args"]
         if "device-id" in args.keys():
-            result = Devices.get_device(int(args["device-id"]))
+            result = ManagedDevices.get_device(int(args["device-id"]))
             key = "device"
         else:
-            result = Devices.get_all_devices()
+            result = ManagedDevices.get_all_devices()
             key = "devices"
 
         # Generate a successful response

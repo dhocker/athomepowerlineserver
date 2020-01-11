@@ -17,7 +17,7 @@
 import datetime
 import socket
 import Version
-from database.devices import Devices
+from database.managed_devices import ManagedDevices
 from drivers.device_driver_manager import DeviceDriverManager
 
 
@@ -44,18 +44,18 @@ class ServerCommand:
 
     @classmethod
     def get_driver_for_id(cls, device_id):
-        r = Devices.get_device_by_id(device_id)
+        r = ManagedDevices.get_device_by_id(device_id)
         driver = DeviceDriverManager.get_driver(r["type"])
         return driver
 
     @classmethod
     def get_address_for_id(cls, device_id):
-        r = Devices.get_device_by_id(device_id)
+        r = ManagedDevices.get_device_by_id(device_id)
         return r["address"]
 
     @classmethod
     def get_device_for_id(cls, device_id):
-        return Devices.get_device_by_id(device_id)
+        return ManagedDevices.get_device_by_id(device_id)
 
     @classmethod
     def parse_time_str(cls, time_string):

@@ -17,11 +17,11 @@ import logging
 logger = logging.getLogger("server")
 
 
-class Devices(BaseTable):
+class ManagedDevices(BaseTable):
     TPLINK = "tplink"
     MEROSS = "meross"
     X10 = "x10"
-    # All valid device types and the device type class they belong to
+    # All valid device models and the device manufacturer they belong to
     VALID_DEVICE_LIST = {
         "x10": X10,
         "x10-appliance": X10,
@@ -52,7 +52,7 @@ class Devices(BaseTable):
     def delete_all(cls):
         conn = AtHomePowerlineServerDb.GetConnection()
         c = AtHomePowerlineServerDb.GetCursor(conn)
-        c.execute("DELETE FROM Devices")
+        c.execute("DELETE FROM ManagedDevices")
         conn.commit()
         conn.close()
 
@@ -61,14 +61,14 @@ class Devices(BaseTable):
         conn = AtHomePowerlineServerDb.GetConnection()
         c = AtHomePowerlineServerDb.GetCursor(conn)
         # The results are sorted based on the most probable use
-        rset = c.execute("SELECT * from Devices ORDER BY location, name")
+        rset = c.execute("SELECT * from ManagedDevices ORDER BY location, name")
         return cls.rows_to_dict_list(rset)
 
     @classmethod
     def get_device(cls, device_id):
         conn = AtHomePowerlineServerDb.GetConnection()
         c = AtHomePowerlineServerDb.GetCursor(conn)
-        rset = c.execute("SELECT * from Devices WHERE id=:deviceid", {"deviceid": device_id})
+        rset = c.execute("SELECT * from ManagedDevices WHERE id=:deviceid", {"deviceid": device_id})
         return cls.row_to_dict(rset.fetchone())
 
     @classmethod
@@ -91,7 +91,7 @@ class Devices(BaseTable):
         # Note that the current time is inserted as the update time. This is added to the
         # row as a convenient way to know when the record was inserted. It isn't used for
         # any other purpose.
-        c.execute("INSERT INTO Devices (name,location,type,address,selected,updatetime) values (?,?,?,?,?,?)",
+        c.execute("INSERT INTO ManagedDevices (name,location,type,address,selected,updatetime) values (?,?,?,?,?,?)",
                   (device_name, device_location, device_type, device_address, device_selected, datetime.datetime.now()))
         id = c.lastrowid
         conn.commit()
@@ -119,7 +119,7 @@ class Devices(BaseTable):
         # Note that the current time is inserted as the update time. This is added to the
         # row as a convenient way to know when the record was inserted. It isn't used for
         # any other purpose.
-        c.execute("UPDATE Devices SET " \
+        c.execute("UPDATE ManagedDevices SET " \
                     "name=?,location=?,type=?,address=?,selected=?,updatetime=? WHERE id=?",
                     (device_name, device_location, device_type, device_address, device_selected,
                     datetime.datetime.now(), device_id)
@@ -133,7 +133,7 @@ class Devices(BaseTable):
     def delete_device(cls, device_id):
         conn = AtHomePowerlineServerDb.GetConnection()
         c = AtHomePowerlineServerDb.GetCursor(conn)
-        c.execute("DELETE FROM Devices WHERE id=:deviceid", {"deviceid": device_id})
+        c.execute("DELETE FROM ManagedDevices WHERE id=:deviceid", {"deviceid": device_id})
         conn.commit()
         change_count = conn.total_changes
         conn.close()
@@ -148,7 +148,7 @@ class Devices(BaseTable):
         """
         conn = AtHomePowerlineServerDb.GetConnection()
         c = AtHomePowerlineServerDb.GetCursor(conn)
-        rset = c.execute("SELECT * from Devices where id=:id", {"id": device_id})
+        rset = c.execute("SELECT * from ManagedDevices where id=:id", {"id": device_id})
         return cls.row_to_dict(rset.fetchone())
 
     @classmethod

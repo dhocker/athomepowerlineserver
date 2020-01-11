@@ -20,7 +20,7 @@ import logging
 import traceback
 import timers.TimerStore
 import timers.TimerProgram
-from database.devices import Devices
+from database.managed_devices import ManagedDevices
 import commands.ActionFactory as ActionFactory
 
 logger = logging.getLogger("server")
@@ -117,12 +117,12 @@ class TimerServiceThread(threading.Thread):
     ########################################################################
     # Run an action
     def RunTimerAction(self, tp):
-        device_rec = Devices.get_device_by_id(tp.device_id)
-        device_type = device_rec["type"]
+        device_rec = ManagedDevices.get_device_by_id(tp.device_id)
+        device_mfg = device_rec["mfg"]
         device_name = device_rec["name"]
         device_address = device_rec["address"]
-        logger.info("Executing action: %s %s %s", tp.Action, device_type, device_address)
-        ActionFactory.RunAction(tp.Action, tp.device_id, device_type, device_name, device_address, int(tp.Dimamount))
+        logger.info("Executing action: %s %s %s", tp.Action, device_mfg, device_address)
+        ActionFactory.RunAction(tp.Action, tp.device_id, device_mfg, device_name, device_address, int(tp.Dimamount))
 
     ########################################################################
     # Test a date to see if its weekday is enabled

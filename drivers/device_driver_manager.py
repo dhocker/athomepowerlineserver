@@ -14,7 +14,7 @@ from drivers.Dummy import Dummy
 from drivers.XTB232 import XTB232
 from drivers.tplink import TPLinkDriver
 from drivers.meross import MerossDriver
-from database.devices import Devices
+from database.managed_devices import ManagedDevices
 
 logger = logging.getLogger("server")
 
@@ -56,12 +56,12 @@ class DeviceDriverManager():
 
     # Build list of supported devices
     # The point is to have one list of devices in the Devices model
-    for device, device_type in Devices.VALID_DEVICE_LIST.items():
-        if device_type == "x10":
+    for device, device_mfg in ManagedDevices.VALID_DEVICE_LIST.items():
+        if device_mfg == "x10":
             X10_DEVICE_LIST.append(device)
-        elif device_type == "tplink":
+        elif device_mfg == "tplink":
             TPLINK_DEVICE_LIST.append(device)
-        elif device_type == "meross":
+        elif device_mfg == "meross":
             MEROSS_DEVICE_LIST.append(device)
 
     @classmethod

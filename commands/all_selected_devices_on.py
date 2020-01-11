@@ -10,7 +10,7 @@
 #
 
 import commands.ServerCommand as ServerCommand
-from database.devices import Devices
+from database.managed_devices import ManagedDevices
 
 
 class AllSelectedDevicesOn(ServerCommand.ServerCommand):
@@ -19,7 +19,7 @@ class AllSelectedDevicesOn(ServerCommand.ServerCommand):
     """
     def Execute(self, request):
         # All defined devices
-        devices = Devices.get_all_devices()
+        devices = ManagedDevices.get_all_devices()
 
         device_count = 0
         for device in devices:
