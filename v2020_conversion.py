@@ -118,7 +118,13 @@ def create_program_assignments():
     # Each row of the Programs table produces a program assignment record
     conn.execute(
         "INSERT INTO ProgramAssignments(device_id,program_id) \
-        SELECT deviceid,id from Programs")
+        SELECT deviceid,id from ProgramsTemp")
+
+    # This is a bit crazy, but Sqlite seems to get confused when
+    # tables are renamed. To delete the deviceid column out of the
+    # old Devices table, we had to rename it and make a copy without
+    # the column. Now that we are done with the copy, we can delete it.
+    conn.execute("DROP TABLE ProgramsTemp")
 
     conn.commit()
     print("ProgramAssignments created")
@@ -160,8 +166,6 @@ def delete_programs_deviceid_column():
         "INSERT INTO Programs(id,name,daymask,triggermethod,time,offset,randomize,randomizeamount,command,dimamount,args,updatetime) \
         SELECT id,name,daymask,triggermethod,time,offset,randomize,randomizeamount,command,dimamount,args,updatetime from ProgramsTemp")
     conn.commit()
-
-    conn.execute("DROP TABLE ProgramsTemp")
 
     conn.commit()
     print("Programs.deviceid dropped")
@@ -222,10 +226,10 @@ def main():
     if schema_version == "4.0.0.0":
         # Rename Timers to Programs
         rename_timers()
-        # Create program assignments from Programs table before deleting device ID column
-        create_program_assignments()
         # Delete no longer needed column
         delete_programs_deviceid_column()
+        # Create program assignments from Programs table before deleting device ID column
+        create_program_assignments()
         # Rename Devices.type to Devices.mfg
         update_devices()
         # Create ActionGroup related tables
