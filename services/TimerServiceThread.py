@@ -1,6 +1,6 @@
 #
 # AtHomePowerlineServer - networked server for CM11/CM11A/XTB-232 X10 controllers
-# Copyright © 2014, 2019  Dave Hocker
+# Copyright © 2014, 2020  Dave Hocker
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,9 +18,11 @@ import time
 import datetime
 import logging
 import traceback
-import timers.TimerStore
-import timers.TimerProgram
+import random
+from helpers.TimeZone import TimeZone
+from helpers.sun_data import get_sunrise, get_sunset
 from database.managed_devices import ManagedDevices
+from database.programs import Programs
 import commands.ActionFactory as ActionFactory
 
 logger = logging.getLogger("server")
@@ -46,7 +48,7 @@ class TimerServiceThread(threading.Thread):
 
         # Check the terminate signal every second
         while not self.terminate_signal.isSet():
-            logger.info("Timer checks sleep")
+            logger.info("Program timer checks sleeping...")
             # This sleeps until the next minute.
             # We sleep in a granular fashion so that
             # a service stop/restart command takes effect
@@ -58,9 +60,9 @@ class TimerServiceThread(threading.Thread):
 
             # Every minute run the program checks if terminate is not set
             if not self.terminate_signal.isSet():
-                logger.info("Timer checks start")
+                logger.info("Program timer checks starting...")
                 self.RunTimerPrograms()
-                logger.info("Timer checks end")
+                logger.info("Program timer checks ended")
 
     ########################################################################
     # Terminate the timer service thread
@@ -74,8 +76,8 @@ class TimerServiceThread(threading.Thread):
     ########################################################################
     # Run timer programs that have reached their trigger time
     def RunTimerPrograms(self):
-        tp_list = timers.TimerStore.TimerStore.AcquireTimerProgramList()
-        logger.info("RunTimerPrograms lock acquired")
+        # All of the Programs records where command is not "none"
+        tp_list = Programs.get_all_active_programs()
 
         try:
             for tp in tp_list:
@@ -85,8 +87,7 @@ class TimerServiceThread(threading.Thread):
             logger.error(ex)
             logger.debug(traceback.format_exc())
         finally:
-            timers.TimerStore.TimerStore.ReleaseTimerProgramList()
-            logger.info("RunTimerPrograms lock released")
+            pass
 
     ########################################################################
     # Run a single timer program
@@ -100,15 +101,14 @@ class TimerServiceThread(threading.Thread):
         # the server was started. That will be a complicated task.
 
         # Only if the current day is enabled...
-        if TimerServiceThread.IsDayOfWeekEnabled(now, tp.DayMask):
+        if TimerServiceThread.IsDayOfWeekEnabled(now, tp["daymask"]):
             # we consider the event triggered if the current date/time in hours and minutes matches the event time
             logger.debug(str(tp))
 
             # Event check
-            if tp.IsEventTriggered():
+            if self.IsEventTriggered(tp):
                 # Event triggered
-                tp.EventRun = True
-                logger.info("TimerProgram event triggered: %s %s", tp.Name, tp.Action)
+                logger.info("Program event triggered: %s %s", tp["name"], tp["command"])
                 # Fire the action
                 self.RunTimerAction(tp)
         else:
@@ -117,12 +117,14 @@ class TimerServiceThread(threading.Thread):
     ########################################################################
     # Run an action
     def RunTimerAction(self, tp):
-        device_rec = ManagedDevices.get_device_by_id(tp.device_id)
-        device_mfg = device_rec["mfg"]
-        device_name = device_rec["name"]
-        device_address = device_rec["address"]
-        logger.info("Executing action: %s %s %s", tp.Action, device_mfg, device_address)
-        ActionFactory.RunAction(tp.Action, tp.device_id, device_mfg, device_name, device_address, int(tp.Dimamount))
+        # Get all devices that have been assigned this program
+        devices = ManagedDevices.get_devices_for_program(tp["id"])
+        for device_rec in devices:
+            device_mfg = device_rec["mfg"]
+            device_name = device_rec["name"]
+            device_address = device_rec["address"]
+            logger.info("Executing action: %s %s %s", tp["command"], device_mfg, device_address)
+            ActionFactory.RunAction(tp["command"], device_rec["id"], device_mfg, device_name, device_address, int(tp["dimamount"]))
 
     ########################################################################
     # Test a date to see if its weekday is enabled
@@ -132,3 +134,79 @@ class TimerServiceThread(threading.Thread):
         if (d != '-') and (d != '.'):
             return True
         return False
+
+    @classmethod
+    def IsEventTriggered(cls, tp):
+        """
+        Test the program against the given time to see if the start event has occurred.
+        :param tp: Timer program record
+        :return:
+        """
+        # We use the time part of the datetime to mean the time TODAY.
+        now = datetime.datetime.now()
+
+        # time without seconds
+        now_dt = datetime.datetime(now.year, now.month, now.day, now.hour, now.minute, 0, tzinfo=TimeZone())
+
+        # Randomized amount
+        randomized_amount = 0
+        if tp["randomize"]:
+            randomized_amount = cls.GetRandomizedAmount(tp["randomizeamount"])
+        logger.debug("Randomize amount: %s", randomized_amount)
+
+        # Factory testing based on trigger method
+        pt = datetime.datetime.strptime(tp["time"], "%Y-%m-%d %H:%M:%S")
+        if tp["triggermethod"] == "clock-time":
+            today_time = datetime.datetime(now.year, now.month, now.day, pt.hour,
+                                                pt.minute, pt.second, tzinfo=TimeZone())
+            today_time = today_time + datetime.timedelta(minutes=(tp["offset"] + randomized_amount))
+            return today_time == now_dt
+        elif tp["triggermethod"] == "sunset":
+            # logger.debug("Testing sunset trigger")
+            sunset = get_sunset(now_dt)
+            offset_sunset = sunset + datetime.timedelta(minutes=(tp["offset"] + randomized_amount))
+            return now_dt == offset_sunset
+        elif tp["triggermethod"] == "sunrise":
+            # logger.debug("Testing sunrise trigger")
+            sunrise = get_sunrise(now_dt)
+            offset_sunrise = sunrise + datetime.timedelta(minutes=(tp["offset"] + randomized_amount))
+            return now_dt == offset_sunrise
+
+        # "none" falls to here
+        return False
+
+
+    @classmethod
+    def GetRandomizedAmount(cls, randomize_amount):
+        """
+        For today's date, calculate the integer randomized amount r where
+        -randomize_amount <= int(r) <= randomize_amount
+        """
+
+        # Today's randomization factor
+        rf = cls.GetRandomFactor()
+
+        # Round randomized value to a whole integer
+        # Return the result as an integer
+        return int(round(rf * float(randomize_amount)))
+
+    @classmethod
+    def GetRandomFactor(cls):
+        """
+        Returns a floating point randomization factor in the range -1.0 <= f <= 1.0
+        """
+
+        # We want to use today's date as the seed (just the date).
+        # This will allow us to reproduce a random factor for a given date, while
+        # allowing the factor to vary over a range of dates.
+        now = datetime.datetime.now()
+        now_date = datetime.date(now.year, now.month, now.day)
+        random.seed(now_date)
+
+        # We'll try to inject a little more controlled randomness by using today's
+        # day as an additional factor.
+        f = 1.0
+        for i in range(0, now_date.day):
+            f = random.uniform(-1.0, 1.0)
+
+        return f

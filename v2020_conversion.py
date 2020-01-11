@@ -133,6 +133,7 @@ def delete_programs_deviceid_column():
     conn = get_connection()
 
     conn.execute("ALTER TABLE Programs RENAME TO ProgramsTemp")
+    conn.commit()
 
     # New Programs table without device ID column
     conn.execute(
@@ -152,11 +153,13 @@ def delete_programs_deviceid_column():
         PRIMARY KEY(id) ) \
         "
     )
+    conn.commit()
 
     # Copy the temp table, losing the device ID in the process.
     conn.execute(
         "INSERT INTO Programs(id,name,daymask,triggermethod,time,offset,randomize,randomizeamount,command,dimamount,args,updatetime) \
         SELECT id,name,daymask,triggermethod,time,offset,randomize,randomizeamount,command,dimamount,args,updatetime from ProgramsTemp")
+    conn.commit()
 
     conn.execute("DROP TABLE ProgramsTemp")
 

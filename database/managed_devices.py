@@ -152,5 +152,14 @@ class ManagedDevices(BaseTable):
         return cls.row_to_dict(rset.fetchone())
 
     @classmethod
+    def get_devices_for_program(cls, program_id):
+        conn = AtHomePowerlineServerDb.GetConnection()
+        c = AtHomePowerlineServerDb.GetCursor(conn)
+        rset = c.execute("SELECT ManagedDevices.* from ProgramAssignments "
+                         "join ManagedDevices on ManagedDevices.id=ProgramAssignments.device_id "
+                         "where ProgramAssignments.program_id=:id", {"id": program_id})
+        return cls.rows_to_dict_list(rset)
+
+    @classmethod
     def is_valid_device_type(cls, device_type):
         return device_type.lower() in cls.VALID_DEVICE_LIST.keys()
