@@ -55,22 +55,59 @@ class AtHomePowerlineServerDb:
         # Create tables (Sqlite3 specific)
         # SchemaVersion (sort of the migration version)
         conn.execute("CREATE TABLE SchemaVersion (Version text, updatetime timestamp)")
-        conn.execute("INSERT INTO SchemaVersion values (?, ?)", ("4.0.0.0", datetime.datetime.now()))
+        conn.execute("INSERT INTO SchemaVersion values (?, ?)", ("5.0.0.0", datetime.datetime.now()))
         conn.commit()
 
-        # Timers
-        conn.execute("CREATE TABLE Timers (id integer PRIMARY KEY, \
-                     name text, deviceid integer, daymask text, \
-                     triggermethod text, time timestamp, offset integer, \
-                     randomize integer, randomizeamount integer, \
-                     command text, dimamount integer, args text, updatetime timestamp, \
-                     FOREIGN KEY(deviceid) REFERENCES Devices(id) ON DELETE CASCADE)")
+        # New Programs table without device ID column
+        conn.execute(
+            "CREATE TABLE Programs ( \
+            id	integer, \
+            name	text, \
+            daymask	text, \
+            triggermethod	text, \
+            time	timestamp, \
+            offset	integer, \
+            randomize	integer, \
+            randomizeamount	integer, \
+            command	text, \
+            dimamount	integer, \
+            args	text, \
+            updatetime	timestamp, \
+            PRIMARY KEY(id) ) \
+            "
+        )
+        conn.commit()
 
         # Devices
         # Note that by definition Sqlite treats the id columns as the ROWID. See https://www.sqlite.org/autoinc.html
         conn.execute(
-            "CREATE TABLE Devices (id integer PRIMARY KEY, name text, location text, \
-            type text, address text, selected integer, updatetime timestamp)")
+            "CREATE TABLE ManagedDevices (id integer PRIMARY KEY, name text, location text, \
+            mfg text, address text, selected integer, updatetime timestamp)")
+        conn.commit()
+
+        conn.execute(
+            "CREATE TABLE ProgramAssignments (id integer PRIMARY KEY, \
+            device_id integer NOT NULL, program_id integer NOT NULL, \
+            FOREIGN KEY (device_id) REFERENCES ManagedDevices(id), \
+            FOREIGN KEY (program_id) REFERENCES Programs(id), \
+            UNIQUE (device_id, program_id))"
+        )
+        conn.commit()
+
+        # ActionGroups table
+        conn.execute(
+            "CREATE TABLE ActionGroups (id integer PRIMARY KEY, name text)"
+        )
+        conn.commit()
+
+        # ActionGroupDevices table
+        conn.execute(
+            "CREATE TABLE ActionGroupDevices (id integer PRIMARY KEY, group_id integer , device_id integer, \
+            FOREIGN KEY (device_id) REFERENCES ManagedDevices(id), \
+            FOREIGN KEY (group_id) REFERENCES ActionGroups(id), \
+            UNIQUE(group_id,device_id))"
+        )
+        conn.commit()
 
         # Done
         conn.close()
