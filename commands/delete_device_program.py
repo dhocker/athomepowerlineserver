@@ -10,7 +10,7 @@
 #
 
 import commands.ServerCommand as ServerCommand
-from database.Timers import Timers
+from database.programs import Programs
 from timers.TimerStore import TimerStore
 
 
@@ -21,7 +21,7 @@ class DeleteDeviceProgram(ServerCommand.ServerCommand):
     def Execute(self, request):
         args = request["args"]
         # Remove program from database and in-memory cache
-        result = Timers.delete(int(args["program-id"]))
+        result = Programs.delete(int(args["program-id"]))
         TimerStore.remove_timer(int(args["program-id"]))
 
         # Generate a successful response

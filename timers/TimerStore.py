@@ -15,7 +15,7 @@
 #
 
 import timers.TimerProgram as TimerProgram
-import database.Timers as Timers
+import database.programs as Timers
 import datetime
 import threading
 import logging
@@ -55,7 +55,7 @@ class TimerStore:
         try:
             cls.ClearTimerProgramList()
 
-            rset = Timers.Timers.GetAll()
+            rset = Timers.Programs.GetAll()
             for r in rset:
                 id = r["id"]
                 name = r["name"]
@@ -95,7 +95,7 @@ class TimerStore:
 
         try:
             # Clear the existing timer programs
-            Timers.Timers.DeleteAll()
+            Timers.Programs.DeleteAll()
 
             logger.info("Saving all timer programs to database")
             for tp in cls.TimerProgramList:
@@ -103,10 +103,10 @@ class TimerStore:
                 # print "Saving timer program:", tp.name
                 # It may be necessary to format on/off time to be certain that the format is held across save/load
                 # Replace house-device-code with device id
-                Timers.Timers.insert(tp.Name, tp.device_id, tp.DayMask,
-                                     tp.TriggerMethod, tp.Time, tp.Offset, tp.Randomize,
-                                     tp.RandomizeAmount,
-                                     tp.Action, tp.Dimamount, tp.Security)
+                Timers.Programs.insert(tp.Name, tp.DayMask,
+                                       tp.TriggerMethod, tp.Time, tp.Offset, tp.Randomize,
+                                       tp.RandomizeAmount,
+                                       tp.Action, tp.Dimamount, tp.Security)
         finally:
             cls.ReleaseTimerProgramList()
 

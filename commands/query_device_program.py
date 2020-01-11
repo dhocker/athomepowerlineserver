@@ -10,7 +10,7 @@
 #
 
 import commands.ServerCommand as ServerCommand
-from database.Timers import Timers
+from database.programs import Programs
 
 
 class QueryDeviceProgram(ServerCommand.ServerCommand):
@@ -19,7 +19,7 @@ class QueryDeviceProgram(ServerCommand.ServerCommand):
     """
     def Execute(self, request):
         programid = int(request["args"]["program-id"])
-        result = Timers.get_device_program(programid)
+        result = Programs.get_program_by_id(programid)
 
         # Generate a successful response
         r = self.CreateResponse(request["request"])

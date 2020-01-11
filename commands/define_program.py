@@ -12,7 +12,7 @@
 
 from commands.ServerCommand import ServerCommand
 import timers.TimerStore
-import database.Timers
+import database.programs
 import datetime
 import logging
 
@@ -43,7 +43,6 @@ class DefineProgram(ServerCommand):
 
         # Pull all of the timer program values out of the dict entry
         name = request["args"]["name"]
-        device_id = request["args"]["device-id"]
         day_mask = request["args"]["day-mask"]
         trigger_method = request["args"]["trigger-method"]
         trigger_time = self.parse_time_str(request["args"]["time"])
@@ -56,13 +55,13 @@ class DefineProgram(ServerCommand):
         security = False
 
         # Insert program into Timers table
-        id = database.Timers.Timers.insert(name, device_id, day_mask,
-                                           trigger_method, trigger_time, offset, randomize,
-                                           randomize_amount,
-                                           action, dimamount, security)
+        id = database.programs.Programs.insert(name, day_mask,
+                                               trigger_method, trigger_time, offset, randomize,
+                                               randomize_amount,
+                                               action, dimamount, security)
 
         # Add the timer program to the current list
-        timers.TimerStore.TimerStore.AppendTimer(id, name, device_id, day_mask,
+        timers.TimerStore.TimerStore.AppendTimer(id, name, day_mask,
                                                  trigger_method, trigger_time, offset, randomize,
                                                  randomize_amount,
                                                  action, dimamount, security=security)

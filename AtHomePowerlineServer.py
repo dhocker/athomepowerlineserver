@@ -86,8 +86,6 @@ def main():
     # Initialize the database
     logger.info("Initializing database")
     database.AtHomePowerlineServerDb.AtHomePowerlineServerDb.Initialize()
-    logger.info("Loading timer programs")
-    timers.TimerStore.TimerStore.LoadTimerProgramList()
 
     # HOST, PORT = "localhost", 9999
     # HOST, PORT = "hedwig", 9999

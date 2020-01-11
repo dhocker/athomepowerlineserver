@@ -12,7 +12,7 @@
 
 from commands.ServerCommand import ServerCommand
 import timers.TimerStore
-import database.Timers
+import database.programs
 import datetime
 import logging
 
@@ -49,10 +49,10 @@ class UpdateProgram(ServerCommand):
         security = False
 
         # Insert program into Timers table
-        database.Timers.Timers.update(id, name, device_id, day_mask,
-                                           trigger_method, trigger_time, offset, randomize,
-                                           randomize_amount,
-                                           action, dimamount, security)
+        database.programs.Programs.update(id, name, device_id, day_mask,
+                                          trigger_method, trigger_time, offset, randomize,
+                                          randomize_amount,
+                                          action, dimamount, security)
 
         # Update the timer program in the current list
         timers.TimerStore.TimerStore.UpdateTimer(id, name, device_id, day_mask,
