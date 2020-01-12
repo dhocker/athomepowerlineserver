@@ -56,6 +56,16 @@ class Programs(BaseTable):
         return cls.rows_to_dict_list(rset)
 
     @classmethod
+    def get_all_device_programs(cls, device_id):
+        conn = AtHomePowerlineServerDb.AtHomePowerlineServerDb.GetConnection()
+        c = AtHomePowerlineServerDb.AtHomePowerlineServerDb.GetCursor(conn)
+        rset = c.execute(
+            'SELECT Programs.* FROM ProgramAssignments JOIN Programs '
+            'WHERE Programs.id=ProgramAssignments.program_id AND ProgramAssignments.device_id=:device_id',
+            {"device_id": device_id})
+        return cls.rows_to_dict_list(rset)
+
+    @classmethod
     def get_program_by_id(cls, programid):
         """
         Return a specific Programs record
