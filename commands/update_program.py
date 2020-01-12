@@ -36,7 +36,6 @@ class UpdateProgram(ServerCommand):
         # Pull all of the timer program values out of the dict entry
         id = int(request["args"]["id"])
         name = request["args"]["name"]
-        device_id = int(request["args"]["device-id"])
         day_mask = request["args"]["day-mask"]
         trigger_method = request["args"]["trigger-method"]
         trigger_time = self.parse_time_str(request["args"]["time"])
@@ -49,19 +48,10 @@ class UpdateProgram(ServerCommand):
         security = False
 
         # Insert program into Timers table
-        database.programs.Programs.update(id, name, device_id, day_mask,
+        database.programs.Programs.update(id, name, day_mask,
                                           trigger_method, trigger_time, offset, randomize,
                                           randomize_amount,
                                           action, dimamount, security)
-
-        # Update the timer program in the current list
-        timers.TimerStore.TimerStore.UpdateTimer(id, name, device_id, day_mask,
-                                                 trigger_method, trigger_time, offset, randomize,
-                                                 randomize_amount,
-                                                 action, dimamount, security=security)
-
-        # Debugging...
-        timers.TimerStore.TimerStore.DumpTimerProgramList()
 
         # Generate a successful response
         r = UpdateProgram.CreateResponse("UpdateProgram")

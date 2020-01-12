@@ -60,15 +60,6 @@ class DefineProgram(ServerCommand):
                                                randomize_amount,
                                                action, dimamount, security)
 
-        # Add the timer program to the current list
-        timers.TimerStore.TimerStore.AppendTimer(id, name, day_mask,
-                                                 trigger_method, trigger_time, offset, randomize,
-                                                 randomize_amount,
-                                                 action, dimamount, security=security)
-
-        # Debugging...
-        timers.TimerStore.TimerStore.DumpTimerProgramList()
-
         # Generate a successful response
         r = DefineProgram.CreateResponse("DefineProgram")
 
