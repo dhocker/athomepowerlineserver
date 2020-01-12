@@ -45,7 +45,7 @@ class Programs(BaseTable):
         c = AtHomePowerlineServerDb.AtHomePowerlineServerDb.GetCursor(conn)
         rset = c.execute(
             "SELECT * from Programs")
-        return rset
+        return cls.rows_to_dict_list(rset)
 
     @classmethod
     def get_all_active_programs(cls):

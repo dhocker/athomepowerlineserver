@@ -39,6 +39,7 @@ import commands.delete_device_program
 import commands.all_selected_devices_on
 import commands.all_selected_devices_off
 import commands.query_available_devices
+import commands.query_programs
 
 logger = logging.getLogger("server")
 
@@ -68,6 +69,7 @@ class CommandHandler:
         "queryavailabledevices": commands.query_available_devices.QueryAvailableDevices,
         "updatedevice": commands.update_device.UpdateDevice,
         "deletedevice": commands.delete_device.DeleteDevice,
+        "queryprograms": commands.query_programs.QueryPrograms,
         "defineprogram": commands.define_program.DefineProgram,
         "updateprogram": commands.update_program.UpdateProgram,
         "deletedeviceprogram": commands.delete_device_program.DeleteDeviceProgram,
