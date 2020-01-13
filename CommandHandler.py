@@ -39,7 +39,9 @@ import commands.delete_device_program
 import commands.all_selected_devices_on
 import commands.all_selected_devices_off
 import commands.query_available_devices
+import commands.query_available_programs
 import commands.query_programs
+import commands.assign_program
 
 logger = logging.getLogger("server")
 
@@ -67,6 +69,7 @@ class CommandHandler:
         "definedevice": commands.define_device.DefineDevice,
         "querydevices": commands.query_devices.QueryDevices,
         "queryavailabledevices": commands.query_available_devices.QueryAvailableDevices,
+        "queryavailableprograms": commands.query_available_programs.QueryAvailablePrograms,
         "updatedevice": commands.update_device.UpdateDevice,
         "deletedevice": commands.delete_device.DeleteDevice,
         "queryprograms": commands.query_programs.QueryPrograms,
@@ -75,6 +78,7 @@ class CommandHandler:
         "deletedeviceprogram": commands.delete_device_program.DeleteDeviceProgram,
         "querydeviceprograms": commands.query_device_programs.QueryDevicePrograms,
         "querydeviceprogram": commands.query_device_program.QueryDeviceProgram,
+        "assignprogram": commands.assign_program.AssignProgram,
         "allselecteddeviceson": commands.all_selected_devices_on.AllSelectedDevicesOn,
         "allselecteddevicesoff": commands.all_selected_devices_off.AllSelectedDevicesOff
     }

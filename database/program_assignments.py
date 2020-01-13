@@ -14,10 +14,28 @@
 # Programs table model
 #
 
-import database.AtHomePowerlineServerDb as AtHomePowerlineServerDb
+from database.AtHomePowerlineServerDb import AtHomePowerlineServerDb
 from .base_table import BaseTable
 
 
 class ProgramAssignments(BaseTable):
     def __init__(self):
         pass
+
+    @classmethod
+    def insert(cls, device_id, program_id):
+        """
+        Insert a program assignment record
+        :param device_id: The target device ID
+        :param program_id: The program to be assigned
+        :return:
+        """
+        conn = AtHomePowerlineServerDb.GetConnection()
+        c = AtHomePowerlineServerDb.GetCursor(conn)
+
+        c.execute("INSERT INTO ProgramAssignments (device_id,program_id) values (?,?)",
+                  (device_id, program_id))
+        id = c.lastrowid
+        conn.commit()
+        conn.close()
+        return id

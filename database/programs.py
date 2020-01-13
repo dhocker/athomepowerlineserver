@@ -66,6 +66,17 @@ class Programs(BaseTable):
         return cls.rows_to_dict_list(rset)
 
     @classmethod
+    def get_all_available_programs(cls, device_id):
+        conn = AtHomePowerlineServerDb.AtHomePowerlineServerDb.GetConnection()
+        c = AtHomePowerlineServerDb.AtHomePowerlineServerDb.GetCursor(conn)
+        # Select programs not already assigned to this device
+        rset = c.execute(
+            'SELECT * FROM Programs '
+            'WHERE Programs.id NOT IN (SELECT program_id from ProgramAssignments where device_id=:device_id)',
+            {"device_id": device_id})
+        return cls.rows_to_dict_list(rset)
+
+    @classmethod
     def get_program_by_id(cls, programid):
         """
         Return a specific Programs record
