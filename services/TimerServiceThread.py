@@ -112,7 +112,7 @@ class TimerServiceThread(threading.Thread):
                 # Fire the action
                 self.RunTimerAction(tp)
         else:
-            logger.debug("%s is not enabled for the current weekday", tp.Name)
+            logger.debug("%s is not enabled for the current weekday", tp["name"])
 
     ########################################################################
     # Run an action
