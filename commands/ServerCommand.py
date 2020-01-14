@@ -45,7 +45,7 @@ class ServerCommand:
     @classmethod
     def get_driver_for_id(cls, device_id):
         r = ManagedDevices.get_device_by_id(device_id)
-        driver = DeviceDriverManager.get_driver(r["type"])
+        driver = DeviceDriverManager.get_driver(r["mfg"])
         return driver
 
     @classmethod
