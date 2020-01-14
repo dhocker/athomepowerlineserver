@@ -39,3 +39,14 @@ class ProgramAssignments(BaseTable):
         conn.commit()
         conn.close()
         return id
+
+    @classmethod
+    def delete(cls, device_id, program_id):
+        conn = AtHomePowerlineServerDb.GetConnection()
+        c = AtHomePowerlineServerDb.GetCursor(conn)
+        c.execute("DELETE FROM ProgramAssignments WHERE device_id=:device_id AND program_id=:program_id",
+                  {"device_id": device_id, "program_id": program_id})
+        conn.commit()
+        change_count = conn.total_changes
+        conn.close()
+        return change_count

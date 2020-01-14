@@ -10,7 +10,7 @@
 #
 
 import commands.ServerCommand as ServerCommand
-from database.programs import Programs
+from database.program_assignments import ProgramAssignments
 from timers.TimerStore import TimerStore
 
 
@@ -20,22 +20,33 @@ class DeleteDeviceProgram(ServerCommand.ServerCommand):
     """
     def Execute(self, request):
         args = request["args"]
-        # Remove program from database and in-memory cache
-        result = Programs.delete(int(args["program-id"]))
-        TimerStore.remove_timer(int(args["program-id"]))
+        device_id = int(args["device-id"])
+        program_id = int(args["program-id"])
 
         # Generate a successful response
         r = self.CreateResponse(request["request"])
 
-        if result:
-            r['result-code'] = 0
-            r['program-id'] = args["program-id"]
-            r['message'] = "Success"
-        else:
-            # Probably invalid device type
+        try:
+            # Remove program from database and in-memory cache
+            result = ProgramAssignments.delete(device_id, program_id)
+
+            if result:
+                r['result-code'] = 0
+                r['device-id'] = args["device-id"]
+                r['program-id'] = args["program-id"]
+                r['message'] = "Success"
+            else:
+                # Probably invalid device type
+                r['result-code'] = 1
+                r['device-id'] = args["device-id"]
+                r['program-id'] = args["program-id"]
+                r['error'] = 1
+                r['message'] = "Failure"
+        except Exception as ex:
             r['result-code'] = 1
+            r['device-id'] = args["device-id"]
             r['program-id'] = args["program-id"]
-            r['error'] = 1
-            r['message'] = "Failure"
+            r['error'] = 2
+            r['message'] = str(ex)
 
         return r
