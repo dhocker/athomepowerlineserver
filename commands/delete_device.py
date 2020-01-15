@@ -22,10 +22,6 @@ class DeleteDevice(ServerCommand.ServerCommand):
         args = request["args"]
         result = ManagedDevices.delete_device(int(args["device-id"]))
 
-        # Deleting a device may cause a cascading delete of timer programs
-        # Therefore, we need to reload the in-memory cache
-        TimerStore.LoadTimerProgramList()
-
         # Generate a successful response
         r = self.CreateResponse(request["request"])
 

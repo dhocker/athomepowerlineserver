@@ -135,6 +135,9 @@ class Programs(BaseTable):
     def delete(cls, id):
         conn = AtHomePowerlineServerDb.AtHomePowerlineServerDb.GetConnection()
         c = AtHomePowerlineServerDb.AtHomePowerlineServerDb.GetCursor(conn)
+        # Note that this is a cascading delete that will cause all related
+        # ProgramAssignment and ActionGroupDevices table records to be deleted.
+        # In effect, any record using the device ID will be deleted.
         c.execute("DELETE FROM Programs WHERE id=:id", {"id": id})
         conn.commit()
         change_count = conn.total_changes
