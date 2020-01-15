@@ -110,8 +110,8 @@ def create_program_assignments():
     conn.execute(
         "CREATE TABLE ProgramAssignments (id integer PRIMARY KEY, \
         device_id integer NOT NULL, program_id integer NOT NULL, \
-        FOREIGN KEY (device_id) REFERENCES ManagedDevices(id), \
-        FOREIGN KEY (program_id) REFERENCES Programs(id), \
+        FOREIGN KEY (device_id) REFERENCES ManagedDevices(id) ON DELETE CASCADE, \
+        FOREIGN KEY (program_id) REFERENCES Programs(id) ON DELETE CASCADE, \
         UNIQUE (device_id, program_id))"
     )
 
@@ -185,8 +185,8 @@ def create_group_tables():
     # ActionGroupDevices table
     cursor.execute(
         "CREATE TABLE ActionGroupDevices (id integer PRIMARY KEY, group_id integer , device_id integer, \
-        FOREIGN KEY (device_id) REFERENCES ManagedDevices(id), \
-        FOREIGN KEY (group_id) REFERENCES ActionGroups(id), \
+        FOREIGN KEY (device_id) REFERENCES ManagedDevices(id) ON DELETE CASCADE, \
+        FOREIGN KEY (group_id) REFERENCES ActionGroups(id) ON DELETE CASCADE, \
         UNIQUE(group_id,device_id))"
     )
 
