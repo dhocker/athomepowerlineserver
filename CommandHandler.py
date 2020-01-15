@@ -1,6 +1,6 @@
 #
 # AtHomePowerlineServer - networked server for CM11/CM11A/XTB-232 X10 controllers
-# Copyright (C) 2014  Dave Hocker
+# Copyright (C) 2014, 2020  Dave Hocker
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -13,8 +13,6 @@ import json
 import datetime
 import logging
 import commands.ServerCommand
-import commands.LoadTimers
-import commands.LoadActions
 import commands.ServerCommand
 import commands.StatusRequest
 import commands.DeviceOn

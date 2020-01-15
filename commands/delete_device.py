@@ -1,6 +1,6 @@
 #
 # Delete a device
-# Copyright © 2019  Dave Hocker
+# Copyright © 2019, 2020  Dave Hocker
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -11,7 +11,6 @@
 
 import commands.ServerCommand as ServerCommand
 from database.managed_devices import ManagedDevices
-from timers.TimerStore import TimerStore
 
 
 class DeleteDevice(ServerCommand.ServerCommand):

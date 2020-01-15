@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # Update a timer program - AtHomePowerlineServer
-# Copyright © 2019  Dave Hocker
+# Copyright © 2019, 2020  Dave Hocker
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -11,7 +11,6 @@
 #
 
 from commands.ServerCommand import ServerCommand
-import timers.TimerStore
 import database.programs
 import datetime
 import logging

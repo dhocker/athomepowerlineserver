@@ -11,7 +11,6 @@
 
 import commands.ServerCommand as ServerCommand
 from database.programs import Programs
-from timers.TimerStore import TimerStore
 
 
 class DeleteProgram(ServerCommand.ServerCommand):

@@ -2,7 +2,7 @@
 
 #
 # AtHomePowerlineServer - networked server for remote power controlled devices
-# Copyright © 2014, 2019  Dave Hocker (email: AtHomeX10@gmail.com)
+# Copyright © 2014, 2020  Dave Hocker (email: AtHomeX10@gmail.com)
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,7 +22,6 @@ import Configuration
 import Logging
 from drivers.device_driver_manager import DeviceDriverManager
 import database.AtHomePowerlineServerDb
-import timers.TimerStore
 import services.TimerService
 import disclaimer.Disclaimer
 import logging
