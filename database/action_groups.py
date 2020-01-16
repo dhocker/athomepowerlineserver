@@ -31,11 +31,19 @@ class ActionGroups(BaseTable):
         return cls.rows_to_dict_list(rset)
 
     @classmethod
+    def get_group_devices(cls, id):
+        conn = AtHomePowerlineServerDb.GetConnection()
+        c = AtHomePowerlineServerDb.GetCursor(conn)
+        # The results are sorted based on the most probable use
+        rset = c.execute("SELECT * from ActionGroups WHERE id=:id", {"id": id})
+        return cls.row_to_dict(rset.fetchone())
+
+    @classmethod
     def get_group_by_id(cls, id):
         conn = AtHomePowerlineServerDb.GetConnection()
         c = AtHomePowerlineServerDb.GetCursor(conn)
         # The results are sorted based on the most probable use
-        rset = c.execute("SELECT * from ActionGroups WHERE id=?", (id))
+        rset = c.execute("SELECT * from ActionGroups WHERE id=:id", {"id": id})
         return cls.row_to_dict(rset.fetchone())
 
     @classmethod
