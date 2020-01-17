@@ -45,6 +45,7 @@ import commands.query_action_groups
 import commands.query_action_group
 import commands.query_action_group_devices
 import commands.update_action_group
+import commands.define_group
 
 logger = logging.getLogger("server")
 
@@ -83,6 +84,7 @@ class CommandHandler:
         "querydeviceprograms": commands.query_device_programs.QueryDevicePrograms,
         "querydeviceprogram": commands.query_device_program.QueryDeviceProgram,
         "assignprogram": commands.assign_program.AssignProgram,
+        "defineactiongroup": commands.define_group.DefineGroup,
         "queryactiongroups": commands.query_action_groups.QueryActionGroups,
         "queryactiongroup": commands.query_action_group.QueryActionGroup,
         "updateactiongroup": commands.update_action_group.UpdateActionGroup,

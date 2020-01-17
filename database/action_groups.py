@@ -47,7 +47,7 @@ class ActionGroups(BaseTable):
         return cls.row_to_dict(rset.fetchone())
 
     @classmethod
-    def insert(cls, name):
+    def insert(cls, group_name):
         """
         Insert a group record
         :param name: The name of the new group
@@ -56,8 +56,7 @@ class ActionGroups(BaseTable):
         conn = AtHomePowerlineServerDb.GetConnection()
         c = AtHomePowerlineServerDb.GetCursor(conn)
 
-        c.execute("INSERT INTO ActionGroups (name) values (?)",
-                  (name))
+        c.execute("INSERT INTO ActionGroups (name) values (:group_name)", {"group_name": group_name})
         id = c.lastrowid
         conn.commit()
         conn.close()
