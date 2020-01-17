@@ -44,6 +44,7 @@ import commands.delete_program
 import commands.query_action_groups
 import commands.query_action_group
 import commands.query_action_group_devices
+import commands.update_action_group
 
 logger = logging.getLogger("server")
 
@@ -84,6 +85,7 @@ class CommandHandler:
         "assignprogram": commands.assign_program.AssignProgram,
         "queryactiongroups": commands.query_action_groups.QueryActionGroups,
         "queryactiongroup": commands.query_action_group.QueryActionGroup,
+        "updateactiongroup": commands.update_action_group.UpdateActionGroup,
         "queryactiongroupdevices": commands.query_action_group_devices.QueryActionGroupDevices,
         "allselecteddeviceson": commands.all_selected_devices_on.AllSelectedDevicesOn,
         "allselecteddevicesoff": commands.all_selected_devices_off.AllSelectedDevicesOff

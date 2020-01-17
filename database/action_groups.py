@@ -75,10 +75,10 @@ class ActionGroups(BaseTable):
 
         c.execute("UPDATE ActionGroups SET name=? WHERE id=?",
                   (name, id))
-        id = c.lastrowid
         conn.commit()
+        change_count = conn.total_changes
         conn.close()
-        return id
+        return change_count
 
     @classmethod
     def delete(cls, id):
