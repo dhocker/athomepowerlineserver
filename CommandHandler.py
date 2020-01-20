@@ -46,6 +46,8 @@ import commands.query_action_group
 import commands.query_action_group_devices
 import commands.update_action_group
 import commands.define_group
+import commands.group_on
+import commands.group_off
 
 logger = logging.getLogger("server")
 
@@ -89,6 +91,8 @@ class CommandHandler:
         "queryactiongroup": commands.query_action_group.QueryActionGroup,
         "updateactiongroup": commands.update_action_group.UpdateActionGroup,
         "queryactiongroupdevices": commands.query_action_group_devices.QueryActionGroupDevices,
+        "groupon": commands.group_on.GroupOn,
+        "groupoff": commands.group_off.GroupOff,
         "allselecteddeviceson": commands.all_selected_devices_on.AllSelectedDevicesOn,
         "allselecteddevicesoff": commands.all_selected_devices_off.AllSelectedDevicesOff
     }
