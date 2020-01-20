@@ -48,6 +48,7 @@ import commands.update_action_group
 import commands.define_group
 import commands.group_on
 import commands.group_off
+import commands.delete_group
 
 logger = logging.getLogger("server")
 
@@ -87,6 +88,7 @@ class CommandHandler:
         "querydeviceprogram": commands.query_device_program.QueryDeviceProgram,
         "assignprogram": commands.assign_program.AssignProgram,
         "defineactiongroup": commands.define_group.DefineGroup,
+        "deleteactiongroup": commands.delete_group.DeleteGroup,
         "queryactiongroups": commands.query_action_groups.QueryActionGroups,
         "queryactiongroup": commands.query_action_group.QueryActionGroup,
         "updateactiongroup": commands.update_action_group.UpdateActionGroup,
