@@ -161,5 +161,17 @@ class ManagedDevices(BaseTable):
         return cls.rows_to_dict_list(rset)
 
     @classmethod
+    def get_all_available_group_devices(cls, group_id):
+        conn = AtHomePowerlineServerDb.GetConnection()
+        c = AtHomePowerlineServerDb.GetCursor(conn)
+        # Select devices not already assigned to this group
+        rset = c.execute(
+            'SELECT * FROM ManagedDevices '
+            'WHERE ManagedDevices.id NOT IN '
+            '(SELECT ActionGroupDevices.device_id from ActionGroupDevices where ActionGroupDevices.group_id=:group_id)',
+            {"group_id": group_id})
+        return cls.rows_to_dict_list(rset)
+
+    @classmethod
     def is_valid_device_type(cls, device_type):
         return device_type.lower() in cls.VALID_DEVICE_LIST.keys()
