@@ -51,6 +51,7 @@ import commands.group_off
 import commands.delete_group
 import commands.query_available_group_devices
 import commands.assign_device
+import commands.delete_group_device
 
 logger = logging.getLogger("server")
 
@@ -97,6 +98,7 @@ class CommandHandler:
         "queryactiongroupdevices": commands.query_action_group_devices.QueryActionGroupDevices,
         "queryavailablegroupdevices": commands.query_available_group_devices.QueryAvailableGroupDevices,
         "assigndevice": commands.assign_device.AssignDevice,
+        "deleteactiongroupdevice": commands.delete_group_device.DeleteActionGroupDevice,
         "groupon": commands.group_on.GroupOn,
         "groupoff": commands.group_off.GroupOff,
         "allselecteddeviceson": commands.all_selected_devices_on.AllSelectedDevicesOn,
