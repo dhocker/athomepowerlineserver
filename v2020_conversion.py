@@ -211,6 +211,36 @@ def create_group_tables():
 
     conn.close()
 
+
+def drop_selected_column():
+    """
+    Drop the selected column from the ManagedDevices table.
+    This has to be done AFTER the ActionGroupTable is created
+    as it depends on the old selected column to assign devices
+    to the new "Selected" group.
+    :return:
+    """
+    conn = get_connection()
+
+    # Temp table without "selected" column
+    conn.execute(
+        "CREATE TABLE ManagedDevicesTemp (id integer PRIMARY KEY, name text, location text, \
+        mfg text, address text, updatetime timestamp)")
+    # Copy all rows from ManagedDevices
+    conn.execute(
+        "INSERT INTO ManagedDevicesTemp(id,name,location,mfg,address,updatetime) \
+        SELECT id,name,location,mfg,address,updatetime from ManagedDevices")
+    # Delete ManagedDevices table
+    conn.execute("DROP TABLE ManagedDevices")
+    # Rename temp table to ManagedDevices
+    conn.execute("ALTER TABLE ManagedDevicesTemp RENAME TO ManagedDevices")
+
+    conn.commit()
+    print("Selected column dropped from ManageDevices table")
+
+    conn.close()
+
+
 def delete_sun_table():
     # Clean up dead table
     conn = get_connection()
@@ -234,6 +264,8 @@ def main():
         update_devices()
         # Create ActionGroup related tables
         create_group_tables()
+        # Drop "selected" column from ManagedDevices
+        drop_selected_column()
         # Clean up unused table
         delete_sun_table()
         # To 5.0.0.0
