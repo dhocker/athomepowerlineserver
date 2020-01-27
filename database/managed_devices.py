@@ -166,7 +166,8 @@ class ManagedDevices(BaseTable):
         rset = c.execute(
             'SELECT * FROM ManagedDevices '
             'WHERE ManagedDevices.id NOT IN '
-            '(SELECT ActionGroupDevices.device_id from ActionGroupDevices where ActionGroupDevices.group_id=:group_id)',
+            '(SELECT ActionGroupDevices.device_id from ActionGroupDevices where ActionGroupDevices.group_id=:group_id) '
+            'ORDER BY ManagedDevices.location',
             {"group_id": group_id})
         return cls.rows_to_dict_list(rset)
 
