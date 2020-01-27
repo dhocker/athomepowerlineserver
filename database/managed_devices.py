@@ -72,14 +72,13 @@ class ManagedDevices(BaseTable):
         return cls.row_to_dict(rset.fetchone())
 
     @classmethod
-    def insert(cls, device_name, device_location, device_mfg, device_address, device_selected):
+    def insert(cls, device_name, device_location, device_mfg, device_address):
         """
         Insert a new device record
         :param device_name: name/tag/label for the device (human readable)
         :param device_location: location of device in house
         :param device_mfg: device type (e.g. x10, tplink, hs100, etc.)
         :param device_address: x10 house-device-code or ip address or ...
-        :param device_selected: device is selected for "all selected" action
         :return:
         """
         if not cls.is_valid_device_type(device_mfg):
@@ -91,26 +90,25 @@ class ManagedDevices(BaseTable):
         # Note that the current time is inserted as the update time. This is added to the
         # row as a convenient way to know when the record was inserted. It isn't used for
         # any other purpose.
-        c.execute("INSERT INTO ManagedDevices (name,location,mfg,address,selected,updatetime) values (?,?,?,?,?,?)",
-                  (device_name, device_location, device_mfg, device_address, device_selected, datetime.datetime.now()))
+        c.execute("INSERT INTO ManagedDevices (name,location,mfg,address,updatetime) values (?,?,?,?,?)",
+                  (device_name, device_location, device_mfg, device_address, datetime.datetime.now()))
         id = c.lastrowid
         conn.commit()
         conn.close()
         return id
 
     @classmethod
-    def update(cls, device_id, device_name, device_location, device_type, device_address, device_selected):
+    def update(cls, device_id, device_name, device_location, device_mfg, device_address):
         """
         Update an existing device record
         :param device_id: ID of existing device
         :param device_name: name/tag/label for the device (human readable)
         :param device_location: location of device in house
-        :param device_type: device type (e.g. x10, tplink, hs100, etc.)
+        :param device_mfg: device type (e.g. x10, tplink, hs100, etc.)
         :param device_address: x10 house-device-code or ip address or ...
-        :param device_selected: device is selected for "all selected" action
         :return:
         """
-        if not cls.is_valid_device_type(device_type):
+        if not cls.is_valid_device_type(device_mfg):
             return False
 
         conn = AtHomePowerlineServerDb.GetConnection()
@@ -120,9 +118,9 @@ class ManagedDevices(BaseTable):
         # row as a convenient way to know when the record was inserted. It isn't used for
         # any other purpose.
         c.execute("UPDATE ManagedDevices SET " \
-                    "name=?,location=?,type=?,address=?,selected=?,updatetime=? WHERE id=?",
-                    (device_name, device_location, device_type, device_address, device_selected,
-                    datetime.datetime.now(), device_id)
+                    "name=?,location=?,mfg=?,address=?,updatetime=? WHERE id=?",
+                    (device_name, device_location, device_mfg, device_address,
+                     datetime.datetime.now(), device_id)
                   )
         conn.commit()
         change_count = conn.total_changes

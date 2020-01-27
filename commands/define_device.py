@@ -22,12 +22,11 @@ class DefineDevice(ServerCommand.ServerCommand):
         device_location = request["args"]["device-location"]
         device_mfg = request["args"]["device-mfg"]
         device_address = request["args"]["device-address"]
-        device_selected = request["args"]["device-selected"]
 
         # TODO Consider a unique check on the name
         # TODO Cases based on type for address validation?
 
-        result = ManagedDevices.insert(device_name, device_location, device_mfg, device_address, device_selected)
+        result = ManagedDevices.insert(device_name, device_location, device_mfg, device_address)
 
         # Generate a successful response
         r = self.CreateResponse(request["request"])

@@ -82,7 +82,7 @@ class AtHomePowerlineServerDb:
         # Note that by definition Sqlite treats the id columns as the ROWID. See https://www.sqlite.org/autoinc.html
         conn.execute(
             "CREATE TABLE ManagedDevices (id integer PRIMARY KEY, name text, location text, \
-            mfg text, address text, selected integer, updatetime timestamp)")
+            mfg text, address text, updatetime timestamp)")
         conn.commit()
 
         conn.execute(
