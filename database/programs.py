@@ -72,7 +72,8 @@ class Programs(BaseTable):
         # Select programs not already assigned to this device
         rset = c.execute(
             'SELECT * FROM Programs '
-            'WHERE Programs.id NOT IN (SELECT program_id from ProgramAssignments where device_id=:device_id)',
+            'WHERE Programs.id NOT IN (SELECT program_id from ProgramAssignments where device_id=:device_id) '
+            'ORDER BY name',
             {"device_id": device_id})
         return cls.rows_to_dict_list(rset)
 
