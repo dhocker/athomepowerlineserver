@@ -52,6 +52,7 @@ import commands.delete_group
 import commands.query_available_group_devices
 import commands.assign_device
 import commands.delete_group_device
+import commands.assign_program_to_group
 
 logger = logging.getLogger("server")
 
@@ -90,6 +91,7 @@ class CommandHandler:
         "querydeviceprograms": commands.query_device_programs.QueryDevicePrograms,
         "querydeviceprogram": commands.query_device_program.QueryDeviceProgram,
         "assignprogram": commands.assign_program.AssignProgram,
+        "assignprogramtogroup": commands.assign_program_to_group.AssignProgramToGroup,
         "defineactiongroup": commands.define_group.DefineGroup,
         "deleteactiongroup": commands.delete_group.DeleteGroup,
         "queryactiongroups": commands.query_action_groups.QueryActionGroups,

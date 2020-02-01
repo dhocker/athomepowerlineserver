@@ -1,5 +1,5 @@
 #
-# Query for all defined devices
+# Query for all defined programs
 # Copyright © 2019  Dave Hocker
 #
 # This program is free software: you can redistribute it and/or modify

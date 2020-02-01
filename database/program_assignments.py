@@ -50,3 +50,22 @@ class ProgramAssignments(BaseTable):
         change_count = conn.total_changes
         conn.close()
         return change_count
+
+    @classmethod
+    def is_assigned(cls, device_id, program_id):
+        """
+        Answers the question: Is this program assigned to the given device?
+        :param device_id:
+        :param program_id:
+        :return:
+        """
+        conn = AtHomePowerlineServerDb.GetConnection()
+        c = AtHomePowerlineServerDb.GetCursor(conn)
+        # Select programs not already assigned to this device
+        rset = c.execute(
+            'SELECT * FROM ProgramAssignments '
+            'WHERE ProgramAssignments.device_id=:device_id AND ProgramAssignments.program_id=:program_id',
+            {"device_id": device_id, "program_id": program_id})
+        program_is_assigned = rset.fetchone() is not None
+        conn.close()
+        return program_is_assigned
