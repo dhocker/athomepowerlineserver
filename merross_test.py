@@ -16,11 +16,12 @@ from meross_iot.cloud.devices.power_plugs import GenericPlug
 # from meross_iot.cloud.devices.door_openers import GenericGarageDoorOpener
 # from random import randint
 import time
+import os
 
 
 if __name__ == '__main__':
-    EMAIL = "athomex10@gmail.com"
-    PASSWORD = "@hoMex10$$"
+    EMAIL = os.environ['MEROSS_EMAIL']
+    PASSWORD = os.environ['MEROSS_PASSWORD']
 
     def event_handler(eventobj):
         if eventobj.event_type == MerossEventType.DEVICE_ONLINE_STATUS:
