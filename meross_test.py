@@ -17,6 +17,7 @@ from meross_iot.cloud.devices.power_plugs import GenericPlug
 # from random import randint
 import time
 import os
+import json
 
 
 if __name__ == '__main__':
@@ -78,35 +79,49 @@ if __name__ == '__main__':
             print("The plug %s seems to be offline. Cannot test..." % p.name)
             continue
 
+        # Filter out non-multi-plug devices (looking for Smart WiFi Indoor/Outdoor Plug)
+        # https://www.meross.com/product/20/article/
+        if p.type.lower() != "mss620":
+            continue
+
         print("Let's play with smart plug %s" % p.name)
         active_list.append(p.uuid)
 
         channels = len(p.get_channels())
         print("The plug %s supports %d channels." % (p.name, channels))
 
+        abilities = p.get_abilities()
+        print("Abilities")
+        print(json.dumps(abilities, sort_keys=True, indent=4))
+
+        cx = 0
         print("Turning on channel %d of %s" % (0, p.name))
-        p.turn_on_channel(0)
+        p.turn_on_channel(cx)
 
-        time.sleep(1)
+        time.sleep(3)
 
-        print("Turning off channel %d of %s" % (0, p.name))
-        p.turn_off_channel(0)
+        print("Turning off channel %d of %s" % (cx, p.name))
+        p.turn_off_channel(cx)
 
         time.sleep(1)
 
     print("Testing device by UUID")
     for u in active_list:
         device = manager.get_device_by_uuid(u)
+        print(str(device))
+        print(type(device))
 
-        print("Turning on channel %d of %s" % (0, device.name))
-        device.turn_on_channel(0)
+        # For each channel on the device
+        for cx in range(len(device.get_channels())):
+            print("Turning on channel %d of %s" % (cx, device.name))
+            device.turn_on_channel(cx)
 
-        time.sleep(1)
+            time.sleep(1)
 
-        print("Turning off channel %d of %s" % (0, device.name))
-        device.turn_off_channel(0)
+            print("Turning off channel %d of %s" % (cx, device.name))
+            device.turn_off_channel(cx)
 
-        time.sleep(1)
+            time.sleep(1)
 
     manager.stop()
     print("Done")
