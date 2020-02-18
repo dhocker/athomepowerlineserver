@@ -44,7 +44,7 @@ class TPLinkDriver(BaseDriverInterface):
         """
         # TODO Support multi-plug devices (e.g. SmartStrip)
         logger.debug("DeviceOn for: %s %s %s %s %s", device_type, device_name_tag, ip_address, channel, dim_amount)
-        dev = self._create_smart_device(device_type, ip_address)
+        dev = self._create_smart_device(ip_address)
         result = self._exec_device_function(dev.turn_on)
         del dev
         return result
@@ -60,7 +60,7 @@ class TPLinkDriver(BaseDriverInterface):
         """
         # TODO Support multi-plug devices (e.g. SmartStrip)
         logger.debug("DeviceOff for: %s %s %s %s %s", device_type, device_name_tag, ip_address, channel, dim_amount)
-        dev = self._create_smart_device(device_type, ip_address)
+        dev = self._create_smart_device(ip_address)
         result = self._exec_device_function(dev.turn_off)
         del dev
         return result
@@ -141,25 +141,15 @@ class TPLinkDriver(BaseDriverInterface):
 
         return False
 
-    TPLINK_DEVICE_LIST = {
-        "tplink": SmartPlug,
-        "hs100": SmartPlug,
-        "hs103": SmartPlug,
-        "hs105": SmartPlug,
-        "hs107": SmartPlug,
-        "smartplug": SmartPlug,
-        "smartswitch": SmartPlug,
-        "smartbulb": SmartBulb,
-        "smartstrip": SmartStrip,
-        "hs300": SmartStrip,
-        "kp200": SmartStrip,
-        "kp303": SmartStrip,
-        "kp400": SmartStrip
-    }
-
     @classmethod
-    def _create_smart_device(cls, device_type, ip_address):
-        if device_type in cls.TPLINK_DEVICE_LIST.keys():
-            return cls.TPLINK_DEVICE_LIST[device_type](ip_address)
-        # Default to smart plug
-        return SmartPlug(ip_address)
+    def _create_smart_device(cls, ip_address):
+        """
+        Create a TPLink SmartDevice instance for the device at a
+        given IP address
+        :param ip_address:
+        :return:
+        """
+        device = Discover.discover_single(ip_address)
+        if device is None:
+            logger.error("Unable to discover TPLink device %s", ip_address)
+        return device

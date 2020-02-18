@@ -9,11 +9,12 @@
 # See the LICENSE file for more details.
 #
 
-from pyHS100 import SmartPlug
+from pyHS100 import SmartPlug, Discover
 
 
 if __name__ == '__main__':
-    plug = SmartPlug("192.168.1.181")
+    # plug = SmartPlug("192.168.1.181")
+    plug = Discover.discover_single("192.168.1.181")
     print("Plug:", plug.alias)
     print(plug)
 
