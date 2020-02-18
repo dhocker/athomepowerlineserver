@@ -25,7 +25,7 @@ class GroupOn(ServerCommand):
         group_devices = ActionGroupDevices.get_group_devices(group_id)
         for group_device in group_devices:
             driver = self.get_driver_for_id(group_device["id"])
-            result = driver.DeviceOn(group_device["mfg"], group_device["name"], group_device["address"], 0)
+            result = driver.DeviceOn(group_device["mfg"], group_device["name"], group_device["address"], group_device["channel"], 0)
 
         # Generate a successful response
         r = self.CreateResponse(request["request"])

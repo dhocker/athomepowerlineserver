@@ -72,7 +72,7 @@ class ManagedDevices(BaseTable):
         return cls.row_to_dict(rset.fetchone())
 
     @classmethod
-    def insert(cls, device_name, device_location, device_mfg, device_address):
+    def insert(cls, device_name, device_location, device_mfg, device_address, device_channel):
         """
         Insert a new device record
         :param device_name: name/tag/label for the device (human readable)
@@ -90,15 +90,15 @@ class ManagedDevices(BaseTable):
         # Note that the current time is inserted as the update time. This is added to the
         # row as a convenient way to know when the record was inserted. It isn't used for
         # any other purpose.
-        c.execute("INSERT INTO ManagedDevices (name,location,mfg,address,updatetime) values (?,?,?,?,?)",
-                  (device_name, device_location, device_mfg, device_address, datetime.datetime.now()))
+        c.execute("INSERT INTO ManagedDevices (name,location,mfg,address,channel,updatetime) values (?,?,?,?,?,?)",
+                  (device_name, device_location, device_mfg, device_address, device_channel, datetime.datetime.now()))
         id = c.lastrowid
         conn.commit()
         conn.close()
         return id
 
     @classmethod
-    def update(cls, device_id, device_name, device_location, device_mfg, device_address):
+    def update(cls, device_id, device_name, device_location, device_mfg, device_address, device_channel):
         """
         Update an existing device record
         :param device_id: ID of existing device
@@ -118,8 +118,8 @@ class ManagedDevices(BaseTable):
         # row as a convenient way to know when the record was inserted. It isn't used for
         # any other purpose.
         c.execute("UPDATE ManagedDevices SET " \
-                    "name=?,location=?,mfg=?,address=?,updatetime=? WHERE id=?",
-                    (device_name, device_location, device_mfg, device_address,
+                    "name=?,location=?,mfg=?,address=?,channel=?,updatetime=? WHERE id=?",
+                    (device_name, device_location, device_mfg, device_address, device_channel,
                      datetime.datetime.now(), device_id)
                   )
         conn.commit()

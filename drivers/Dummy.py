@@ -31,7 +31,7 @@ class Dummy(BaseDriverInterface):
     def Close(self):
         logger.debug("Driver closed")
 
-    def DeviceOn(self, device_type, device_name_tag, house_device_code, dim_amount):
+    def DeviceOn(self, device_type, device_name_tag, house_device_code, channel, dim_amount):
         """
         Turn device on
         :param device_type: the device's type (e.g. x10, hs100, smartplug, etc.)
@@ -40,10 +40,10 @@ class Dummy(BaseDriverInterface):
         :param dim_amount: a percent 0 to 100
         :return:
         """
-        logger.debug("DeviceOn for: %s %s", house_device_code, dim_amount)
+        logger.debug("DeviceOn for: %s %s %s", house_device_code, channel, dim_amount)
         return True
 
-    def DeviceOff(self, device_type, device_name_tag, house_device_code, dim_amount):
+    def DeviceOff(self, device_type, device_name_tag, house_device_code, channel, dim_amount):
         """
         Turn device off
         :param device_type: the device's type (e.g. x10, hs100, smartplug, etc.)
@@ -52,10 +52,10 @@ class Dummy(BaseDriverInterface):
         :param dim_amount: a percent 0 to 100
         :return:
         """
-        logger.debug("DeviceOff for: %s %s", house_device_code, dim_amount)
+        logger.debug("DeviceOff for: %s %s %s", house_device_code, channel, dim_amount)
         return True
 
-    def DeviceDim(self, device_type, device_name_tag, house_device_code, dim_amount):
+    def DeviceDim(self, device_type, device_name_tag, house_device_code, channel, dim_amount):
         """
         Dim device
         :param device_type: the device's type (e.g. x10, hs100, smartplug, etc.)
@@ -64,10 +64,10 @@ class Dummy(BaseDriverInterface):
         :param dim_amount: a percent 0 to 100
         :return:
         """
-        logger.debug("DeviceDim for: %s %s", house_device_code, dim_amount)
+        logger.debug("DeviceDim for: %s %s %s", house_device_code, channel, dim_amount)
         return True
 
-    def DeviceBright(self, device_type, device_name_tag, house_device_code, bright_amount):
+    def DeviceBright(self, device_type, device_name_tag, house_device_code, channel, bright_amount):
         """
         Turn device on
         :param device_type: the device's type (e.g. x10, hs100, smartplug, etc.)
@@ -76,7 +76,7 @@ class Dummy(BaseDriverInterface):
         :param bright_amount: a percent 0 to 100
         :return:
         """
-        logger.debug("DeviceBright for: %s %s", house_device_code, bright_amount)
+        logger.debug("DeviceBright for: %s %s %s", house_device_code, channel, bright_amount)
         return True
 
     def DeviceAllUnitsOff(self, house_code):

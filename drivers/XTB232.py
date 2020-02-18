@@ -103,7 +103,7 @@ class XTB232(BaseDriverInterface):
     # Turn a device on
     # house_device_code = Ex. 'A1'
     # dim_amount as a percent 0 <= v <= 100
-    def DeviceOn(self, device_type, device_name_tag, house_device_code, dim_amount):
+    def DeviceOn(self, device_type, device_name_tag, house_device_code, channel, dim_amount):
         self.ClearLastError()
 
         # The XTB-232 does not seem to perform the dim action as part of the on action.
@@ -117,7 +117,7 @@ class XTB232(BaseDriverInterface):
     # Turn a device off
     # house_device_code = Ex. 'A1'
     # dim_amount 0 <= v <= 100
-    def DeviceOff(self, device_type, device_name_tag, house_device_code, dim_amount):
+    def DeviceOff(self, device_type, device_name_tag, house_device_code, channel, dim_amount):
         self.ClearLastError()
         return self.ExecuteFunction(house_device_code, self.ConvertDimPercent(dim_amount), XTB232.Off)
 

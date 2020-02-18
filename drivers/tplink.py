@@ -33,7 +33,7 @@ class TPLinkDriver(BaseDriverInterface):
     def Close(self):
         logger.debug("TPLink driver closed")
 
-    def DeviceOn(self, device_type, device_name_tag, ip_address, dim_amount):
+    def DeviceOn(self, device_type, device_name_tag, ip_address, channel, dim_amount):
         """
         Turn device on
         :param device_type: the device's type (e.g. x10, hs100, smartplug, etc.)
@@ -42,13 +42,14 @@ class TPLinkDriver(BaseDriverInterface):
         :param dim_amount: 0 to 100
         :return:
         """
-        logger.debug("DeviceOn for: %s %s %s %s", device_type, device_name_tag, ip_address, dim_amount)
+        # TODO Support multi-plug devices (e.g. SmartStrip)
+        logger.debug("DeviceOn for: %s %s %s %s %s", device_type, device_name_tag, ip_address, channel, dim_amount)
         dev = self._create_smart_device(device_type, ip_address)
         result = self._exec_device_function(dev.turn_on)
         del dev
         return result
 
-    def DeviceOff(self, device_type, device_name_tag, ip_address, dim_amount):
+    def DeviceOff(self, device_type, device_name_tag, ip_address, channel, dim_amount):
         """
         Turn device off
         :param device_type: the device's type (e.g. x10, hs100, smartplug, etc.)
@@ -57,18 +58,19 @@ class TPLinkDriver(BaseDriverInterface):
         :param dim_amount: 0 to 100
         :return:
         """
-        logger.debug("DeviceOff for: %s %s %s %s", device_type, device_name_tag, ip_address, dim_amount)
+        # TODO Support multi-plug devices (e.g. SmartStrip)
+        logger.debug("DeviceOff for: %s %s %s %s %s", device_type, device_name_tag, ip_address, channel, dim_amount)
         dev = self._create_smart_device(device_type, ip_address)
         result = self._exec_device_function(dev.turn_off)
         del dev
         return result
 
-    def DeviceDim(self, device_type, device_name_tag, ip_address, dim_amount):
-        logger.debug("DeviceDim for: %s %s", ip_address, dim_amount)
+    def DeviceDim(self, device_type, device_name_tag, ip_address, channel, dim_amount):
+        logger.debug("DeviceDim for: %s %s %s", ip_address, channel, dim_amount)
         return True
 
-    def DeviceBright(self, device_type, device_name_tag, ip_address, bright_amount):
-        logger.debug("DeviceBright for: %s %s", ip_address, bright_amount)
+    def DeviceBright(self, device_type, device_name_tag, ip_address, channel, bright_amount):
+        logger.debug("DeviceBright for: %s %s %s", ip_address, channel, bright_amount)
         return True
 
     def DeviceAllUnitsOff(self, house_code):
@@ -94,14 +96,18 @@ class TPLinkDriver(BaseDriverInterface):
             result = {}
             # This can take a few seconds
             for ip, dev in Discover.discover().items():
-                attrs = {"manufacturer": "TPLink/Kasa"}
+                sys_info = dev.get_sysinfo()
+                attrs = {"manufacturer": "TPLink"}
+                attrs["model"] = sys_info["model"]
                 attrs["label"] = dev.alias
+                attrs["channels"] = 1
                 if isinstance(dev, SmartPlug):
                     attrs["type"] = "Plug"
                 elif isinstance(dev, SmartBulb):
                     attrs["type"] = "Bulb"
                 elif isinstance(dev, SmartStrip):
                     attrs["type"] = "Strip"
+                    attrs["channels"] = len(sys_info["children"])
                 else:
                     attrs["type"] = "Unknown"
                 result[ip] = attrs
@@ -144,7 +150,11 @@ class TPLinkDriver(BaseDriverInterface):
         "smartplug": SmartPlug,
         "smartswitch": SmartPlug,
         "smartbulb": SmartBulb,
-        "smartstrip": SmartStrip
+        "smartstrip": SmartStrip,
+        "hs300": SmartStrip,
+        "kp200": SmartStrip,
+        "kp303": SmartStrip,
+        "kp400": SmartStrip
     }
 
     @classmethod

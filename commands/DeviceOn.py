@@ -24,7 +24,7 @@ class DeviceOn(ServerCommand.ServerCommand):
 
         driver = self.get_driver_for_id(device_id)
         device = self.get_device_for_id(device_id)
-        result = driver.DeviceOn(device["mfg"], device["name"], device["address"], dim_amount)
+        result = driver.DeviceOn(device["mfg"], device["name"], device["address"], device["channel"], dim_amount)
 
         # Generate a successful response
         r = self.CreateResponse(request["request"])
