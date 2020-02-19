@@ -1,6 +1,6 @@
 #
 # AtHomePowerlineServer - networked server for CM11/CM11A/XTB-232 X10 controllers
-# Copyright (C) 2014  Dave Hocker
+# Copyright (C) 2014, 2020  Dave Hocker
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,21 +20,21 @@ import logging
 logger = logging.getLogger("server")
 
 
-def RunAction(command, device_id, device_mfg, device_name, device_address, dim_amount):
+def RunAction(command, device_id, device_mfg, device_name, device_address, device_channel, dim_amount):
     if command.startswith("all"):
         run_all_units_action(command, device_id, device_mfg, device_address)
     else:
         driver = DeviceDriverManager.get_driver(device_mfg)
         # Cases for command
         if command == "on":
-            driver.DeviceOn(device_mfg, device_name, device_address, dim_amount)
+            driver.DeviceOn(device_mfg, device_name, device_address, device_channel, dim_amount)
         elif command == "off":
-            driver.DeviceOff(device_mfg, device_name, device_address, dim_amount)
+            driver.DeviceOff(device_mfg, device_name, device_address, device_channel, dim_amount)
         elif command == "dim":
-            driver.DeviceDim(device_mfg, device_name, device_address, dim_amount)
+            driver.DeviceDim(device_mfg, device_name, device_address, device_channel, dim_amount)
         elif (command == "bright") or (command == "brighten"):
             # The dim_amount is really a bright_amount
-            driver.DeviceBright(device_mfg, device_name, device_address, dim_amount)
+            driver.DeviceBright(device_mfg, device_name, device_address, device_channel, dim_amount)
 
 
 def run_all_units_action(command, device_id, device_type, device_address):

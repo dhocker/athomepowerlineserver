@@ -123,8 +123,10 @@ class TimerServiceThread(threading.Thread):
             device_mfg = device_rec["mfg"]
             device_name = device_rec["name"]
             device_address = device_rec["address"]
-            logger.info("Executing action: %s %s %s", tp["command"], device_mfg, device_address)
-            ActionFactory.RunAction(tp["command"], device_rec["id"], device_mfg, device_name, device_address, int(tp["dimamount"]))
+            device_channel = device_rec["channel"]
+            logger.info("Executing action: %s %s %s %s", tp["command"], device_mfg, device_address, device_channel)
+            ActionFactory.RunAction(tp["command"], device_rec["id"], device_mfg, device_name, device_address,
+                                    device_channel, int(tp["dimamount"]))
 
     ########################################################################
     # Test a date to see if its weekday is enabled
