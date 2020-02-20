@@ -114,7 +114,6 @@ class TPLinkDriver(BaseDriverInterface):
         except Exception as ex:
             logger.error("An exception occurred while trying to enumerate available TPLink/Kasa devices")
             logger.error(str(ex))
-            result = {}
 
         return result
 
