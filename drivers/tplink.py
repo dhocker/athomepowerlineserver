@@ -96,21 +96,7 @@ class TPLinkDriver(BaseDriverInterface):
             result = {}
             # This can take a few seconds
             for ip, dev in Discover.discover().items():
-                sys_info = dev.get_sysinfo()
-                attrs = {"manufacturer": "TPLink"}
-                attrs["model"] = sys_info["model"]
-                attrs["label"] = dev.alias
-                attrs["channels"] = 1
-                if isinstance(dev, SmartPlug):
-                    attrs["type"] = "Plug"
-                elif isinstance(dev, SmartBulb):
-                    attrs["type"] = "Bulb"
-                elif isinstance(dev, SmartStrip):
-                    attrs["type"] = "Strip"
-                    attrs["channels"] = len(sys_info["children"])
-                else:
-                    attrs["type"] = "Unknown"
-                result[ip] = attrs
+                result[ip] = self._get_device_attrs(dev)
         except Exception as ex:
             logger.error("An exception occurred while trying to enumerate available TPLink/Kasa devices")
             logger.error(str(ex))
@@ -119,6 +105,35 @@ class TPLinkDriver(BaseDriverInterface):
 
     def SetTime(self, time_value):
         pass
+
+    def _get_device_attrs(self, dev):
+        """
+        Get information for a TPLink device
+        :param ip:
+        :param dev:
+        :return:
+        """
+        attrs = {}
+        try:
+            sys_info = dev.get_sysinfo()
+            attrs["manufacturer"] ="TPLink"
+            attrs["model"] = sys_info["model"]
+            attrs["label"] = dev.alias
+            attrs["channels"] = 1
+            if isinstance(dev, SmartPlug):
+                attrs["type"] = "Plug"
+            elif isinstance(dev, SmartBulb):
+                attrs["type"] = "Bulb"
+            elif isinstance(dev, SmartStrip):
+                attrs["type"] = "Strip"
+                attrs["channels"] = len(sys_info["children"])
+            else:
+                attrs["type"] = "Unknown"
+        except Exception as ex:
+            logger.error("An exception occurred getting info for TPLink/Kasa device %s", ip)
+            logger.error(str(ex))
+
+        return attrs
 
     def _exec_device_function(self, device_function, retries=5):
         """
