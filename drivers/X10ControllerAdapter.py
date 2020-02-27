@@ -52,23 +52,23 @@ class X10ControllerAdapter:
   def Open(cls, driver):
     cls.Driver = driver
     logger.info("X10ControllerAdapter has been injected with driver: %s", str(driver))
-    return cls.Driver.Open()
+    return cls.Driver.open()
     
   #************************************************************************
   # Close the singleton copy of the controller driver
   @classmethod
   def Close(cls):
-    result = cls.Driver.Close()
+    result = cls.Driver.close()
     logger.info("X10ControllerAdapter has been closed")
     return result
 
   @classmethod
   def GetLastErrorCode(cls):
-    return cls.Driver.LastErrorCode
+    return cls.Driver.last_error_code
 
   @classmethod
   def GetLastError(cls):
-    return cls.Driver.LastError
+    return cls.Driver.last_error
 
   #************************************************************************
   # Turn a device on
@@ -77,7 +77,7 @@ class X10ControllerAdapter:
   @classmethod
   def DeviceOn(cls, house_device_code, dim_amount):
     logger.info("Device on: {} {}".format(house_device_code, dim_amount))
-    return cls.Driver.DeviceOn(house_device_code, dim_amount)
+    return cls.Driver.device_on(house_device_code, dim_amount)
 
   #************************************************************************
   # Turn a device off
@@ -86,7 +86,7 @@ class X10ControllerAdapter:
   @classmethod
   def DeviceOff(cls, house_device_code, dim_amount):
     logger.info("Device off: {} {}".format(house_device_code, dim_amount))
-    return cls.Driver.DeviceOff(house_device_code, dim_amount)
+    return cls.Driver.device_off(house_device_code, dim_amount)
 
   #************************************************************************
   # Dim a lamp module
@@ -95,7 +95,7 @@ class X10ControllerAdapter:
   @classmethod
   def DeviceDim(cls, house_device_code, dim_amount):
     logger.info("Device dim: {0} {1}".format(house_device_code, dim_amount))
-    return cls.Driver.DeviceDim(house_device_code, dim_amount)
+    return cls.Driver.device_dim(house_device_code, dim_amount)
 
   #************************************************************************
   # Bright(en) a lamp module
@@ -104,25 +104,25 @@ class X10ControllerAdapter:
   @classmethod
   def DeviceBright(cls, house_device_code, bright_amount):
     logger.info("Device bright: {0} {1}".format(house_device_code, bright_amount))
-    return cls.Driver.DeviceBright(house_device_code, bright_amount)
+    return cls.Driver.device_bright(house_device_code, bright_amount)
 
   #************************************************************************
   # Turn all units off
   @classmethod
   def DeviceAllUnitsOff(cls, house_code):
     logger.info("Device all units off for house code: {0}".format(house_code))
-    return cls.Driver.DeviceAllUnitsOff(house_code)
+    return cls.Driver.device_all_units_off(house_code)
 
   #************************************************************************
   # Turn all lights off
   @classmethod
   def DeviceAllLightsOff(cls, house_code):
     logger.info("Device all lights off")
-    return cls.Driver.DeviceAllLightsOff(house_code)
+    return cls.Driver.device_all_lights_off(house_code)
 
   #************************************************************************
   # Turn all lights on
   @classmethod
   def DeviceAllLightsOn(cls, house_code):
     logger.info("Device all lights on")
-    return cls.Driver.DeviceAllLightsOn(house_code)
+    return cls.Driver.device_all_lights_on(house_code)

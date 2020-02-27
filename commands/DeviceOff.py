@@ -28,17 +28,17 @@ class DeviceOff(ServerCommand.ServerCommand):
 
         driver = self.get_driver_for_id(device_id)
         device = self.get_device_for_id(device_id)
-        result = driver.DeviceOff(device["mfg"], device["name"], device["address"], device["channel"])
+        result = driver.device_off(device["mfg"], device["name"], device["address"], device["channel"])
 
         # Generate a successful response
         r = self.CreateResponse(request["request"])
 
-        r['result-code'] = driver.LastErrorCode
+        r['result-code'] = driver.last_error_code
         if result:
             # r['error'] = "Command not fully implemented"
             r['message'] = "Success"
         else:
-            r['error'] = driver.LastError
-            r['message'] = driver.LastError
+            r['error'] = driver.last_error
+            r['message'] = driver.last_error
 
         return r

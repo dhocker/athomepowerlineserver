@@ -25,17 +25,17 @@ class DeviceOn(ServerCommand.ServerCommand):
         device = self.get_device_for_id(device_id)
         driver.set_brightness(device["mfg"], device["name"], device["address"], device["channel"], device["brightness"])
         driver.set_color(device["mfg"], device["name"], device["address"], device["channel"], device["color"])
-        result = driver.DeviceOn(device["mfg"], device["name"], device["address"], device["channel"])
+        result = driver.device_on(device["mfg"], device["name"], device["address"], device["channel"])
 
         # Generate a successful response
         r = self.CreateResponse(request["request"])
 
-        r['result-code'] = driver.LastErrorCode
+        r['result-code'] = driver.last_error_code
         if result:
             # r['error'] = "Command not fully implemented"
             r['message'] = "Success"
         else:
-            r['error'] = driver.LastError
-            r['message'] = driver.LastError
+            r['error'] = driver.last_error
+            r['message'] = driver.last_error
 
         return r

@@ -61,11 +61,11 @@ class MerossDriver(BaseDriverInterface):
         logger.error("After 10 retries, unable to create MerossManager instance")
 
     # Open the device
-    def Open(self):
+    def open(self):
         # Register event handlers for the manager...(this does not appear to be required)
         # manager.register_event_handler(event_handler)
         # Starts the manager
-        self.ClearLastError()
+        self.clear_last_error()
         try:
             self._manager.start()
             logger.info("Meross driver opened")
@@ -78,8 +78,8 @@ class MerossDriver(BaseDriverInterface):
         return False
 
     # Close the device
-    def Close(self):
-        self.ClearLastError()
+    def close(self):
+        self.clear_last_error()
         try:
             self._manager.stop()
             logger.info("Meross driver closed")
@@ -146,7 +146,7 @@ class MerossDriver(BaseDriverInterface):
         finally:
             pass
 
-    def DeviceOn(self, device_type, device_name_tag, house_device_code, channel):
+    def device_on(self, device_type, device_name_tag, house_device_code, channel):
         """
         Turn device on
         :param device_type: the device's type (e.g. x10, hs100, smartplug, etc.)
@@ -156,7 +156,7 @@ class MerossDriver(BaseDriverInterface):
         :param dim_amount: a percent 0 to 100
         :return:
         """
-        self.ClearLastError()
+        self.clear_last_error()
         try:
             device = self._get_device(house_device_code)
             if isinstance(device, GenericPlug):
@@ -180,7 +180,7 @@ class MerossDriver(BaseDriverInterface):
 
         return False
 
-    def DeviceOff(self, device_type, device_name_tag, house_device_code, channel):
+    def device_off(self, device_type, device_name_tag, house_device_code, channel):
         """
         Turn device off
         :param device_type: the device's type (e.g. x10, hs100, smartplug, etc.)
@@ -189,7 +189,7 @@ class MerossDriver(BaseDriverInterface):
         :param dim_amount: a percent 0 to 100
         :return:
         """
-        self.ClearLastError()
+        self.clear_last_error()
         try:
             device = self._get_device(house_device_code)
             if isinstance(device, GenericPlug):
@@ -213,7 +213,7 @@ class MerossDriver(BaseDriverInterface):
 
         return False
 
-    def DeviceDim(self, device_type, device_name_tag, house_device_code, channel, dim_amount):
+    def device_dim(self, device_type, device_name_tag, house_device_code, channel, dim_amount):
         """
         Dim device
         :param device_type: the device's type (e.g. x10, hs100, smartplug, etc.)
@@ -225,7 +225,7 @@ class MerossDriver(BaseDriverInterface):
         logger.debug("DeviceDim for: %s %s", house_device_code, dim_amount)
         return True
 
-    def DeviceBright(self, device_type, device_name_tag, house_device_code, channel, bright_amount):
+    def device_bright(self, device_type, device_name_tag, house_device_code, channel, bright_amount):
         """
         Turn device on
         :param device_type: the device's type (e.g. x10, hs100, smartplug, etc.)
@@ -237,7 +237,7 @@ class MerossDriver(BaseDriverInterface):
         logger.debug("DeviceBright for: %s %s", house_device_code, bright_amount)
         return True
 
-    def DeviceAllUnitsOff(self, house_code):
+    def device_all_units_off(self, house_code):
         """
         Turn all units off. Not implemented by all device types.
         :param house_code:
@@ -246,7 +246,7 @@ class MerossDriver(BaseDriverInterface):
         logger.debug("DeviceAllUnitsOff for: %s", house_code)
         return True
 
-    def DeviceAllLightsOff(self, house_code):
+    def device_all_lights_off(self, house_code):
         """
         Turn all lights off. Not implemented by all device types.
         :param house_code:
@@ -255,7 +255,7 @@ class MerossDriver(BaseDriverInterface):
         logger.debug("DeviceAllLightsOff for: %s", house_code)
         return True
 
-    def DeviceAllLightsOn(self, house_code):
+    def device_all_lights_on(self, house_code):
         """
         Turn all lights on. Not implemented by all device types
         :param house_code:
@@ -264,7 +264,7 @@ class MerossDriver(BaseDriverInterface):
         logger.debug("DeviceAllLightsOn for: %s", house_code)
         return True
 
-    def GetAvailableDevices(self):
+    def get_available_devices(self):
         """
         Get all known available devices for supported types.
         :return: Returns a dict where the key is the device UUID
@@ -308,7 +308,7 @@ class MerossDriver(BaseDriverInterface):
 
     #######################################################################
     # Set the controller time to the current, local time.
-    def SetTime(self, time_value):
+    def set_time(self, time_value):
         pass
 
     def _get_device(self, device_uuid):

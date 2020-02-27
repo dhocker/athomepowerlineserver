@@ -29,14 +29,14 @@ def RunAction(command, device_id, device_mfg, device_name, device_address, devic
         if command == "on":
             driver.set_brightness(device_mfg, device_name, device_address, device_channel, brightness)
             driver.set_color(device_mfg, device_name, device_address, device_channel, color)
-            driver.DeviceOn(device_mfg, device_name, device_address, device_channel)
+            driver.device_on(device_mfg, device_name, device_address, device_channel)
         elif command == "off":
-            driver.DeviceOff(device_mfg, device_name, device_address, device_channel)
+            driver.device_off(device_mfg, device_name, device_address, device_channel)
         elif command == "dim":
-            driver.DeviceDim(device_mfg, device_name, device_address, device_channel)
+            driver.device_dim(device_mfg, device_name, device_address, device_channel)
         elif (command == "bright") or (command == "brighten"):
             # The dim_amount is really a bright_amount
-            driver.DeviceBright(device_mfg, device_name, device_address, device_channel)
+            driver.device_bright(device_mfg, device_name, device_address, device_channel)
 
 
 def run_all_units_action(command, device_id, device_type, device_address):

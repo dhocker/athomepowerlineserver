@@ -1,6 +1,6 @@
 #
 # TPLink device driver for TPLink/Kasa devices
-# Copyright © 2019  Dave Hocker
+# Copyright © 2019, 2020  Dave Hocker
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -26,11 +26,11 @@ class TPLinkDriver(BaseDriverInterface):
         logger.info("TPLink driver initialized")
 
     # Open the device
-    def Open(self):
+    def open(self):
         logger.debug("TPLink driver opened")
 
     # Close the device
-    def Close(self):
+    def close(self):
         logger.debug("TPLink driver closed")
 
     def set_color(self, device_type, device_name_tag, ip_address, channel, hex_color):
@@ -59,7 +59,7 @@ class TPLinkDriver(BaseDriverInterface):
         # TODO Requires a TPLink/Kasa bulb for testing
         logger.debug("set_brightness for: %s %s %s %s", device_type, device_name_tag, ip_address, channel)
 
-    def DeviceOn(self, device_type, device_name_tag, ip_address, channel):
+    def device_on(self, device_type, device_name_tag, ip_address, channel):
         """
         Turn device on
         :param device_type: the device's type (e.g. x10, hs100, smartplug, etc.)
@@ -74,7 +74,7 @@ class TPLinkDriver(BaseDriverInterface):
         del dev
         return result
 
-    def DeviceOff(self, device_type, device_name_tag, ip_address, channel):
+    def device_off(self, device_type, device_name_tag, ip_address, channel):
         """
         Turn device off
         :param device_type: the device's type (e.g. x10, hs100, smartplug, etc.)
@@ -89,27 +89,27 @@ class TPLinkDriver(BaseDriverInterface):
         del dev
         return result
 
-    def DeviceDim(self, device_type, device_name_tag, ip_address, channel, dim_amount):
+    def device_dim(self, device_type, device_name_tag, ip_address, channel, dim_amount):
         logger.debug("DeviceDim for: %s %s %s", ip_address, channel, dim_amount)
         return True
 
-    def DeviceBright(self, device_type, device_name_tag, ip_address, channel, bright_amount):
+    def device_bright(self, device_type, device_name_tag, ip_address, channel, bright_amount):
         logger.debug("DeviceBright for: %s %s %s", ip_address, channel, bright_amount)
         return True
 
-    def DeviceAllUnitsOff(self, house_code):
+    def device_all_units_off(self, house_code):
         logger.debug("DeviceAllUnitsOff for: %s", house_code)
         return True
 
-    def DeviceAllLightsOff(self, house_code):
+    def device_all_lights_off(self, house_code):
         logger.debug("DeviceAllLightsOff for: %s", house_code)
         return True
 
-    def DeviceAllLightsOn(self, house_code):
+    def device_all_lights_on(self, house_code):
         logger.debug("DeviceAllLightsOn for: %s", house_code)
         return True
 
-    def GetAvailableDevices(self):
+    def get_available_devices(self):
         """
         Get all known available TPLink/Kasa devices.
         Reference: https://github.com/GadgetReactor/pyHS100
@@ -127,7 +127,7 @@ class TPLinkDriver(BaseDriverInterface):
 
         return result
 
-    def SetTime(self, time_value):
+    def set_time(self, time_value):
         pass
 
     def _get_device_attrs(self, dev):
@@ -166,7 +166,7 @@ class TPLinkDriver(BaseDriverInterface):
         :param retries: The maximum number of attempts
         :return:
         """
-        self.ClearLastError()
+        self.clear_last_error()
         for r in range(retries):
             try:
                 device_function()

@@ -25,29 +25,29 @@ class BaseDriverInterface:
     DEVICE_TYPE_STRIP = "strip"
 
     def __init__(self):
-        self.ClearLastError()
+        self.clear_last_error()
         logger.info("Device driver base class initialized")
 
     @property
-    def LastErrorCode(self):
+    def last_error_code(self):
         return self._last_error_code
 
-    @LastErrorCode.setter
-    def LastErrorCode(self, v):
+    @last_error_code.setter
+    def last_error_code(self, v):
         self._last_error_code = v
 
     @property
-    def LastError(self):
+    def last_error(self):
         return self._last_error
 
-    @LastError.setter
-    def LastError(self, v):
+    @last_error.setter
+    def last_error(self, v):
         self._last_error = v
 
-    def Open(self):
+    def open(self):
         pass
 
-    def Close(self):
+    def close(self):
         pass
 
     def set_color(self, device_type, device_name_tag, house_device_code, channel, hex_color):
@@ -74,28 +74,28 @@ class BaseDriverInterface:
         """
         pass
 
-    def DeviceOn(self, device_type, device_name_tag, house_device_code, channel):
+    def device_on(self, device_type, device_name_tag, house_device_code, channel):
         pass
 
-    def DeviceOff(self, device_type, device_name_tag, house_device_code, channel):
+    def device_off(self, device_type, device_name_tag, house_device_code, channel):
         pass
 
-    def DeviceDim(self, device_type, device_name_tag, house_device_code, channel, dim_amount):
+    def device_dim(self, device_type, device_name_tag, house_device_code, channel, dim_amount):
         pass
 
-    def DeviceBright(self, device_type, device_name_tag, house_device_code, channel, bright_amount):
+    def device_bright(self, device_type, device_name_tag, house_device_code, channel, bright_amount):
         pass
 
-    def DeviceAllUnitsOff(self, house_code):
+    def device_all_units_off(self, house_code):
         pass
 
-    def DeviceAllLightsOff(self, house_code):
+    def device_all_lights_off(self, house_code):
         pass
 
-    def DeviceAllLightsOn(self, house_code):
+    def device_all_lights_on(self, house_code):
         pass
 
-    def GetAvailableDevices(self):
+    def get_available_devices(self):
         """
         Get all known available devices of a given type. Not every device can be discovered.
         For example TPLink/Kasa devices can be discovered, but X10 devices
@@ -116,13 +116,13 @@ class BaseDriverInterface:
 
     # TODO Consider defining this as SetCurrentTime taking no parameters.
     # Set the controller time to the current, local time.
-    def SetTime(self, time_value):
+    def set_time(self, time_value):
         raise NotImplementedError()
 
     # Reset the last error info
-    def ClearLastError(self):
-        self.LastErrorCode = 0
-        self.LastError = None
+    def clear_last_error(self):
+        self.last_error_code = 0
+        self.last_error = None
 
     def hex_to_rgb(self, hex):
         """

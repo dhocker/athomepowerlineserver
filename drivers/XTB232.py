@@ -1,6 +1,6 @@
 #
 # AtHomePowerlineServer - networked server for CM11/CM11A/XTB-232 X10 controllers
-# Copyright © 2014, 2019  Dave Hocker
+# Copyright © 2014, 2020  Dave Hocker
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -89,12 +89,12 @@ class XTB232(BaseDriverInterface):
 
     # ************************************************************************
     # Open the device
-    def Open(self):
+    def open(self):
         self.InitializeController()
 
     # ************************************************************************
     # Close the device
-    def Close(self):
+    def close(self):
         logger.info("Closing XTB232 controller")
         if self.port is not None:
             self.port.close()
@@ -103,8 +103,8 @@ class XTB232(BaseDriverInterface):
     # Turn a device on
     # house_device_code = Ex. 'A1'
     # dim_amount as a percent 0 <= v <= 100
-    def DeviceOn(self, device_type, device_name_tag, house_device_code, channel):
-        self.ClearLastError()
+    def device_on(self, device_type, device_name_tag, house_device_code, channel):
+        self.clear_last_error()
 
         # The XTB-232 does not seem to perform the dim action as part of the on action.
         # Therefore, we do an on and a conditional dim (if dim > 0)
@@ -117,45 +117,45 @@ class XTB232(BaseDriverInterface):
     # Turn a device off
     # house_device_code = Ex. 'A1'
     # dim_amount 0 <= v <= 100
-    def DeviceOff(self, device_type, device_name_tag, house_device_code, channel):
-        self.ClearLastError()
+    def device_off(self, device_type, device_name_tag, house_device_code, channel):
+        self.clear_last_error()
         return self.ExecuteFunction(house_device_code, self.ConvertDimPercent(100), XTB232.Off)
 
     # ************************************************************************
     # Dim a lamp module
     # house_device_code = Ex. 'A1'
     # dim_amount as a percent 0 <= v <= 100
-    def DeviceDim(self, device_type, device_name_tag, house_device_code, dim_amount):
-        self.ClearLastError()
+    def device_dim(self, device_type, device_name_tag, house_device_code, dim_amount):
+        self.clear_last_error()
         return self.ExecuteFunction(house_device_code, self.ConvertDimPercent(dim_amount), XTB232.Dim)
 
     # ************************************************************************
     # Bright(en) a lamp module
     # house_device_code = Ex. 'A1'
     # bright_amount as a percent 0 <= v <= 100
-    def DeviceBright(self, device_type, device_name_tag, house_device_code, bright_amount):
-        self.ClearLastError()
+    def device_bright(self, device_type, device_name_tag, house_device_code, bright_amount):
+        self.clear_last_error()
         return self.ExecuteFunction(house_device_code, self.ConvertDimPercent(bright_amount), XTB232.Bright)
 
     # ************************************************************************
     # Turn all units off (for a given house code)
     # house_code = "A"..."P"
-    def DeviceAllUnitsOff(self, house_code):
-        self.ClearLastError()
+    def device_all_units_off(self, house_code):
+        self.clear_last_error()
         return self.SendStandardCommand(house_code, 0, XTB232.AllUnitsOff)
 
     # ************************************************************************
     # Turn all lights off
     # house_code = "A"..."P"
-    def DeviceAllLightsOff(self, house_code):
-        self.ClearLastError()
+    def device_all_lights_off(self, house_code):
+        self.clear_last_error()
         return self.SendStandardCommand(house_code, 0, XTB232.AllLightsOff)
 
     # ************************************************************************
     # Turn all lights on
     # house_code = "A"..."P"
-    def DeviceAllLightsOn(self, house_code):
-        self.ClearLastError()
+    def device_all_lights_on(self, house_code):
+        self.clear_last_error()
         return self.SendStandardCommand(house_code, 0, XTB232.AllLightsOn)
 
     # ************************************************************************
@@ -202,14 +202,14 @@ class XTB232(BaseDriverInterface):
     # ************************************************************************
     # Return a datetime type
     def GetTime(self):
-        self.ClearLastError()
+        self.clear_last_error()
         # TODO implement
         pass
 
     # ************************************************************************
     # Return controller status
     def GetStatus(self):
-        self.ClearLastError()
+        self.clear_last_error()
         # TODO implement
         pass
 
@@ -217,8 +217,8 @@ class XTB232(BaseDriverInterface):
 
     # TODO Consider defining this as SetCurrentTime taking no parameters.
     # Set the controller time to the current, local time.
-    def SetTime(self, time_value):
-        self.ClearLastError()
+    def set_time(self, time_value):
+        self.clear_last_error()
         # TODO implement
         pass
 
@@ -325,7 +325,7 @@ class XTB232(BaseDriverInterface):
         NOTE: This method CANNOT call another method that would result in recursion.
         Specifically, that means it cannot call SendCommand.
         """
-        self.ClearLastError()
+        self.clear_last_error()
 
         # The set time command is 7 bytes long
         TimeData = self.CreateSetTimeCommand(time_value)
@@ -375,7 +375,7 @@ class XTB232(BaseDriverInterface):
     # Note that the XTB232 ignores the time value. But, this is kept for CM11A compatibility.
     # See section 8 of the spec.
     def SendTime(self, time_value):
-        self.ClearLastError()
+        self.clear_last_error()
 
         # The set time command is 7 bytes long
         TimeData = self.CreateSetTimeCommand(time_value)

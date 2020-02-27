@@ -27,7 +27,7 @@ class AllSelectedDevicesOn(ServerCommand.ServerCommand):
             if device["selected"]:
                 device_count += 1
                 driver = self.get_driver_for_id(device["id"])
-                result = driver.DeviceOn(device["type"], device["name"], device["address"], 0)
+                result = driver.device_on(device["type"], device["name"], device["address"], 0)
                 if result:
                     device_count -= 1
 

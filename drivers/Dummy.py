@@ -1,6 +1,6 @@
 #
 # Dummy device driver that works for all devices
-# Copyright © 2014, 2019  Dave Hocker
+# Copyright © 2014, 2020  Dave Hocker
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,14 +24,14 @@ class Dummy(BaseDriverInterface):
         pass
 
     # Open the device
-    def Open(self):
+    def open(self):
         logger.debug("Driver opened")
 
     # Close the device
-    def Close(self):
+    def close(self):
         logger.debug("Driver closed")
 
-    def DeviceOn(self, device_type, device_name_tag, house_device_code, channel):
+    def device_on(self, device_type, device_name_tag, house_device_code, channel):
         """
         Turn device on
         :param device_type: the device's type (e.g. x10, hs100, smartplug, etc.)
@@ -43,7 +43,7 @@ class Dummy(BaseDriverInterface):
         logger.debug("DeviceOn for: %s %s", house_device_code, channel)
         return True
 
-    def DeviceOff(self, device_type, device_name_tag, house_device_code, channel):
+    def device_off(self, device_type, device_name_tag, house_device_code, channel):
         """
         Turn device off
         :param device_type: the device's type (e.g. x10, hs100, smartplug, etc.)
@@ -55,7 +55,7 @@ class Dummy(BaseDriverInterface):
         logger.debug("DeviceOff for: %s %s", house_device_code, channel)
         return True
 
-    def DeviceDim(self, device_type, device_name_tag, house_device_code, channel, dim_amount):
+    def device_dim(self, device_type, device_name_tag, house_device_code, channel, dim_amount):
         """
         Dim device
         :param device_type: the device's type (e.g. x10, hs100, smartplug, etc.)
@@ -67,7 +67,7 @@ class Dummy(BaseDriverInterface):
         logger.debug("DeviceDim for: %s %s %s", house_device_code, channel, dim_amount)
         return True
 
-    def DeviceBright(self, device_type, device_name_tag, house_device_code, channel, bright_amount):
+    def device_bright(self, device_type, device_name_tag, house_device_code, channel, bright_amount):
         """
         Turn device on
         :param device_type: the device's type (e.g. x10, hs100, smartplug, etc.)
@@ -79,7 +79,7 @@ class Dummy(BaseDriverInterface):
         logger.debug("DeviceBright for: %s %s %s", house_device_code, channel, bright_amount)
         return True
 
-    def DeviceAllUnitsOff(self, house_code):
+    def device_all_units_off(self, house_code):
         """
         Turn all units off. Not implemented by all device types.
         :param house_code:
@@ -88,7 +88,7 @@ class Dummy(BaseDriverInterface):
         logger.debug("DeviceAllUnitsOff for: %s", house_code)
         return True
 
-    def DeviceAllLightsOff(self, house_code):
+    def device_all_lights_off(self, house_code):
         """
         Turn all lights off. Not implemented by all device types.
         :param house_code:
@@ -97,7 +97,7 @@ class Dummy(BaseDriverInterface):
         logger.debug("DeviceAllLightsOff for: %s", house_code)
         return True
 
-    def DeviceAllLightsOn(self, house_code):
+    def device_all_lights_on(self, house_code):
         """
         Turn all lights on. Not implemented by all device types
         :param house_code:
@@ -108,5 +108,5 @@ class Dummy(BaseDriverInterface):
 
     #######################################################################
     # Set the controller time to the current, local time.
-    def SetTime(self, time_value):
+    def set_time(self, time_value):
         pass
