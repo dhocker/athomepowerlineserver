@@ -20,10 +20,18 @@ class QueryDevices(ServerCommand.ServerCommand):
     def Execute(self, request):
         args = request["args"]
         if "device-id" in args.keys():
-            result = ManagedDevices.get_device(int(args["device-id"]))
+            device_id = request["args"]["device-id"]
+            result = ManagedDevices.get_device(int(device_id))
+            # Add device specific properties to result (from driver)
+            driver = self.get_driver_for_id(device_id)
+            result["type"] = driver.get_device_type(result["address"], result["channel"])
             key = "device"
         else:
             result = ManagedDevices.get_all_devices()
+            # Add device specific properties to each result (from driver)
+            for device in result:
+                driver = self.get_driver_for_id(device["id"])
+                device["type"] = driver.get_device_type(device["address"], device["channel"])
             key = "devices"
 
         # Generate a successful response

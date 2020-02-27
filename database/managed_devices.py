@@ -98,7 +98,8 @@ class ManagedDevices(BaseTable):
         return id
 
     @classmethod
-    def update(cls, device_id, device_name, device_location, device_mfg, device_address, device_channel):
+    def update(cls, device_id, device_name, device_location, device_mfg, device_address, device_channel,
+               device_color, device_brightness):
         """
         Update an existing device record
         :param device_id: ID of existing device
@@ -118,9 +119,9 @@ class ManagedDevices(BaseTable):
         # row as a convenient way to know when the record was inserted. It isn't used for
         # any other purpose.
         c.execute("UPDATE ManagedDevices SET " \
-                    "name=?,location=?,mfg=?,address=?,channel=?,updatetime=? WHERE id=?",
+                    "name=?,location=?,mfg=?,address=?,channel=?,color=?,brightness=?,updatetime=? WHERE id=?",
                     (device_name, device_location, device_mfg, device_address, device_channel,
-                     datetime.datetime.now(), device_id)
+                     device_color, device_brightness, datetime.datetime.now(), device_id)
                   )
         conn.commit()
         change_count = conn.total_changes

@@ -12,8 +12,8 @@
 
 from commands.ServerCommand import ServerCommand
 import database.programs
-import datetime
 import logging
+import json
 
 logger = logging.getLogger("server")
 
@@ -42,15 +42,14 @@ class UpdateProgram(ServerCommand):
         action = request["args"]["command"]
         randomize = True if int(request["args"]["randomize"]) else False
         randomize_amount = int(request["args"]["randomize-amount"])
-        dimamount = int(request["args"]["dimamount"])
-        # Unclear what security is used for, but it is not part of the program
-        security = False
+        color = request["args"]["color"]
+        brightness = int(request["args"]["brightness"])
 
         # Insert program into Timers table
         database.programs.Programs.update(id, name, day_mask,
                                           trigger_method, trigger_time, offset, randomize,
                                           randomize_amount,
-                                          action, dimamount, security)
+                                          action, color, brightness)
 
         # Generate a successful response
         r = UpdateProgram.CreateResponse("UpdateProgram")

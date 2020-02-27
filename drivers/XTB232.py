@@ -103,23 +103,23 @@ class XTB232(BaseDriverInterface):
     # Turn a device on
     # house_device_code = Ex. 'A1'
     # dim_amount as a percent 0 <= v <= 100
-    def DeviceOn(self, device_type, device_name_tag, house_device_code, channel, dim_amount):
+    def DeviceOn(self, device_type, device_name_tag, house_device_code, channel):
         self.ClearLastError()
 
         # The XTB-232 does not seem to perform the dim action as part of the on action.
         # Therefore, we do an on and a conditional dim (if dim > 0)
-        result = self.ExecuteFunction(house_device_code, self.ConvertDimPercent(dim_amount), XTB232.On)
-        if result and (dim_amount > 0):
-            result = self.ExecuteFunction(house_device_code, self.ConvertDimPercent(dim_amount), XTB232.Dim)
+        result = self.ExecuteFunction(house_device_code, self.ConvertDimPercent(100), XTB232.On)
+        if result:
+            result = self.ExecuteFunction(house_device_code, self.ConvertDimPercent(100), XTB232.Dim)
         return result
 
     # ************************************************************************
     # Turn a device off
     # house_device_code = Ex. 'A1'
     # dim_amount 0 <= v <= 100
-    def DeviceOff(self, device_type, device_name_tag, house_device_code, channel, dim_amount):
+    def DeviceOff(self, device_type, device_name_tag, house_device_code, channel):
         self.ClearLastError()
-        return self.ExecuteFunction(house_device_code, self.ConvertDimPercent(dim_amount), XTB232.Off)
+        return self.ExecuteFunction(house_device_code, self.ConvertDimPercent(100), XTB232.Off)
 
     # ************************************************************************
     # Dim a lamp module

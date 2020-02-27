@@ -96,18 +96,18 @@ class Programs(BaseTable):
     @classmethod
     def insert(cls, name, day_mask,
                trigger_method, program_time, offset, randomize, randomize_amount,
-               action, dimamount, security):
+               action, color, brightness):
         conn = AtHomePowerlineServerDb.AtHomePowerlineServerDb.GetConnection()
         c = AtHomePowerlineServerDb.AtHomePowerlineServerDb.GetCursor(conn)
         # SQL insertion safe...
         # Note that the current time is inserted as the update time. This is added to the
         # row as a convenient way to know when the program was stored. It isn't used for
         # any other purpose.
-        c.execute("INSERT INTO Programs (name,daymask,triggermethod,time,offset,randomize,randomizeamount,command,dimamount,args,updatetime) " \
+        c.execute("INSERT INTO Programs (name,daymask,triggermethod,time,offset,randomize,randomizeamount,command,color,brightness,updatetime) " \
                   "values (?, ?, ?, ?, ?, ?, ?, ? ,?, ?, ?)",
                   (name, day_mask,
                    trigger_method, program_time, offset, randomize, randomize_amount,
-                   action, security, dimamount, datetime.datetime.now()))
+                   action, color, brightness, datetime.datetime.now()))
         conn.commit()
 
         # Get id of inserted record
@@ -119,14 +119,14 @@ class Programs(BaseTable):
     @classmethod
     def update(cls, id, name, day_mask,
                trigger_method, program_time, offset, randomize, randomize_amount,
-               action, dimamount, security):
+               action, color, brightness):
         conn = AtHomePowerlineServerDb.AtHomePowerlineServerDb.GetConnection()
         c = AtHomePowerlineServerDb.AtHomePowerlineServerDb.GetCursor(conn)
-        c.execute("UPDATE Programs SET name=?,daymask=?,triggermethod=?,time=?,offset=?,randomize=?,randomizeamount=?,command=?,dimamount=?,args=?,updatetime=? " \
+        c.execute("UPDATE Programs SET name=?,daymask=?,triggermethod=?,time=?,offset=?,randomize=?,randomizeamount=?,command=?,color=?,brightness=?,updatetime=? " \
                   "WHERE id=?",
                   (name, day_mask,
                    trigger_method, program_time, offset, randomize, randomize_amount,
-                   action, security, dimamount, datetime.datetime.now(), id))
+                   action, color, brightness, datetime.datetime.now(), id))
         conn.commit()
         change_count = conn.total_changes
         conn.close()

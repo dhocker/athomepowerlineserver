@@ -11,6 +11,7 @@
 
 import commands.ServerCommand as ServerCommand
 from database.programs import Programs
+import json
 
 
 class QueryDeviceProgram(ServerCommand.ServerCommand):
@@ -25,6 +26,7 @@ class QueryDeviceProgram(ServerCommand.ServerCommand):
         r = self.CreateResponse(request["request"])
 
         if result:
+            # The args column is a string. Turn it into a dict.
             r['result-code'] = 0
             r['program'] = result
             r['message'] = "Success"

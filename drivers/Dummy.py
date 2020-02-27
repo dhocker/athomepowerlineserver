@@ -31,7 +31,7 @@ class Dummy(BaseDriverInterface):
     def Close(self):
         logger.debug("Driver closed")
 
-    def DeviceOn(self, device_type, device_name_tag, house_device_code, channel, dim_amount):
+    def DeviceOn(self, device_type, device_name_tag, house_device_code, channel):
         """
         Turn device on
         :param device_type: the device's type (e.g. x10, hs100, smartplug, etc.)
@@ -40,10 +40,10 @@ class Dummy(BaseDriverInterface):
         :param dim_amount: a percent 0 to 100
         :return:
         """
-        logger.debug("DeviceOn for: %s %s %s", house_device_code, channel, dim_amount)
+        logger.debug("DeviceOn for: %s %s", house_device_code, channel)
         return True
 
-    def DeviceOff(self, device_type, device_name_tag, house_device_code, channel, dim_amount):
+    def DeviceOff(self, device_type, device_name_tag, house_device_code, channel):
         """
         Turn device off
         :param device_type: the device's type (e.g. x10, hs100, smartplug, etc.)
@@ -52,7 +52,7 @@ class Dummy(BaseDriverInterface):
         :param dim_amount: a percent 0 to 100
         :return:
         """
-        logger.debug("DeviceOff for: %s %s %s", house_device_code, channel, dim_amount)
+        logger.debug("DeviceOff for: %s %s", house_device_code, channel)
         return True
 
     def DeviceDim(self, device_type, device_name_tag, house_device_code, channel, dim_amount):

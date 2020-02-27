@@ -33,33 +33,44 @@ class TPLinkDriver(BaseDriverInterface):
     def Close(self):
         logger.debug("TPLink driver closed")
 
-    def DeviceOn(self, device_type, device_name_tag, ip_address, channel, dim_amount):
+    def set_color(self, device_type, device_name_tag, ip_address, channel, hex_color):
+        """
+        Sets the color of the device. Ignored by devices that do not support color.
+        :param device_type: the device's type (e.g. x10, hs100, smartplug, etc.)
+        :param device_name_tag: human readable name of device
+        :param ip_address: Device IP address
+        :param channel: 0-n
+        :param hex_color: Hex color #RRGGBB
+        :return:
+        """
+        # TODO Requires a TPLink/Kasa bulb for testing
+        logger.debug("set_color for: %s %s %s %s", device_type, device_name_tag, ip_address, channel)
+
+    def DeviceOn(self, device_type, device_name_tag, ip_address, channel):
         """
         Turn device on
         :param device_type: the device's type (e.g. x10, hs100, smartplug, etc.)
         :param device_name_tag: human readable name of device
         :param ip_address: Smart device IP address
-        :param dim_amount: 0 to 100
+        :param channel: 0 to n
         :return:
         """
-        # TODO Support multi-plug devices (e.g. SmartStrip)
-        logger.debug("DeviceOn for: %s %s %s %s %s", device_type, device_name_tag, ip_address, channel, dim_amount)
+        logger.debug("DeviceOn for: %s %s %s %s", device_type, device_name_tag, ip_address, channel)
         dev = self._create_smart_device(ip_address)
         result = self._exec_device_function(dev.turn_on)
         del dev
         return result
 
-    def DeviceOff(self, device_type, device_name_tag, ip_address, channel, dim_amount):
+    def DeviceOff(self, device_type, device_name_tag, ip_address, channel):
         """
         Turn device off
         :param device_type: the device's type (e.g. x10, hs100, smartplug, etc.)
         :param device_name_tag: human readable name of device
         :param ip_address: Smart device IP address
-        :param dim_amount: 0 to 100
+        :param channel: 0 to n
         :return:
         """
-        # TODO Support multi-plug devices (e.g. SmartStrip)
-        logger.debug("DeviceOff for: %s %s %s %s %s", device_type, device_name_tag, ip_address, channel, dim_amount)
+        logger.debug("DeviceOff for: %s %s %s %s", device_type, device_name_tag, ip_address, channel)
         dev = self._create_smart_device(ip_address)
         result = self._exec_device_function(dev.turn_off)
         del dev

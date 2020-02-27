@@ -19,6 +19,11 @@ logger = logging.getLogger("server")
 
 
 class BaseDriverInterface:
+    # Device types
+    DEVICE_TYPE_PLUG = "plug"
+    DEVICE_TYPE_BULB = "bulb"
+    DEVICE_TYPE_STRIP = "strip"
+
     def __init__(self):
         self.ClearLastError()
         logger.info("Device driver base class initialized")
@@ -45,10 +50,22 @@ class BaseDriverInterface:
     def Close(self):
         pass
 
-    def DeviceOn(self, device_type, device_name_tag, house_device_code, channel, dim_amount):
+    def set_color(self, device_type, device_name_tag, house_device_code, channel, hex_color):
+        """
+        Sets the color of the device. Ignored by devices that do not support color.
+        :param device_type: the device's type (e.g. x10, hs100, smartplug, etc.)
+        :param device_name_tag: human readable name of device
+        :param house_device_code: Device address or UUID
+        :param channel: 0-n
+        :param hex_color: Hex color #RRGGBB
+        :return:
+        """
         pass
 
-    def DeviceOff(self, device_type, device_name_tag, house_device_code, channel, dim_amount):
+    def DeviceOn(self, device_type, device_name_tag, house_device_code, channel):
+        pass
+
+    def DeviceOff(self, device_type, device_name_tag, house_device_code, channel):
         pass
 
     def DeviceDim(self, device_type, device_name_tag, house_device_code, channel, dim_amount):
@@ -76,6 +93,15 @@ class BaseDriverInterface:
         """
         return {}
 
+    def get_device_type(self, device_address, device_channel):
+        """
+        Return the type of device: plug, bulb, strip, etc.
+        :param device_address:
+        :param channel:
+        :return:
+        """
+        return BaseDriverInterface.DEVICE_TYPE_PLUG
+
     # TODO Consider defining this as SetCurrentTime taking no parameters.
     # Set the controller time to the current, local time.
     def SetTime(self, time_value):
@@ -85,3 +111,13 @@ class BaseDriverInterface:
     def ClearLastError(self):
         self.LastErrorCode = 0
         self.LastError = None
+
+    def hex_to_rgb(self, hex):
+        """
+        Convert #rrggbb to tuple(r,g,b).
+        From: https://gist.github.com/matthewkremer/3295567
+        :return:
+        """
+        hex = hex.lstrip('#')
+        hlen = len(hex)
+        return tuple(int(hex[i:i + hlen // 3], 16) for i in range(0, hlen, hlen // 3))

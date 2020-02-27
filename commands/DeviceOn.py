@@ -20,11 +20,11 @@ class DeviceOn(ServerCommand.ServerCommand):
     # Execute the "on" command.
     def Execute(self, request):
         device_id = int(request["args"]["device-id"])
-        dim_amount = int(request["args"]["dim-amount"])
 
         driver = self.get_driver_for_id(device_id)
         device = self.get_device_for_id(device_id)
-        result = driver.DeviceOn(device["mfg"], device["name"], device["address"], device["channel"], dim_amount)
+        driver.set_color(device["mfg"], device["name"], device["address"], device["channel"], device["color"])
+        result = driver.DeviceOn(device["mfg"], device["name"], device["address"], device["channel"])
 
         # Generate a successful response
         r = self.CreateResponse(request["request"])

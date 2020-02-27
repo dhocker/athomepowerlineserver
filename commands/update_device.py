@@ -23,15 +23,15 @@ class UpdateDevice(ServerCommand.ServerCommand):
         device_location = request["args"]["device-location"]
         device_mfg = request["args"]["device-mfg"]
         device_address = request["args"]["device-address"]
-        device_channel = 0
-        if "device-channel" in request["args"].keys():
-            device_channel = int(request["args"]["device-channel"])
+        device_channel = int(request["args"]["device-channel"])
+        device_color = request["args"]["device-color"]
+        device_brightness = int(request["args"]["device-brightness"])
 
         # TODO Consider a unique check on the name
         # TODO Cases based on type for address validation?
 
         result = ManagedDevices.update(device_id, device_name, device_location, device_mfg,
-                                       device_address, device_channel)
+                                       device_address, device_channel, device_color, device_brightness)
 
         # Generate a successful response
         r = self.CreateResponse(request["request"])

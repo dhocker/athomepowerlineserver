@@ -91,7 +91,35 @@ class MerossDriver(BaseDriverInterface):
             self.LastError = str(ex)
         return False
 
-    def DeviceOn(self, device_type, device_name_tag, house_device_code, channel, dim_amount):
+    def set_color(self, device_type, device_name_tag, house_device_code, channel, hex_color):
+        """
+        Sets the color of the device. Ignored by devices that do not support color.
+        :param device_type: the device's type (e.g. x10, hs100, smartplug, etc.)
+        :param device_name_tag: human readable name of device
+        :param house_device_code: Device address or UUID
+        :param channel: 0-n
+        :param hex_color: Hex color #RRGGBB
+        :return:
+        """
+        try:
+            device = self._get_device(house_device_code)
+            # Currently, a bulb is the only Meross device that supports color
+            if isinstance(device, GenericBulb):
+                rgb_color = self.hex_to_rgb(hex_color)
+                device.set_light_color(channel=channel, rgb=rgb_color)
+            else:
+               return False
+            logger.debug("Setcolor for: %s (%s %s) %s", device_name_tag, house_device_code, channel, hex_color)
+            return True
+        except Exception as ex:
+            logger.error("Exeception during SetColor for: %s (%s %s) %s", device_name_tag, house_device_code, channel, hex_color)
+            logger.error(str(ex))
+            self.LastErrorCode = MerossDriver.MEROSS_ERROR
+            self.LastError = str(ex)
+        finally:
+            pass
+
+    def DeviceOn(self, device_type, device_name_tag, house_device_code, channel):
         """
         Turn device on
         :param device_type: the device's type (e.g. x10, hs100, smartplug, etc.)
@@ -102,34 +130,30 @@ class MerossDriver(BaseDriverInterface):
         :return:
         """
         self.ClearLastError()
-        for retry in range(MerossDriver.RETRY_COUNT):
-            try:
-                device = self._manager.get_device_by_uuid(house_device_code)
-                if isinstance(device, GenericPlug):
-                    device.turn_on_channel(channel)
-                elif isinstance(device, GenericBulb):
-                    device.turn_on()
-                else:
-                    logger.error("Unrecognized Meross device type: %s (%s)", device_name_tag, house_device_code)
-                    self.LastErrorCode = MerossDriver.MEROSS_ERROR
-                    self.LastError = "Unrecognized Meross device type"
-                    return False
-                logger.debug("DeviceOn for: %s (%s %s) %s", device_name_tag, house_device_code, channel, dim_amount)
-                return True
-            except Exception as ex:
-                logger.error("Exeception during DeviceOn for: %s (%s %s) %s", device_name_tag, house_device_code, channel, dim_amount)
-                logger.error(str(ex))
+        try:
+            device = self._get_device(house_device_code)
+            if isinstance(device, GenericPlug):
+                device.turn_on_channel(channel)
+            elif isinstance(device, GenericBulb):
+                device.turn_on()
+            else:
+                logger.error("Unrecognized Meross device type: %s (%s)", device_name_tag, house_device_code)
                 self.LastErrorCode = MerossDriver.MEROSS_ERROR
-                self.LastError = str(ex)
-                # Restart the Meross manager
-                self._manager.stop()
-                self._manager.start()
-            finally:
-                pass
+                self.LastError = "Unrecognized Meross device type"
+                return False
+            logger.debug("DeviceOn for: %s (%s %s)", device_name_tag, house_device_code, channel)
+            return True
+        except Exception as ex:
+            logger.error("Exeception during DeviceOn for: %s (%s %s)", device_name_tag, house_device_code, channel)
+            logger.error(str(ex))
+            self.LastErrorCode = MerossDriver.MEROSS_ERROR
+            self.LastError = str(ex)
+        finally:
+            pass
 
         return False
 
-    def DeviceOff(self, device_type, device_name_tag, house_device_code, channel, dim_amount):
+    def DeviceOff(self, device_type, device_name_tag, house_device_code, channel):
         """
         Turn device off
         :param device_type: the device's type (e.g. x10, hs100, smartplug, etc.)
@@ -138,32 +162,27 @@ class MerossDriver(BaseDriverInterface):
         :param dim_amount: a percent 0 to 100
         :return:
         """
-        # TODO How to support multi-channel Meross devices
         self.ClearLastError()
-        for retry in range(MerossDriver.RETRY_COUNT):
-            try:
-                device = self._manager.get_device_by_uuid(house_device_code)
-                if isinstance(device, GenericPlug):
-                    device.turn_off_channel(channel)
-                elif isinstance(device, GenericBulb):
-                    device.turn_off()
-                else:
-                    logger.error("Unrecognized Meross device type: %s (%s %s)", device_name_tag, house_device_code, channel)
-                    self.LastErrorCode = MerossDriver.MEROSS_ERROR
-                    self.LastError = "Unrecognized Meross device type"
-                    return False
-                logger.debug("DeviceOff for: %s (%s %s) %s", device_name_tag, house_device_code, channel, dim_amount)
-                return True
-            except Exception as ex:
-                logger.error("Exeception during DeviceOff for: %s (%s %s) %s", device_name_tag, house_device_code, channel, dim_amount)
-                logger.error(str(ex))
+        try:
+            device = self._get_device(house_device_code)
+            if isinstance(device, GenericPlug):
+                device.turn_off_channel(channel)
+            elif isinstance(device, GenericBulb):
+                device.turn_off()
+            else:
+                logger.error("Unrecognized Meross device type: %s (%s %s)", device_name_tag, house_device_code, channel)
                 self.LastErrorCode = MerossDriver.MEROSS_ERROR
-                self.LastError = str(ex)
-                # Restart the Meross manager
-                self._manager.stop()
-                self._manager.start()
-            finally:
-                pass
+                self.LastError = "Unrecognized Meross device type"
+                return False
+            logger.debug("DeviceOff for: %s (%s %s)", device_name_tag, house_device_code, channel)
+            return True
+        except Exception as ex:
+            logger.error("Exeception during DeviceOff for: %s (%s %s)", device_name_tag, house_device_code, channel)
+            logger.error(str(ex))
+            self.LastErrorCode = MerossDriver.MEROSS_ERROR
+            self.LastError = str(ex)
+        finally:
+            pass
 
         return False
 
@@ -249,10 +268,44 @@ class MerossDriver(BaseDriverInterface):
 
         return available_devices
 
+    def get_device_type(self, device_address, device_channel):
+        device = self._get_device(device_address)
+        if isinstance(device, GenericPlug):
+            return MerossDriver.DEVICE_TYPE_PLUG
+        elif isinstance(device, GenericBulb):
+            return MerossDriver.DEVICE_TYPE_BULB
+        else:
+            logger.error("Device is neither plug nor bulb. Strip?")
+            logger.error(str(device))
+            return MerossDriver.DEVICE_TYPE_PLUG
+
     #######################################################################
     # Set the controller time to the current, local time.
     def SetTime(self, time_value):
         pass
+
+    def _get_device(self, device_uuid):
+        """
+        Return the device instance for a given device.
+        :param device_uuid: UUID of device
+        :return: Device instance or None
+        """
+        device = None
+        for retry in range(MerossDriver.RETRY_COUNT):
+            try:
+                device = self._manager.get_device_by_uuid(device_uuid)
+            except Exception as ex:
+                logger.error("Exeception attempting to get Meross device instance for %s", device_uuid)
+                logger.error(str(ex))
+                self.LastErrorCode = MerossDriver.MEROSS_ERROR
+                self.LastError = str(ex)
+                # Restart the Meross manager
+                self._manager.stop()
+                self._manager.start()
+            finally:
+                pass
+
+        return device
 
     def _build_device_details(self, dd):
         """
@@ -264,14 +317,14 @@ class MerossDriver(BaseDriverInterface):
         attrs["online"] = dd.online
         attrs["model"] = dd.type
         if isinstance(dd, GenericPlug):
-            attrs["type"] = "Plug"
+            attrs["type"] = MerossDriver.DEVICE_TYPE_PLUG
             channels = len(dd.get_channels())
             attrs["channels"] = channels
             device_label = "{0} [{1} channel(s)]".format(dd.name, channels)
             attrs["label"] = device_label
             attrs["usb"] = dd.get_usb_channel_index() is not None
         elif isinstance(dd, GenericBulb):
-            attrs["type"] = "Bulb"
+            attrs["type"] = MerossDriver.DEVICE_TYPE_BULB
             attrs["channels"] = 1
             device_label = dd.name
             attrs["label"] = device_label
