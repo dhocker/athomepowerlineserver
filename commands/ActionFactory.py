@@ -27,6 +27,7 @@ def RunAction(command, device_id, device_mfg, device_name, device_address, devic
         driver = DeviceDriverManager.get_driver(device_mfg)
         # Cases for command
         if command == "on":
+            driver.set_brightness(device_mfg, device_name, device_address, device_channel, brightness)
             driver.set_color(device_mfg, device_name, device_address, device_channel, color)
             driver.DeviceOn(device_mfg, device_name, device_address, device_channel)
         elif command == "off":
