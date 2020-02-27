@@ -46,6 +46,19 @@ class TPLinkDriver(BaseDriverInterface):
         # TODO Requires a TPLink/Kasa bulb for testing
         logger.debug("set_color for: %s %s %s %s", device_type, device_name_tag, ip_address, channel)
 
+    def set_brightness(self, device_type, device_name_tag, ip_address, channel, brightness):
+        """
+        Sets the color of the device. Ignored by devices that do not support color.
+        :param device_type: the device's type (e.g. x10, hs100, smartplug, etc.)
+        :param device_name_tag: human readable name of device
+        :param ip_address: Device address or UUID
+        :param channel: 0-n
+        :param brightness: 0-100 percent
+        :return:
+        """
+        # TODO Requires a TPLink/Kasa bulb for testing
+        logger.debug("set_brightness for: %s %s %s %s", device_type, device_name_tag, ip_address, channel)
+
     def DeviceOn(self, device_type, device_name_tag, ip_address, channel):
         """
         Turn device on

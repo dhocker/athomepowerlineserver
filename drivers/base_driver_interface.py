@@ -62,6 +62,18 @@ class BaseDriverInterface:
         """
         pass
 
+    def set_brightness(self, device_type, device_name_tag, house_device_code, channel, brightness):
+        """
+        Sets the color of the device. Ignored by devices that do not support color.
+        :param device_type: the device's type (e.g. x10, hs100, smartplug, etc.)
+        :param device_name_tag: human readable name of device
+        :param house_device_code: Device address or UUID
+        :param channel: 0-n
+        :param brightness: 0-100 percent
+        :return:
+        """
+        pass
+
     def DeviceOn(self, device_type, device_name_tag, house_device_code, channel):
         pass
 

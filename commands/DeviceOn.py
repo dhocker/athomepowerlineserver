@@ -23,6 +23,7 @@ class DeviceOn(ServerCommand.ServerCommand):
 
         driver = self.get_driver_for_id(device_id)
         device = self.get_device_for_id(device_id)
+        driver.set_brightness(device["mfg"], device["name"], device["address"], device["channel"], device["brightness"])
         driver.set_color(device["mfg"], device["name"], device["address"], device["channel"], device["color"])
         result = driver.DeviceOn(device["mfg"], device["name"], device["address"], device["channel"])
 

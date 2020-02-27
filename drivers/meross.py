@@ -109,10 +109,37 @@ class MerossDriver(BaseDriverInterface):
                 device.set_light_color(channel=channel, rgb=rgb_color)
             else:
                return False
-            logger.debug("Setcolor for: %s (%s %s) %s", device_name_tag, house_device_code, channel, hex_color)
+            logger.debug("set_color for: %s (%s %s) %s", device_name_tag, house_device_code, channel, hex_color)
             return True
         except Exception as ex:
-            logger.error("Exeception during SetColor for: %s (%s %s) %s", device_name_tag, house_device_code, channel, hex_color)
+            logger.error("Exeception during set_color for: %s (%s %s) %s", device_name_tag, house_device_code, channel, hex_color)
+            logger.error(str(ex))
+            self.LastErrorCode = MerossDriver.MEROSS_ERROR
+            self.LastError = str(ex)
+        finally:
+            pass
+
+    def set_brightness(self, device_type, device_name_tag, house_device_code, channel, brightness):
+        """
+        Sets the color of the device. Ignored by devices that do not support color.
+        :param device_type: the device's type (e.g. x10, hs100, smartplug, etc.)
+        :param device_name_tag: human readable name of device
+        :param house_device_code: Device address or UUID
+        :param channel: 0-n
+        :param brightness: 0-100 percent
+        :return:
+        """
+        try:
+            device = self._get_device(house_device_code)
+            # Currently, a bulb is the only Meross device that supports brightness
+            if isinstance(device, GenericBulb):
+                device.set_light_color(channel=channel, luminance=brightness)
+            else:
+               return False
+            logger.debug("set_brightness for: %s (%s %s) %s", device_name_tag, house_device_code, channel, brightness)
+            return True
+        except Exception as ex:
+            logger.error("Exeception during set_brightness for: %s (%s %s) %s", device_name_tag, house_device_code, channel, brightness)
             logger.error(str(ex))
             self.LastErrorCode = MerossDriver.MEROSS_ERROR
             self.LastError = str(ex)
