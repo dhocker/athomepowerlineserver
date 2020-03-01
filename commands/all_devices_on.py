@@ -1,6 +1,6 @@
 #
-# Turn on all selected devices
-# Copyright © 2019  Dave Hocker
+# Turn on all devices
+# Copyright © 2020  Dave Hocker
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -13,7 +13,7 @@ import commands.ServerCommand as ServerCommand
 from database.managed_devices import ManagedDevices
 
 
-class AllSelectedDevicesOn(ServerCommand.ServerCommand):
+class AllDevicesOn(ServerCommand.ServerCommand):
     """
     Command handler for turning on all selected devices
     """
@@ -23,13 +23,15 @@ class AllSelectedDevicesOn(ServerCommand.ServerCommand):
 
         device_count = 0
         for device in devices:
-            # We're only interested in selected devices
-            if device["selected"]:
-                device_count += 1
-                driver = self.get_driver_for_id(device["id"])
-                result = driver.device_on(device["type"], device["name"], device["address"], 0)
-                if result:
-                    device_count -= 1
+            device_count += 1
+            driver = self.get_driver_for_id(device["id"])
+            # Before turning on device, set its brightness and color
+            driver.set_brightness(device["mfg"], device["name"], device["address"], device["channel"],
+                                  device["brightness"])
+            driver.set_color(device["mfg"], device["name"], device["address"], device["channel"], device["color"])
+            result = driver.device_on(device["mfg"], device["name"], device["address"], device["channel"])
+            if result:
+                device_count -= 1
 
         # Generate a successful response
         r = self.CreateResponse(request["request"])

@@ -34,8 +34,8 @@ import commands.query_device_programs
 import commands.query_device_program
 import commands.delete_device
 import commands.delete_device_program
-import commands.all_selected_devices_on
-import commands.all_selected_devices_off
+import commands.all_devices_on
+import commands.all_devices_off
 import commands.query_available_devices
 import commands.query_available_programs
 import commands.query_programs
@@ -69,8 +69,6 @@ class CommandHandler:
         "on": commands.DeviceOn.DeviceOn,
         "deviceoff": commands.DeviceOff.DeviceOff,
         "off": commands.DeviceOff.DeviceOff,
-        "allunitsoff": commands.DeviceAllUnitsOff.DeviceAllUnitsOff,
-        "alllightson": commands.DeviceAllLightsOn.DeviceAllLightsOn,
         "dim": commands.DeviceDim.DeviceDim,
         "bright": commands.DeviceBright.DeviceBright,
         "statusrequest": commands.StatusRequest.StatusRequest,
@@ -103,8 +101,8 @@ class CommandHandler:
         "deleteactiongroupdevice": commands.delete_group_device.DeleteActionGroupDevice,
         "groupon": commands.group_on.GroupOn,
         "groupoff": commands.group_off.GroupOff,
-        "allselecteddeviceson": commands.all_selected_devices_on.AllSelectedDevicesOn,
-        "allselecteddevicesoff": commands.all_selected_devices_off.AllSelectedDevicesOff
+        "alldeviceson": commands.all_devices_on.AllDevicesOn,
+        "alldevicesoff": commands.all_devices_off.AllDevicesOff
     }
 
     def GetHandler(self, command):

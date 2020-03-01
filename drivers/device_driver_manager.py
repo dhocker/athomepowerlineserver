@@ -136,14 +136,14 @@ class DeviceDriverManager():
         # Open all used drivers
         for dn, driver in cls.used_driver_list.items():
             if driver:
-                driver.Open()
+                driver.open()
 
     @classmethod
     def close_drivers(cls):
         # Call each driver's close method
         for dn, driver in cls.used_driver_list.items():
             if driver:
-                driver.Close()
+                driver.close()
 
     @classmethod
     def get_driver(cls, device_name):
