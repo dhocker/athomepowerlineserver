@@ -72,7 +72,8 @@ class ManagedDevices(BaseTable):
         return cls.row_to_dict(rset.fetchone())
 
     @classmethod
-    def insert(cls, device_name, device_location, device_mfg, device_address, device_channel):
+    def insert(cls, device_name, device_location, device_mfg, device_address, device_channel,
+               device_color, device_brightness):
         """
         Insert a new device record
         :param device_name: name/tag/label for the device (human readable)
@@ -90,8 +91,8 @@ class ManagedDevices(BaseTable):
         # Note that the current time is inserted as the update time. This is added to the
         # row as a convenient way to know when the record was inserted. It isn't used for
         # any other purpose.
-        c.execute("INSERT INTO ManagedDevices (name,location,mfg,address,channel,updatetime) values (?,?,?,?,?,?)",
-                  (device_name, device_location, device_mfg, device_address, device_channel, datetime.datetime.now()))
+        c.execute("INSERT INTO ManagedDevices (name,location,mfg,address,channel,color,brightness,updatetime) values (?,?,?,?,?,?,?,?)",
+                  (device_name, device_location, device_mfg, device_address, device_channel, device_color, device_brightness, datetime.datetime.now()))
         id = c.lastrowid
         conn.commit()
         conn.close()
