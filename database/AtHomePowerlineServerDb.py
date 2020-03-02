@@ -55,7 +55,7 @@ class AtHomePowerlineServerDb:
         # Create tables (Sqlite3 specific)
         # SchemaVersion (sort of the migration version)
         conn.execute("CREATE TABLE SchemaVersion (Version text, updatetime timestamp)")
-        conn.execute("INSERT INTO SchemaVersion values (?, ?)", ("5.0.0.0", datetime.datetime.now()))
+        conn.execute("INSERT INTO SchemaVersion values (?, ?)", ("5.2.0.0", datetime.datetime.now()))
         conn.commit()
 
         # New Programs table without device ID column
@@ -70,8 +70,8 @@ class AtHomePowerlineServerDb:
             randomize	integer, \
             randomizeamount	integer, \
             command	text, \
-            dimamount	integer, \
-            args	text, \
+            color	text, \
+            brightness	integer, \
             updatetime	timestamp, \
             PRIMARY KEY(id) ) \
             "
@@ -82,7 +82,7 @@ class AtHomePowerlineServerDb:
         # Note that by definition Sqlite treats the id columns as the ROWID. See https://www.sqlite.org/autoinc.html
         conn.execute(
             "CREATE TABLE ManagedDevices (id integer PRIMARY KEY, name text, location text, \
-            mfg text, address text, channel integer, updatetime timestamp)")
+            mfg text, address text, channel integer, color integer, brightness text, updatetime timestamp)")
         conn.commit()
 
         conn.execute(
