@@ -79,15 +79,15 @@ class TimerServiceThread(threading.Thread):
         # All of the Programs records where command is not "none"
         tp_list = Programs.get_all_active_programs()
 
-        try:
-            for tp in tp_list:
+        for tp in tp_list:
+            try:
                 self.RunTimerProgram(tp)
-        except Exception as ex:
-            logger.error("Exception caught while running timer programs")
-            logger.error(ex)
-            logger.debug(traceback.format_exc())
-        finally:
-            pass
+            except Exception as ex:
+                logger.error("Unhandled exception caught while running timer program %s id=%d", tp["name"], tp["id"])
+                logger.error(ex)
+                logger.debug(traceback.format_exc())
+            finally:
+                pass
 
     ########################################################################
     # Run a single timer program
