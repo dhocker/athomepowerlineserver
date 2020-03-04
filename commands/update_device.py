@@ -1,6 +1,6 @@
 #
 # Update an existing device
-# Copyright © 2019  Dave Hocker
+# Copyright © 2019, 2020  Dave Hocker
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -30,20 +30,20 @@ class UpdateDevice(ServerCommand.ServerCommand):
         # TODO Consider a unique check on the name
         # TODO Cases based on type for address validation?
 
-        result = ManagedDevices.update(device_id, device_name, device_location, device_mfg,
+        md = ManagedDevices()
+        result = md.update(device_id, device_name, device_location, device_mfg,
                                        device_address, device_channel, device_color, device_brightness)
 
         # Generate a successful response
         r = self.CreateResponse(request["request"])
 
-        if result:
-            r['result-code'] = 0
+        if result >= 0:
+            r['result-code'] = ServerCommand.ServerCommand.SUCCESS
             r['device-id'] = device_id
-            r['message'] = "Success"
+            r['message'] = ServerCommand.ServerCommand.MSG_SUCCESS
         else:
             # Probably invalid device type
-            r['result-code'] = 1
-            r['error'] = 1
-            r['message'] = "Failure"
+            r['result-code'] = md.last_error_code
+            r['message'] = md.last_error
 
         return r

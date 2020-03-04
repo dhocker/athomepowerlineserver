@@ -1,6 +1,6 @@
 #
 # Device on
-# Copyright © 2014, 2019  Dave Hocker
+# Copyright © 2014, 2020  Dave Hocker
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -25,17 +25,18 @@ class DeviceOn(ServerCommand.ServerCommand):
         device = self.get_device_for_id(device_id)
         driver.set_brightness(device["mfg"], device["name"], device["address"], device["channel"], device["brightness"])
         driver.set_color(device["mfg"], device["name"], device["address"], device["channel"], device["color"])
-        result = driver.device_on(device["mfg"], device["name"], device["address"], device["channel"])
-
-        # Generate a successful response
         r = self.CreateResponse(request["request"])
-
-        r['result-code'] = driver.last_error_code
-        if result:
-            # r['error'] = "Command not fully implemented"
-            r['message'] = "Success"
-        else:
-            r['error'] = driver.last_error
-            r['message'] = driver.last_error
+        try:
+            result = driver.device_on(device["mfg"], device["name"], device["address"], device["channel"])
+            if result:
+                r['result-code'] = ServerCommand.ServerCommand.SUCCESS
+                r['message'] = ServerCommand.ServerCommand.MSG_SUCCESS
+            else:
+                r['result-code'] = ServerCommand.ServerCommand.SERVER_ERROR
+                r['device-code'] = driver.last_error_code
+                r['message'] = driver.last_error
+        except Exception as ex:
+            r['result-code'] = ServerCommand.ServerCommand.SERVER_ERROR
+            r['message'] = str(ex)
 
         return r

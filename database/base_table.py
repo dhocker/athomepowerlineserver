@@ -1,6 +1,6 @@
 #
 # Base table model for all database models
-# Copyright © 2019  Dave Hocker
+# Copyright © 2019, 2020  Dave Hocker
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,6 +17,35 @@ logger = logging.getLogger("server")
 
 
 class BaseTable:
+    # Error codes
+    SUCCESS = 0
+    BAD_REQUEST = 400
+    SERVER_ERROR = 500
+
+    @property
+    def last_error_code(self):
+        return self._last_error_code
+
+    @last_error_code.setter
+    def last_error_code(self, v):
+        self._last_error_code = v
+
+    @property
+    def last_error(self):
+        return self._last_error
+
+    @last_error.setter
+    def last_error(self, v):
+        self._last_error = v
+
+    def clear_last_error(self):
+        """
+        Clear out the last error properties
+        :return:
+        """
+        self.last_error_code = BaseTable.SUCCESS
+        self.last_error = None
+
     @classmethod
     def rows_to_dict_list(cls, rows):
         """

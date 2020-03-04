@@ -19,19 +19,19 @@ class DeleteDevice(ServerCommand.ServerCommand):
     """
     def Execute(self, request):
         args = request["args"]
-        result = ManagedDevices.delete_device(int(args["device-id"]))
+        md = ManagedDevices()
+        result = md.delete_device(int(args["device-id"]))
 
         # Generate a successful response
         r = self.CreateResponse(request["request"])
 
-        if result:
-            r['result-code'] = 0
+        if result >= 0:
+            r['result-code'] = ServerCommand.ServerCommand.SUCCESS
             r['device-id'] = args["device-id"]
-            r['message'] = "Success"
+            r['message'] = ServerCommand.ServerCommand.MSG_SUCCESS
         else:
             # Probably invalid device type
-            r['result-code'] = 1
-            r['error'] = 1
-            r['message'] = "Failure"
+            r['result-code'] = md.last_error_code
+            r['message'] = md.last_error
 
         return r

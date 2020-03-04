@@ -1,6 +1,6 @@
 #
 # AtHomePowerlineServer - networked server for CM11/CM11A/XTB-232 X10 controllers
-# Copyright (C) 2014  Dave Hocker
+# Copyright © 2014, 2020  Dave Hocker
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,10 +22,17 @@ from drivers.device_driver_manager import DeviceDriverManager
 
 
 class ServerCommand:
+    # Error codes
+    SUCCESS = 0
+    COMMAND_NOT_FOUND = 404
+    SERVER_ERROR = 500
+    NOT_IMPLEMENTED = 501
+    # Messages
+    MSG_SUCCESS = "Success"
 
     def Execute(self, request):
         r = self.CreateResponse()
-        r['result-code'] = 404
+        r['result-code'] = ServerCommand.COMMAND_NOT_FOUND
         r['error'] = "Command not recognized"
         r['date-time'] = str(datetime.datetime.now())
         r['message'] = "none"

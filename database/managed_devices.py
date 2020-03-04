@@ -1,6 +1,6 @@
 #
 # Devices table model
-# Copyright © 2019  Dave Hocker
+# Copyright © 2019, 2020  Dave Hocker
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -56,23 +56,47 @@ class ManagedDevices(BaseTable):
         conn.commit()
         conn.close()
 
-    @classmethod
-    def get_all_devices(cls):
-        conn = AtHomePowerlineServerDb.GetConnection()
-        c = AtHomePowerlineServerDb.GetCursor(conn)
-        # The results are sorted based on the most probable use
-        rset = c.execute("SELECT * from ManagedDevices ORDER BY location, name")
-        return cls.rows_to_dict_list(rset)
+    def get_all_devices(self):
+        self.clear_last_error()
 
-    @classmethod
-    def get_device(cls, device_id):
-        conn = AtHomePowerlineServerDb.GetConnection()
-        c = AtHomePowerlineServerDb.GetCursor(conn)
-        rset = c.execute("SELECT * from ManagedDevices WHERE id=:deviceid", {"deviceid": device_id})
-        return cls.row_to_dict(rset.fetchone())
+        try:
+            conn = AtHomePowerlineServerDb.GetConnection()
+            c = AtHomePowerlineServerDb.GetCursor(conn)
+            # The results are sorted based on the most probable use
+            rset = c.execute("SELECT * from ManagedDevices ORDER BY location, name")
+            result = ManagedDevices.rows_to_dict_list(rset)
+        except Exception as ex:
+            self.last_error_code = ManagedDevices.SERVER_ERROR
+            self.last_error = str(ex)
+            result = None
+        finally:
+            # Make sure connection is closed
+            if conn:
+                conn.close()
 
-    @classmethod
-    def insert(cls, device_name, device_location, device_mfg, device_address, device_channel,
+        return result
+
+    def get_device(self, device_id):
+        self.clear_last_error()
+
+        conn = None
+        try:
+            conn = AtHomePowerlineServerDb.GetConnection()
+            c = AtHomePowerlineServerDb.GetCursor(conn)
+            rset = c.execute("SELECT * from ManagedDevices WHERE id=:deviceid", {"deviceid": device_id})
+            result = ManagedDevices.row_to_dict(rset.fetchone())
+        except Exception as ex:
+            self.last_error_code = ManagedDevices.SERVER_ERROR
+            self.last_error = str(ex)
+            result = None
+        finally:
+            # Make sure connection is closed
+            if conn:
+                conn.close()
+
+        return result
+
+    def insert(self, device_name, device_location, device_mfg, device_address, device_channel,
                device_color, device_brightness):
         """
         Insert a new device record
@@ -80,26 +104,41 @@ class ManagedDevices(BaseTable):
         :param device_location: location of device in house
         :param device_mfg: device type (e.g. x10, tplink, hs100, etc.)
         :param device_address: x10 house-device-code or ip address or ...
-        :return:
+        :return: >0 = ID of new record. <0 = error
         """
-        if not cls.is_valid_device_type(device_mfg):
+        self.clear_last_error()
+
+        # Validate device mfg/type
+        if not ManagedDevices.is_valid_device_type(device_mfg):
+            self.last_error_code = ManagedDevices.BAD_REQUEST
+            self.last_error = "Invalid device mfg/type"
             return -1
 
-        conn = AtHomePowerlineServerDb.GetConnection()
-        c = AtHomePowerlineServerDb.GetCursor(conn)
-        # SQL insertion safe...
-        # Note that the current time is inserted as the update time. This is added to the
-        # row as a convenient way to know when the record was inserted. It isn't used for
-        # any other purpose.
-        c.execute("INSERT INTO ManagedDevices (name,location,mfg,address,channel,color,brightness,updatetime) values (?,?,?,?,?,?,?,?)",
-                  (device_name, device_location, device_mfg, device_address, device_channel, device_color, device_brightness, datetime.datetime.now()))
-        id = c.lastrowid
-        conn.commit()
-        conn.close()
+        conn = None
+        try:
+            conn = AtHomePowerlineServerDb.GetConnection()
+            c = AtHomePowerlineServerDb.GetCursor(conn)
+            # SQL insertion safe...
+            # Note that the current time is inserted as the update time. This is added to the
+            # row as a convenient way to know when the record was inserted. It isn't used for
+            # any other purpose.
+            c.execute("INSERT INTO ManagedDevices (name,location,mfg,address,channel,color,brightness,updatetime) values (?,?,?,?,?,?,?,?)",
+                      (device_name, device_location, device_mfg, device_address, device_channel, device_color, device_brightness, datetime.datetime.now()))
+            id = c.lastrowid
+            conn.commit()
+        except Exception as ex:
+            self.last_error_code = ManagedDevices.SERVER_ERROR
+            self.last_error = str(ex)
+            id = -1
+        finally:
+            # Make sure connection is closed
+            if conn:
+                conn.close()
+
+        # Return new record ID
         return id
 
-    @classmethod
-    def update(cls, device_id, device_name, device_location, device_mfg, device_address, device_channel,
+    def update(self, device_id, device_name, device_location, device_mfg, device_address, device_channel,
                device_color, device_brightness):
         """
         Update an existing device record
@@ -110,33 +149,58 @@ class ManagedDevices(BaseTable):
         :param device_address: x10 house-device-code or ip address or ...
         :return:
         """
-        if not cls.is_valid_device_type(device_mfg):
-            return False
+        self.clear_last_error()
 
-        conn = AtHomePowerlineServerDb.GetConnection()
-        c = AtHomePowerlineServerDb.GetCursor(conn)
-        # SQL update safe...
-        # Note that the current time is inserted as the update time. This is added to the
-        # row as a convenient way to know when the record was inserted. It isn't used for
-        # any other purpose.
-        c.execute("UPDATE ManagedDevices SET " \
-                    "name=?,location=?,mfg=?,address=?,channel=?,color=?,brightness=?,updatetime=? WHERE id=?",
-                    (device_name, device_location, device_mfg, device_address, device_channel,
-                     device_color, device_brightness, datetime.datetime.now(), device_id)
-                  )
-        conn.commit()
-        change_count = conn.total_changes
-        conn.close()
+        if not ManagedDevices.is_valid_device_type(device_mfg):
+            self.last_error_code = ManagedDevices.BAD_REQUEST
+            self.last_error = "Invalid device mfg/type"
+            return -1
+
+        conn = None
+        try:
+            conn = AtHomePowerlineServerDb.GetConnection()
+            c = AtHomePowerlineServerDb.GetCursor(conn)
+            # SQL update safe...
+            # Note that the current time is inserted as the update time. This is added to the
+            # row as a convenient way to know when the record was inserted. It isn't used for
+            # any other purpose.
+            c.execute("UPDATE ManagedDevices SET " \
+                        "name=?,location=?,mfg=?,address=?,channel=?,color=?,brightness=?,updatetime=? WHERE id=?",
+                        (device_name, device_location, device_mfg, device_address, device_channel,
+                         device_color, device_brightness, datetime.datetime.now(), device_id)
+                      )
+            conn.commit()
+            change_count = conn.total_changes
+        except Exception as ex:
+            self.last_error_code = ManagedDevices.SERVER_ERROR
+            self.last_error = str(ex)
+            change_count = -1
+        finally:
+            # Make sure connection is closed
+            if conn:
+                conn.close()
+
         return change_count
 
-    @classmethod
-    def delete_device(cls, device_id):
-        conn = AtHomePowerlineServerDb.GetConnection()
-        c = AtHomePowerlineServerDb.GetCursor(conn)
-        c.execute("DELETE FROM ManagedDevices WHERE id=:deviceid", {"deviceid": device_id})
-        conn.commit()
-        change_count = conn.total_changes
-        conn.close()
+    def delete_device(self, device_id):
+        self.clear_last_error()
+
+        conn = None
+        try:
+            conn = AtHomePowerlineServerDb.GetConnection()
+            c = AtHomePowerlineServerDb.GetCursor(conn)
+            c.execute("DELETE FROM ManagedDevices WHERE id=:deviceid", {"deviceid": device_id})
+            conn.commit()
+            change_count = conn.total_changes
+        except Exception as ex:
+            self.last_error_code = ManagedDevices.SERVER_ERROR
+            self.last_error = str(ex)
+            change_count = -1
+        finally:
+            # Make sure connection is closed
+            if conn:
+                conn.close()
+
         return change_count
 
     @classmethod

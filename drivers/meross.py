@@ -101,6 +101,7 @@ class MerossDriver(BaseDriverInterface):
         :param hex_color: Hex color #RRGGBB
         :return:
         """
+        self.clear_last_error()
         try:
             device = self._get_device(house_device_code)
             # Currently, a bulb is the only Meross device that supports color
@@ -129,6 +130,7 @@ class MerossDriver(BaseDriverInterface):
         :param brightness: 0-100 percent
         :return:
         """
+        self.clear_last_error()
         try:
             device = self._get_device(house_device_code)
             # Currently, a bulb is the only Meross device that supports brightness

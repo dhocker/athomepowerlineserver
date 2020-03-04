@@ -19,6 +19,8 @@ logger = logging.getLogger("server")
 
 
 class BaseDriverInterface:
+    # Error codes
+    SUCCESS = 0
     # Device types
     DEVICE_TYPE_PLUG = "plug"
     DEVICE_TYPE_BULB = "bulb"
@@ -121,7 +123,7 @@ class BaseDriverInterface:
 
     # Reset the last error info
     def clear_last_error(self):
-        self.last_error_code = 0
+        self.last_error_code = BaseDriverInterface.SUCCESS
         self.last_error = None
 
     def hex_to_rgb(self, hex):

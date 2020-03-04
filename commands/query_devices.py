@@ -1,6 +1,6 @@
 #
 # Query for all defined devices
-# Copyright © 2019  Dave Hocker
+# Copyright © 2019, 2020  Dave Hocker
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,32 +19,35 @@ class QueryDevices(ServerCommand.ServerCommand):
     """
     def Execute(self, request):
         args = request["args"]
+
+        md = ManagedDevices()
         if "device-id" in args.keys():
             device_id = request["args"]["device-id"]
-            result = ManagedDevices.get_device(int(device_id))
-            # Add device specific properties to result (from driver)
-            driver = self.get_driver_for_id(device_id)
-            result["type"] = driver.get_device_type(result["address"], result["channel"])
+            result = md.get_device(int(device_id))
+            if result:
+                # Add device specific properties to result (from driver)
+                driver = self.get_driver_for_id(device_id)
+                result["type"] = driver.get_device_type(result["address"], result["channel"])
             key = "device"
         else:
-            result = ManagedDevices.get_all_devices()
-            # Add device specific properties to each result (from driver)
-            for device in result:
-                driver = self.get_driver_for_id(device["id"])
-                device["type"] = driver.get_device_type(device["address"], device["channel"])
+            result = md.get_all_devices()
+            if result:
+                # Add device specific properties to each result (from driver)
+                for device in result:
+                    driver = self.get_driver_for_id(device["id"])
+                    device["type"] = driver.get_device_type(device["address"], device["channel"])
             key = "devices"
 
         # Generate a successful response
         r = self.CreateResponse(request["request"])
 
         if result or len(result) >= 0:
-            r['result-code'] = 0
+            r['result-code'] = ServerCommand.ServerCommand.SUCCESS
             r[key] = result
-            r['message'] = "Success"
+            r['message'] = ServerCommand.ServerCommand.MSG_SUCCESS
         else:
             # Probably invalid device type
-            r['result-code'] = 1
-            r['error'] = 1
-            r['message'] = "Failure"
+            r['result-code'] = md.last_error_code
+            r['message'] = md.last_error
 
         return r
