@@ -71,7 +71,7 @@ class MerossDriver(BaseDriverInterface):
             logger.info("Meross driver opened")
             return True
         except Exception as ex:
-            logger.error("Exeception during manager.start()")
+            logger.error("Exception during manager.start()")
             logger.error(str(ex))
             self.LastErrorCode = MerossDriver.MEROSS_ERROR
             self.LastError = str(ex)
@@ -85,7 +85,7 @@ class MerossDriver(BaseDriverInterface):
             logger.info("Meross driver closed")
             return True
         except Exception as ex:
-            logger.error("Exeception during manager.stop()")
+            logger.error("Exception during manager.stop()")
             logger.error(str(ex))
             self.LastErrorCode = MerossDriver.MEROSS_ERROR
             self.LastError = str(ex)
@@ -114,7 +114,7 @@ class MerossDriver(BaseDriverInterface):
                 logger.debug("set_color for: %s (%s %s) %s", device_name_tag, house_device_code, channel, hex_color)
                 return True
             except Exception as ex:
-                logger.error("Exeception during set_color for: %s (%s %s) %s", device_name_tag, house_device_code, channel, hex_color)
+                logger.error("Exception during set_color for: %s (%s %s) %s", device_name_tag, house_device_code, channel, hex_color)
                 logger.error(str(ex))
                 self.LastErrorCode = MerossDriver.MEROSS_ERROR
                 self.LastError = str(ex)
@@ -150,7 +150,7 @@ class MerossDriver(BaseDriverInterface):
                 logger.debug("set_brightness for: %s (%s %s) %s", device_name_tag, house_device_code, channel, brightness)
                 return True
             except Exception as ex:
-                logger.error("Exeception during set_brightness for: %s (%s %s) %s", device_name_tag, house_device_code, channel, brightness)
+                logger.error("Exception during set_brightness for: %s (%s %s) %s", device_name_tag, house_device_code, channel, brightness)
                 logger.error(str(ex))
                 self.LastErrorCode = MerossDriver.MEROSS_ERROR
                 self.LastError = str(ex)
@@ -190,7 +190,7 @@ class MerossDriver(BaseDriverInterface):
                 logger.debug("DeviceOn for: %s (%s %s)", device_name_tag, house_device_code, channel)
                 return True
             except Exception as ex:
-                logger.error("Exeception during DeviceOn for: %s (%s %s)", device_name_tag, house_device_code, channel)
+                logger.error("Exception during DeviceOn for: %s (%s %s)", device_name_tag, house_device_code, channel)
                 logger.error(str(ex))
                 self.LastErrorCode = MerossDriver.MEROSS_ERROR
                 self.LastError = str(ex)
@@ -229,7 +229,7 @@ class MerossDriver(BaseDriverInterface):
                 logger.debug("DeviceOff for: %s (%s %s)", device_name_tag, house_device_code, channel)
                 return True
             except Exception as ex:
-                logger.error("Exeception during DeviceOff for: %s (%s %s)", device_name_tag, house_device_code, channel)
+                logger.error("Exception during DeviceOff for: %s (%s %s)", device_name_tag, house_device_code, channel)
                 logger.error(str(ex))
                 self.LastErrorCode = MerossDriver.MEROSS_ERROR
                 self.LastError = str(ex)
@@ -316,7 +316,7 @@ class MerossDriver(BaseDriverInterface):
             for b in bulbs:
                 available_devices[b.uuid] = self._build_device_details(b)
         except Exception as ex:
-            logger.error("Exeception enumerating available devices")
+            logger.error("Exception enumerating available devices")
             logger.error(str(ex))
             self.LastErrorCode = 1
             self.LastError = str(ex)
@@ -360,7 +360,7 @@ class MerossDriver(BaseDriverInterface):
             try:
                 device = self._manager.get_device_by_uuid(device_uuid)
             except Exception as ex:
-                logger.error("Exeception attempting to get Meross device instance for %s", device_uuid)
+                logger.error("Exception attempting to get Meross device instance for %s", device_uuid)
                 logger.error(str(ex))
                 self.LastErrorCode = MerossDriver.MEROSS_ERROR
                 self.LastError = str(ex)
