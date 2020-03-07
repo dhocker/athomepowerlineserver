@@ -346,6 +346,7 @@ class MerossDriver(BaseDriverInterface):
         Restart the Meross communication manager
         :return:
         """
+        logger.debug("Restarting Meross communication manager")
         self._manager.stop()
         self._manager.start()
 

@@ -38,6 +38,10 @@ class BaseTable:
     def last_error(self, v):
         self._last_error = v
 
+    def set_last_error(self, code, message):
+        self.last_error_code = code
+        self.last_error = message
+
     def clear_last_error(self):
         """
         Clear out the last error properties

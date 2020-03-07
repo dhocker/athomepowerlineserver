@@ -56,6 +56,7 @@ class ManagedDevices(BaseTable):
         conn.commit()
         conn.close()
 
+
     def get_all_devices(self):
         self.clear_last_error()
 
@@ -203,39 +204,78 @@ class ManagedDevices(BaseTable):
 
         return change_count
 
-    @classmethod
-    def get_device_by_id(cls, device_id):
+    def get_device_by_id(self, device_id):
         """
         Return the dvice record for a given device
         :param device_id: The device id (key)
         :return: device record as a dict
         """
-        conn = AtHomePowerlineServerDb.GetConnection()
-        c = AtHomePowerlineServerDb.GetCursor(conn)
-        rset = c.execute("SELECT * from ManagedDevices where id=:id", {"id": device_id})
-        return cls.row_to_dict(rset.fetchone())
+        self.clear_last_error()
 
-    @classmethod
-    def get_devices_for_program(cls, program_id):
-        conn = AtHomePowerlineServerDb.GetConnection()
-        c = AtHomePowerlineServerDb.GetCursor(conn)
-        rset = c.execute("SELECT ManagedDevices.* from ProgramAssignments "
-                         "join ManagedDevices on ManagedDevices.id=ProgramAssignments.device_id "
-                         "where ProgramAssignments.program_id=:id", {"id": program_id})
-        return cls.rows_to_dict_list(rset)
+        conn = None
+        try:
+            conn = AtHomePowerlineServerDb.GetConnection()
+            c = AtHomePowerlineServerDb.GetCursor(conn)
+            rset = c.execute("SELECT * from ManagedDevices where id=:id", {"id": device_id})
+            result = ManagedDevices.row_to_dict(rset.fetchone())
+        except Exception as ex:
+            self.last_error_code = ManagedDevices.SERVER_ERROR
+            self.last_error = str(ex)
+            result = None
+        finally:
+            # Make sure connection is closed
+            if conn:
+                conn.close()
 
-    @classmethod
-    def get_all_available_group_devices(cls, group_id):
-        conn = AtHomePowerlineServerDb.GetConnection()
-        c = AtHomePowerlineServerDb.GetCursor(conn)
-        # Select devices not already assigned to this group
-        rset = c.execute(
-            'SELECT * FROM ManagedDevices '
-            'WHERE ManagedDevices.id NOT IN '
-            '(SELECT ActionGroupDevices.device_id from ActionGroupDevices where ActionGroupDevices.group_id=:group_id) '
-            'ORDER BY ManagedDevices.location',
-            {"group_id": group_id})
-        return cls.rows_to_dict_list(rset)
+        return result
+
+    def get_devices_for_program(self, program_id):
+        self.clear_last_error()
+
+        conn = None
+        try:
+            conn = AtHomePowerlineServerDb.GetConnection()
+            c = AtHomePowerlineServerDb.GetCursor(conn)
+            rset = c.execute("SELECT ManagedDevices.* from ProgramAssignments "
+                             "join ManagedDevices on ManagedDevices.id=ProgramAssignments.device_id "
+                             "where ProgramAssignments.program_id=:id", {"id": program_id})
+            result = ManagedDevices.rows_to_dict_list(rset)
+        except Exception as ex:
+            self.last_error_code = ManagedDevices.SERVER_ERROR
+            self.last_error = str(ex)
+            result = None
+        finally:
+            # Make sure connection is closed
+            if conn:
+                conn.close()
+
+        return result
+
+    def get_all_available_group_devices(self, group_id):
+        self.clear_last_error()
+
+        conn = None
+        try:
+            conn = AtHomePowerlineServerDb.GetConnection()
+            c = AtHomePowerlineServerDb.GetCursor(conn)
+            # Select devices not already assigned to this group
+            rset = c.execute(
+                'SELECT * FROM ManagedDevices '
+                'WHERE ManagedDevices.id NOT IN '
+                '(SELECT ActionGroupDevices.device_id from ActionGroupDevices where ActionGroupDevices.group_id=:group_id) '
+                'ORDER BY ManagedDevices.location',
+                {"group_id": group_id})
+            result = ManagedDevices.rows_to_dict_list(rset)
+        except Exception as ex:
+            self.last_error_code = ManagedDevices.SERVER_ERROR
+            self.last_error = str(ex)
+            result = None
+        finally:
+            # Make sure connection is closed
+            if conn:
+                conn.close()
+
+        return result
 
     @classmethod
     def is_valid_device_type(cls, device_type):

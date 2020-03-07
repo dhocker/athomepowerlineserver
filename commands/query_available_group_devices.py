@@ -19,19 +19,19 @@ class QueryAvailableGroupDevices(ServerCommand):
     """
     def Execute(self, request):
         groupid = int(request["args"]["group-id"])
-        result = ManagedDevices.get_all_available_group_devices(groupid)
+        md = ManagedDevices()
+        result = md.get_all_available_group_devices(groupid)
 
         # Generate a successful response
         r = self.CreateResponse(request["request"])
 
-        if result:
-            r['result-code'] = 0
+        if result is not None:
+            r['result-code'] = ServerCommand.SUCCESS
             r['devices'] = result
-            r['message'] = "Success"
+            r['message'] = ServerCommand.MSG_SUCCESS
         else:
-            # No records found
-            r['result-code'] = 0
-            r['programs'] = []
-            r['message'] = "No records found"
+            r['result-code'] = md.last_error_code
+            r['devices'] = []
+            r['message'] = md.last_error
 
         return r

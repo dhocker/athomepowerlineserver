@@ -19,6 +19,9 @@ import socket
 import Version
 from database.managed_devices import ManagedDevices
 from drivers.device_driver_manager import DeviceDriverManager
+import logging
+
+logger = logging.getLogger("server")
 
 
 class ServerCommand:
@@ -51,18 +54,43 @@ class ServerCommand:
 
     @classmethod
     def get_driver_for_id(cls, device_id):
-        r = ManagedDevices.get_device_by_id(device_id)
-        driver = DeviceDriverManager.get_driver(r["mfg"])
+        """
+        Return a device driver instance for a given device ID
+        :param device_id:
+        :return:
+        """
+        device = ServerCommand.get_device_for_id(device_id)
+        if device is not None:
+            driver = DeviceDriverManager.get_driver(device["mfg"])
+        else:
+            driver = None
         return driver
 
     @classmethod
     def get_address_for_id(cls, device_id):
-        r = ManagedDevices.get_device_by_id(device_id)
+        """
+        Return the address/UUID for a given device ID
+        :param device_id:
+        :return:
+        """
+        r = ServerCommand.get_device_for_id(device_id)
+        if r is None:
+            return None
         return r["address"]
 
     @classmethod
     def get_device_for_id(cls, device_id):
-        return ManagedDevices.get_device_by_id(device_id)
+        """
+        Get the device record for a given device ID
+        :param device_id:
+        :return:
+        """
+        md = ManagedDevices()
+        device = md.get_device_by_id(device_id)
+        if device is None:
+            logger.error("No device record for device %d", device_id)
+            logger.error(md.last_error)
+        return device
 
     @classmethod
     def parse_time_str(cls, time_string):

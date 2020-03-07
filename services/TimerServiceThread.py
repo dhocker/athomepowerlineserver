@@ -119,17 +119,18 @@ class TimerServiceThread(threading.Thread):
     def RunTimerAction(self, tp):
         # Get all devices that have been assigned this program
         devices = ManagedDevices.get_devices_for_program(tp["id"])
-        for device_rec in devices:
-            device_mfg = device_rec["mfg"]
-            device_name = device_rec["name"]
-            device_address = device_rec["address"]
-            device_channel = device_rec["channel"]
-            # color and brightness from the program
-            device_color = tp["color"]
-            device_brightness = tp["brightness"]
-            logger.info("Executing action: %s %s %s %s", tp["command"], device_mfg, device_address, device_channel)
-            ActionFactory.RunAction(tp["command"], device_rec["id"], device_mfg, device_name, device_address,
-                                    device_channel, device_color, device_brightness)
+        if devices is not None:
+            for device_rec in devices:
+                device_mfg = device_rec["mfg"]
+                device_name = device_rec["name"]
+                device_address = device_rec["address"]
+                device_channel = device_rec["channel"]
+                # color and brightness from the program
+                device_color = tp["color"]
+                device_brightness = tp["brightness"]
+                logger.info("Executing action: %s %s %s %s", tp["command"], device_mfg, device_address, device_channel)
+                ActionFactory.RunAction(tp["command"], device_rec["id"], device_mfg, device_name, device_address,
+                                        device_channel, device_color, device_brightness)
 
     ########################################################################
     # Test a date to see if its weekday is enabled
