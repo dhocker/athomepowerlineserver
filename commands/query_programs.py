@@ -23,8 +23,6 @@ class QueryPrograms(ServerCommand.ServerCommand):
         if "program-id" in args.keys():
             result = Programs.get_program_by_id(int(args["program-id"]))
             key = "program"
-            # The args column is a string. Turn it into a dict.
-            result["args"] = json.loads(result["args"])
         else:
             result = Programs.GetAll()
             key = "programs"
