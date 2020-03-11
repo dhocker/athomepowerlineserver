@@ -9,31 +9,32 @@
 # See the LICENSE file for more details.
 #
 
-import commands.ServerCommand as ServerCommand
+from commands.ServerCommand import ServerCommand
 from database.programs import Programs
 import json
 
 
-class QueryDeviceProgram(ServerCommand.ServerCommand):
+class QueryDeviceProgram(ServerCommand):
     """
     Command handler for querying for all devices
     """
     def Execute(self, request):
         programid = int(request["args"]["program-id"])
-        result = Programs.get_program_by_id(programid)
+        pd = Programs()
+        result = pd.get_program_by_id(programid)
 
         # Generate a successful response
         r = self.CreateResponse(request["request"])
 
         if result:
             # The args column is a string. Turn it into a dict.
-            r['result-code'] = 0
+            r['result-code'] = ServerCommand.SUCCESS
             r['program'] = result
-            r['message'] = "Success"
+            r['message'] = ServerCommand.MSG_SUCCESS
         else:
             # No records found
-            r['result-code'] = 0
+            r['result-code'] = pd.last_error_code
             r['programs'] = []
-            r['message'] = "No records found"
+            r['message'] = pd.last_error
 
         return r

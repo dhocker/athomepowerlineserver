@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
-# AtHomePowerlineServer - networked server for CM11/CM11A/XTB-232 X10 controllers
-# Copyright © 2014, 2019  Dave Hocker
+# AtHomePowerlineServer
+# Copyright © 2014, 2020  Dave Hocker
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,7 +14,7 @@
 # Programs table model
 #
 
-import database.AtHomePowerlineServerDb as AtHomePowerlineServerDb
+from database.AtHomePowerlineServerDb import AtHomePowerlineServerDb
 from .base_table import BaseTable
 import datetime
 
@@ -30,117 +30,263 @@ class Programs(BaseTable):
     # Empty all records from the Programs table
     @classmethod
     def DeleteAll(cls):
-        conn = AtHomePowerlineServerDb.AtHomePowerlineServerDb.GetConnection()
-        c = AtHomePowerlineServerDb.AtHomePowerlineServerDb.GetCursor(conn)
+        conn = AtHomePowerlineServerDb.GetConnection()
+        c = AtHomePowerlineServerDb.GetCursor(conn)
         c.execute("DELETE FROM Programs")
         conn.commit()
         conn.close()
         return True
 
-    # Return the set of all records in the Programs table
-    # TODO Is this still used?
-    @classmethod
-    def GetAll(cls):
-        conn = AtHomePowerlineServerDb.AtHomePowerlineServerDb.GetConnection()
-        c = AtHomePowerlineServerDb.AtHomePowerlineServerDb.GetCursor(conn)
-        rset = c.execute(
-            "SELECT * from Programs")
-        return cls.rows_to_dict_list(rset)
+    def get_all_programs(self):
+        """
+        Return the set of all records in the Programs table
+        :return:
+        """
+        self.clear_last_error()
 
-    @classmethod
-    def get_all_active_programs(cls):
-        conn = AtHomePowerlineServerDb.AtHomePowerlineServerDb.GetConnection()
-        c = AtHomePowerlineServerDb.AtHomePowerlineServerDb.GetCursor(conn)
-        rset = c.execute(
-            'SELECT * FROM Programs WHERE command<>"none"')
-        return cls.rows_to_dict_list(rset)
+        conn = None
+        try:
+            conn = AtHomePowerlineServerDb.GetConnection()
+            c = AtHomePowerlineServerDb.GetCursor(conn)
+            # The results are sorted based on the most probable use
+            rset = c.execute(
+                "SELECT * from Programs"
+            )
+            result = Programs.rows_to_dict_list(rset)
+        except Exception as ex:
+            self.set_last_error(Programs.SERVER_ERROR, str(ex))
+            result = None
+        finally:
+            # Make sure connection is closed
+            if conn is not None:
+                conn.close()
 
-    @classmethod
-    def get_all_device_programs(cls, device_id):
-        conn = AtHomePowerlineServerDb.AtHomePowerlineServerDb.GetConnection()
-        c = AtHomePowerlineServerDb.AtHomePowerlineServerDb.GetCursor(conn)
-        rset = c.execute(
-            'SELECT Programs.* FROM ProgramAssignments JOIN Programs '
-            'WHERE Programs.id=ProgramAssignments.program_id AND ProgramAssignments.device_id=:device_id',
-            {"device_id": device_id})
-        return cls.rows_to_dict_list(rset)
+        return result
 
-    @classmethod
-    def get_all_available_programs(cls, device_id):
-        conn = AtHomePowerlineServerDb.AtHomePowerlineServerDb.GetConnection()
-        c = AtHomePowerlineServerDb.AtHomePowerlineServerDb.GetCursor(conn)
-        # Select programs not already assigned to this device
-        rset = c.execute(
-            'SELECT * FROM Programs '
-            'WHERE Programs.id NOT IN (SELECT program_id from ProgramAssignments where device_id=:device_id) '
-            'ORDER BY name',
-            {"device_id": device_id})
-        return cls.rows_to_dict_list(rset)
+    def get_all_active_programs(self):
+        """
+        Return the set of all records where the program command is not none
+        :return:
+        """
+        self.clear_last_error()
 
-    @classmethod
-    def get_program_by_id(cls, programid):
+        conn = None
+        try:
+            conn = AtHomePowerlineServerDb.GetConnection()
+            c = AtHomePowerlineServerDb.GetCursor(conn)
+            # The results are sorted based on the most probable use
+            rset = c.execute(
+                'SELECT * FROM Programs WHERE command<>"none"'
+            )
+            result = Programs.rows_to_dict_list(rset)
+        except Exception as ex:
+            self.set_last_error(Programs.SERVER_ERROR, str(ex))
+            result = None
+        finally:
+            # Make sure connection is closed
+            if conn is not None:
+                conn.close()
+
+        return result
+
+    def get_all_device_programs(self, device_id):
+        """
+        Return the set of programs for a given device
+        :param device_id:
+        :return:
+        """
+        self.clear_last_error()
+
+        conn = None
+        try:
+            conn = AtHomePowerlineServerDb.GetConnection()
+            c = AtHomePowerlineServerDb.GetCursor(conn)
+            # The results are sorted based on the most probable use
+            rset = c.execute(
+                'SELECT Programs.* FROM ProgramAssignments JOIN Programs '
+                'WHERE Programs.id=ProgramAssignments.program_id AND ProgramAssignments.device_id=:device_id',
+                {"device_id": device_id}
+            )
+            result = Programs.rows_to_dict_list(rset)
+        except Exception as ex:
+            self.set_last_error(Programs.SERVER_ERROR, str(ex))
+            result = None
+        finally:
+            # Make sure connection is closed
+            if conn is not None:
+                conn.close()
+
+        return result
+
+    def get_all_available_programs(self, device_id):
+        """
+        Return all programs that ARE NOT assigned to a device
+        :param device_id:
+        :return:
+        """
+        self.clear_last_error()
+
+        conn = None
+        try:
+            conn = AtHomePowerlineServerDb.GetConnection()
+            c = AtHomePowerlineServerDb.GetCursor(conn)
+            # The results are sorted based on the most probable use
+            rset = c.execute(
+                'SELECT * FROM Programs '
+                'WHERE Programs.id NOT IN (SELECT program_id from ProgramAssignments where device_id=:device_id) '
+                'ORDER BY name',
+                {"device_id": device_id}
+            )
+            result = Programs.rows_to_dict_list(rset)
+        except Exception as ex:
+            self.set_last_error(Programs.SERVER_ERROR, str(ex))
+            result = None
+        finally:
+            # Make sure connection is closed
+            if conn is not None:
+                conn.close()
+
+        return result
+
+    def get_program_by_id(self, programid):
         """
         Return a specific Programs record
         :param programid:
         :return:
         """
-        conn = AtHomePowerlineServerDb.AtHomePowerlineServerDb.GetConnection()
-        c = AtHomePowerlineServerDb.AtHomePowerlineServerDb.GetCursor(conn)
-        rset = c.execute(
-            "SELECT * FROM Programs WHERE id=:programid", {"programid": programid})
-        return cls.row_to_dict(rset.fetchone())
+        self.clear_last_error()
 
-    #######################################################################
-    # Insert a record into the Programs table.
-    # This is not exactly optimized, but we don't expect to be saving that many programs.
-    @classmethod
-    def insert(cls, name, day_mask,
+        conn = None
+        try:
+            conn = AtHomePowerlineServerDb.GetConnection()
+            c = AtHomePowerlineServerDb.GetCursor(conn)
+            # The results are sorted based on the most probable use
+            rset = c.execute(
+                "SELECT * FROM Programs WHERE id=:programid",
+                {"programid": programid}
+            )
+            result = Programs.row_to_dict(rset.fetchone())
+        except Exception as ex:
+            self.set_last_error(Programs.SERVER_ERROR, str(ex))
+            result = None
+        finally:
+            # Make sure connection is closed
+            if conn is not None:
+                conn.close()
+
+        return result
+
+    def insert(self, name, day_mask,
                trigger_method, program_time, offset, randomize, randomize_amount,
                action, color, brightness):
-        conn = AtHomePowerlineServerDb.AtHomePowerlineServerDb.GetConnection()
-        c = AtHomePowerlineServerDb.AtHomePowerlineServerDb.GetCursor(conn)
-        # SQL insertion safe...
-        # Note that the current time is inserted as the update time. This is added to the
-        # row as a convenient way to know when the program was stored. It isn't used for
-        # any other purpose.
-        c.execute("INSERT INTO Programs (name,daymask,triggermethod,time,offset,randomize,randomizeamount,command,color,brightness,updatetime) " \
-                  "values (?, ?, ?, ?, ?, ?, ?, ? ,?, ?, ?)",
-                  (name, day_mask,
-                   trigger_method, program_time, offset, randomize, randomize_amount,
-                   action, color, brightness, datetime.datetime.now()))
-        conn.commit()
+        """
+        Insert a record into the Programs table.
+        :param name:
+        :param day_mask:
+        :param trigger_method:
+        :param program_time:
+        :param offset:
+        :param randomize:
+        :param randomize_amount:
+        :param action:
+        :param color:
+        :param brightness:
+        :return:
+        """
+        self.clear_last_error()
 
-        # Get id of inserted record
-        id = c.lastrowid
+        conn = None
+        try:
+            conn = AtHomePowerlineServerDb.GetConnection()
+            c = AtHomePowerlineServerDb.GetCursor(conn)
+            c.execute(
+                "INSERT INTO Programs (name,daymask,triggermethod,time,offset,randomize,randomizeamount,command,color,brightness,updatetime) " \
+                "values (?, ?, ?, ?, ?, ?, ?, ? ,?, ?, ?)",
+                (name, day_mask,
+                 trigger_method, program_time, offset, randomize, randomize_amount,
+                 action, color, brightness, datetime.datetime.now())
+            )
+            conn.commit()
 
-        conn.close()
+            # Get id of inserted record
+            id = c.lastrowid
+        except Exception as ex:
+            self.set_last_error(Programs.SERVER_ERROR, str(ex))
+            id = None
+        finally:
+            # Make sure connection is closed
+            if conn is not None:
+                conn.close()
+
         return id
 
-    @classmethod
-    def update(cls, id, name, day_mask,
+    def update(self, id, name, day_mask,
                trigger_method, program_time, offset, randomize, randomize_amount,
                action, color, brightness):
-        conn = AtHomePowerlineServerDb.AtHomePowerlineServerDb.GetConnection()
-        c = AtHomePowerlineServerDb.AtHomePowerlineServerDb.GetCursor(conn)
-        c.execute("UPDATE Programs SET name=?,daymask=?,triggermethod=?,time=?,offset=?,randomize=?,randomizeamount=?,command=?,color=?,brightness=?,updatetime=? " \
-                  "WHERE id=?",
-                  (name, day_mask,
-                   trigger_method, program_time, offset, randomize, randomize_amount,
-                   action, color, brightness, datetime.datetime.now(), id))
-        conn.commit()
-        change_count = conn.total_changes
-        conn.close()
+        """
+        Update a program record
+        :param id:
+        :param name:
+        :param day_mask:
+        :param trigger_method:
+        :param program_time:
+        :param offset:
+        :param randomize:
+        :param randomize_amount:
+        :param action:
+        :param color:
+        :param brightness:
+        :return:
+        """
+        self.clear_last_error()
+
+        conn = None
+        try:
+            conn = AtHomePowerlineServerDb.GetConnection()
+            c = AtHomePowerlineServerDb.GetCursor(conn)
+            c.execute(
+                "UPDATE Programs SET name=?,daymask=?,triggermethod=?,time=?,offset=?,randomize=?,randomizeamount=?,command=?,color=?,brightness=?,updatetime=? " \
+                "WHERE id=?",
+                (name, day_mask,
+                 trigger_method, program_time, offset, randomize, randomize_amount,
+                 action, color, brightness, datetime.datetime.now(), id)
+            )
+            conn.commit()
+            change_count = conn.total_changes
+        except Exception as ex:
+            self.set_last_error(Programs.SERVER_ERROR, str(ex))
+            change_count = 0
+        finally:
+            # Make sure connection is closed
+            if conn is not None:
+                conn.close()
+
         return change_count
 
-    @classmethod
-    def delete(cls, id):
-        conn = AtHomePowerlineServerDb.AtHomePowerlineServerDb.GetConnection()
-        c = AtHomePowerlineServerDb.AtHomePowerlineServerDb.GetCursor(conn)
-        # Note that this is a cascading delete that will cause all related
-        # ProgramAssignment and ActionGroupDevices table records to be deleted.
-        # In effect, any record using the device ID will be deleted.
-        c.execute("DELETE FROM Programs WHERE id=:id", {"id": id})
-        conn.commit()
-        change_count = conn.total_changes
-        conn.close()
+    def delete(self, id):
+        """
+        Delete a given program record
+        :param id:
+        :return:
+        """
+        self.clear_last_error()
+
+        conn = None
+        try:
+            conn = AtHomePowerlineServerDb.GetConnection()
+            c = AtHomePowerlineServerDb.GetCursor(conn)
+            # The results are sorted based on the most probable use
+            c.execute(
+                "DELETE FROM Programs WHERE id=:id", {"id": id}
+            )
+            conn.commit()
+            change_count = conn.total_changes
+        except Exception as ex:
+            self.set_last_error(Programs.SERVER_ERROR, str(ex))
+            change_count = 0
+        finally:
+            # Make sure connection is closed
+            if conn is not None:
+                conn.close()
+
         return change_count

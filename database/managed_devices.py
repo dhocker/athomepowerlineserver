@@ -60,6 +60,7 @@ class ManagedDevices(BaseTable):
     def get_all_devices(self):
         self.clear_last_error()
 
+        conn = None
         try:
             conn = AtHomePowerlineServerDb.GetConnection()
             c = AtHomePowerlineServerDb.GetCursor(conn)

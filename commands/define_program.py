@@ -11,7 +11,7 @@
 #
 
 from commands.ServerCommand import ServerCommand
-import database.programs
+from database.programs import Programs
 import logging
 import json
 
@@ -53,17 +53,18 @@ class DefineProgram(ServerCommand):
         brightness = int(request["args"]["brightness"])
 
         # Insert program into Timers table
-        id = database.programs.Programs.insert(name, day_mask,
-                                               trigger_method, trigger_time, offset, randomize,
-                                               randomize_amount,
-                                               action, color, brightness)
+        pd = Programs()
+        id = pd.insert(name, day_mask,
+                       trigger_method, trigger_time, offset, randomize,
+                       randomize_amount,
+                       action, color, brightness)
 
         # Generate a successful response
         r = DefineProgram.CreateResponse("DefineProgram")
 
         # Return the timer program ID
-        r['result-code'] = 0
+        r['result-code'] = pd.last_error_code
         r['id'] = id
-        r['message'] = "Success"
+        r['message'] = pd.last_error
 
         return r

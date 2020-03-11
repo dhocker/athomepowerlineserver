@@ -11,16 +11,18 @@
 
 from database.AtHomePowerlineServerDb import AtHomePowerlineServerDb
 import datetime
+from http import HTTPStatus
 import logging
 
 logger = logging.getLogger("server")
 
 
 class BaseTable:
-    # Error codes
+    # Error codes (use HTTP status codes where possible)
     SUCCESS = 0
-    BAD_REQUEST = 400
-    SERVER_ERROR = 500
+    OK = HTTPStatus.OK
+    BAD_REQUEST = HTTPStatus.BAD_REQUEST
+    SERVER_ERROR = HTTPStatus.INTERNAL_SERVER_ERROR
 
     @property
     def last_error_code(self):
@@ -48,7 +50,7 @@ class BaseTable:
         :return:
         """
         self.last_error_code = BaseTable.SUCCESS
-        self.last_error = None
+        self.last_error = ""
 
     @classmethod
     def rows_to_dict_list(cls, rows):

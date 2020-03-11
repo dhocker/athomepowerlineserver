@@ -77,7 +77,12 @@ class TimerServiceThread(threading.Thread):
     # Run timer programs that have reached their trigger time
     def RunTimerPrograms(self):
         # All of the Programs records where command is not "none"
-        tp_list = Programs.get_all_active_programs()
+        pd = Programs()
+        tp_list = pd.get_all_active_programs()
+        if tp_list is None:
+            logger.error("Unable to get list of active timer programs")
+            logger.error(pd.last_error)
+            return
 
         for tp in tp_list:
             try:
