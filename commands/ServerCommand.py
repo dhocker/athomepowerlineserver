@@ -16,6 +16,7 @@
 
 import datetime
 import socket
+from http import HTTPStatus
 import Version
 from database.managed_devices import ManagedDevices
 from drivers.device_driver_manager import DeviceDriverManager
@@ -27,11 +28,14 @@ logger = logging.getLogger("server")
 class ServerCommand:
     # Error codes
     SUCCESS = 0
-    COMMAND_NOT_FOUND = 404
-    SERVER_ERROR = 500
-    NOT_IMPLEMENTED = 501
+    OK = HTTPStatus.OK
+    BAD_REQUEST = HTTPStatus.BAD_REQUEST
+    COMMAND_NOT_FOUND = HTTPStatus.NOT_FOUND
+    SERVER_ERROR = HTTPStatus.INTERNAL_SERVER_ERROR
+    NOT_IMPLEMENTED = HTTPStatus.NOT_IMPLEMENTED
     # Messages
     MSG_SUCCESS = "Success"
+    MSG_BAD_REQUEST = "Incomplete/invalid request"
 
     def Execute(self, request):
         r = self.CreateResponse()
@@ -51,6 +55,16 @@ class ServerCommand:
         r['server'] = "{0}/AtHomePowerlineServer".format(socket.gethostname())
         r['server-version'] = Version.GetVersion()
         return r
+
+    @classmethod
+    def get_driver_for_mfg(cls, device_mfg):
+        """
+        Return a device driver instance for a given device mfg/type
+        :param device_mfg:
+        :return:
+        """
+        driver = DeviceDriverManager.get_driver(device_mfg)
+        return driver
 
     @classmethod
     def get_driver_for_id(cls, device_id):

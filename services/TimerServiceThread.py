@@ -123,7 +123,8 @@ class TimerServiceThread(threading.Thread):
     # Run an action
     def RunTimerAction(self, tp):
         # Get all devices that have been assigned this program
-        devices = ManagedDevices.get_devices_for_program(tp["id"])
+        md = ManagedDevices()
+        devices = md.get_devices_for_program(tp["id"])
         if devices is not None:
             for device_rec in devices:
                 device_mfg = device_rec["mfg"]
