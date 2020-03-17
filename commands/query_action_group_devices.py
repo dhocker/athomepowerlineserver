@@ -9,17 +9,19 @@
 # See the LICENSE file for more details.
 #
 
-import commands.ServerCommand as ServerCommand
+from commands.ServerCommand import ServerCommand
 from database.action_group_devices import ActionGroupDevices
 
 
-class QueryActionGroupDevices(ServerCommand.ServerCommand):
+class QueryActionGroupDevices(ServerCommand):
     """
     Command handler for querying for all devices
     """
     def Execute(self, request):
         args = request["args"]
-        result = ActionGroupDevices.get_group_devices(int(args["group-id"]))
+
+        agd = ActionGroupDevices()
+        result = agd.get_group_devices(int(args["group-id"]))
 
         # Generate a successful response
         r = self.CreateResponse(request["request"])
@@ -29,9 +31,8 @@ class QueryActionGroupDevices(ServerCommand.ServerCommand):
             r["devices"] = result
             r['message'] = "Success"
         else:
-            # Probably invalid device type
-            r['result-code'] = 1
-            r['error'] = 1
-            r['message'] = "Failure"
+            # Probably bad group ID
+            r['result-code'] = agd.last_error_code
+            r['message'] = agd.last_error
 
         return r

@@ -22,41 +22,81 @@ class ActionGroupDevices(BaseTable):
     def __init__(self):
         pass
 
-    @classmethod
-    def get_group_devices(cls, group_id):
-        conn = AtHomePowerlineServerDb.GetConnection()
-        c = AtHomePowerlineServerDb.GetCursor(conn)
-        # The results are sorted based on the most probable use
-        rset = c.execute("SELECT * from ManagedDevices "
-                         "JOIN ActionGroupDevices ON ActionGroupDevices.group_id=:group_id "
-                         "WHERE ManagedDevices.id=ActionGroupDevices.device_id", {"group_id": group_id})
-        return cls.rows_to_dict_list(rset)
+    def get_group_devices(self, group_id):
+        self.clear_last_error()
 
-    @classmethod
-    def insert_device(cls, group_id, device_id):
+        conn = None
+        try:
+            conn = AtHomePowerlineServerDb.GetConnection()
+            c = AtHomePowerlineServerDb.GetCursor(conn)
+            # The results are sorted based on the most probable use
+            rset = c.execute(
+                "SELECT * from ManagedDevices "
+                "JOIN ActionGroupDevices ON ActionGroupDevices.group_id=:group_id "
+                "WHERE ManagedDevices.id=ActionGroupDevices.device_id", {"group_id": group_id}
+            )
+            result = ActionGroupDevices.rows_to_dict_list(rset)
+        except Exception as ex:
+            self.set_last_error(ActionGroupDevices.SERVER_ERROR, str(ex))
+            result = None
+        finally:
+            # Make sure connection is closed
+            if conn is not None:
+                conn.close()
+
+        return result
+
+    def insert_device(self, group_id, device_id):
         """
         Insert a group device record
         :param group_id: The containing group ID
         :param device_id: The devid ID being added to the group
         :return:
         """
-        conn = AtHomePowerlineServerDb.GetConnection()
-        c = AtHomePowerlineServerDb.GetCursor(conn)
+        self.clear_last_error()
 
-        c.execute("INSERT INTO ActionGroupDevices (group_id,device_id) values (?,?)",
-                  (group_id, device_id))
-        id = c.lastrowid
-        conn.commit()
-        conn.close()
+        conn = None
+        try:
+            conn = AtHomePowerlineServerDb.GetConnection()
+            c = AtHomePowerlineServerDb.GetCursor(conn)
+            c.execute(
+                "INSERT INTO ActionGroupDevices (group_id,device_id) values (?,?)",
+                (group_id, device_id)
+            )
+            conn.commit()
+
+            # Get id of inserted record
+            id = c.lastrowid
+        except Exception as ex:
+            self.set_last_error(ActionGroupDevices.SERVER_ERROR, str(ex))
+            id = None
+        finally:
+            # Make sure connection is closed
+            if conn is not None:
+                conn.close()
+
         return id
 
-    @classmethod
-    def delete_device(cls, group_id, device_id):
-        conn = AtHomePowerlineServerDb.GetConnection()
-        c = AtHomePowerlineServerDb.GetCursor(conn)
-        c.execute("DELETE FROM ActionGroupDevices WHERE group_id=:group_id AND device_id=:device_id",
-                  {"group_id": group_id, "device_id": device_id})
-        conn.commit()
-        change_count = conn.total_changes
-        conn.close()
+    def delete_device(self, group_id, device_id):
+        self.clear_last_error()
+
+        conn = None
+        try:
+            conn = AtHomePowerlineServerDb.GetConnection()
+            c = AtHomePowerlineServerDb.GetCursor(conn)
+            # The results are sorted based on the most probable use
+            c.execute(
+                "DELETE FROM ActionGroupDevices WHERE group_id=:group_id AND device_id=:device_id",
+                {"group_id": group_id, "device_id": device_id}
+            )
+            conn.commit()
+            change_count = conn.total_changes
+        except Exception as ex:
+            self.set_last_error(ActionGroupDevices.SERVER_ERROR, str(ex))
+            change_count = 0
+        finally:
+            # Make sure connection is closed
+            if conn is not None:
+                conn.close()
+
         return change_count

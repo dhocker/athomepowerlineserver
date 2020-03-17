@@ -22,8 +22,15 @@ class AssignProgramToGroup(ServerCommand):
         group_id = int(request["args"]["group-id"])
         program_id = int(request["args"]["program-id"])
 
+        r = self.CreateResponse(request["request"])
+
         # Devices in group
-        devices = ActionGroupDevices.get_group_devices(group_id)
+        agd = ActionGroupDevices()
+        devices = agd.get_group_devices(group_id)
+        if devices is None:
+            r['result-code'] = agd.last_error_code
+            r['message'] = agd.last_error
+            return r
 
         # For each device in the group...
         assigned_count = 0
@@ -40,12 +47,11 @@ class AssignProgramToGroup(ServerCommand):
                 already_assigned_count += 1
 
         # Generate a successful response
-        r = self.CreateResponse(request["request"])
-        r['result-code'] = 0
+        r['result-code'] = ServerCommand.SUCCESS
         r['group-id'] = group_id
         r['program-id'] = program_id
         r['assigned-count'] = assigned_count
         r['already-assigned-count'] = already_assigned_count
-        r['message'] = "Success"
+        r['message'] = ServerCommand.MSG_SUCCESS
 
         return r
