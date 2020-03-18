@@ -19,19 +19,18 @@ class DeleteGroup(ServerCommand):
     """
     def Execute(self, request):
         args = request["args"]
-        result = ActionGroups.delete(int(args["group-id"]))
+        ag = ActionGroups()
+        result = ag.delete(int(args["group-id"]))
 
         # Generate a successful response
         r = self.CreateResponse(request["request"])
 
         if result:
-            r['result-code'] = 0
+            r['result-code'] = ServerCommand.SUCCESS
             r['group-id'] = args["group-id"]
-            r['message'] = "Success"
+            r['message'] = ServerCommand.MSG_SUCCESS
         else:
-            # Probably invalid device type
-            r['result-code'] = 1
-            r['error'] = 1
-            r['message'] = "Failure"
+            r['result-code'] = ag.last_error_code
+            r['message'] = ag.last_error
 
         return r

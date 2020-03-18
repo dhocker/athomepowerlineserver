@@ -9,30 +9,30 @@
 # See the LICENSE file for more details.
 #
 
-import commands.ServerCommand as ServerCommand
+from commands.ServerCommand import ServerCommand
 from database.action_groups import ActionGroups
 
 
-class DefineGroup(ServerCommand.ServerCommand):
+class DefineGroup(ServerCommand):
     """
     Command handler for defining a new device
     """
     def Execute(self, request):
         group_name = request["args"]["group-name"]
 
-        result = ActionGroups.insert(group_name)
+        ag = ActionGroups()
+        result = ag.insert(group_name)
 
         # Generate a successful response
         r = self.CreateResponse(request["request"])
 
         if result >= 0:
-            r['result-code'] = 0
+            r['result-code'] = ServerCommand.SUCCESS
             r['group-id'] = result
-            r['message'] = "Success"
+            r['message'] = ServerCommand.MSG_SUCCESS
         else:
             # Probably invalid device type
-            r['result-code'] = 1
-            r['error'] = 1
-            r['message'] = "Failure"
+            r['result-code'] = ag.last_error_code
+            r['message'] = ag.last_error
 
         return r

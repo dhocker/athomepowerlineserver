@@ -9,34 +9,33 @@
 # See the LICENSE file for more details.
 #
 
-import commands.ServerCommand as ServerCommand
+from commands.ServerCommand import ServerCommand
 from database.action_groups import ActionGroups
 
 
-class QueryActionGroups(ServerCommand.ServerCommand):
+class QueryActionGroups(ServerCommand):
     """
     Command handler for querying for all devices
     """
     def Execute(self, request):
         args = request["args"]
+        ag = ActionGroups()
         if "group-id" in args.keys():
-            result = ActionGroups.get_group(int(args["group-id"]))
+            result = ag.get_group(int(args["group-id"]))
             key = "group"
         else:
-            result = ActionGroups.get_all_groups()
+            result = ag.get_all_groups()
             key = "groups"
 
         # Generate a successful response
         r = self.CreateResponse(request["request"])
 
         if result or len(result) >= 0:
-            r['result-code'] = 0
+            r['result-code'] = ServerCommand.SUCCESS
             r[key] = result
-            r['message'] = "Success"
+            r['message'] = ServerCommand.MSG_SUCCESS
         else:
-            # Probably invalid device type
-            r['result-code'] = 1
-            r['error'] = 1
-            r['message'] = "Failure"
+            r['result-code'] = ag.last_error_code
+            r['message'] = ag.last_error
 
         return r
