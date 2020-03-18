@@ -9,11 +9,11 @@
 # See the LICENSE file for more details.
 #
 
-import commands.ServerCommand as ServerCommand
+from commands.ServerCommand import ServerCommand
 from database.program_assignments import ProgramAssignments
 
 
-class DeleteDeviceProgram(ServerCommand.ServerCommand):
+class DeleteDeviceProgram(ServerCommand):
     """
     Command handler for deleting a device timer program
     """
@@ -25,27 +25,19 @@ class DeleteDeviceProgram(ServerCommand.ServerCommand):
         # Generate a successful response
         r = self.CreateResponse(request["request"])
 
-        try:
-            # Remove program from database and in-memory cache
-            result = ProgramAssignments.delete(device_id, program_id)
+        # Remove program from database
+        pa = ProgramAssignments()
+        result = pa.delete(device_id, program_id)
 
-            if result:
-                r['result-code'] = 0
-                r['device-id'] = args["device-id"]
-                r['program-id'] = args["program-id"]
-                r['message'] = "Success"
-            else:
-                # Probably invalid device type
-                r['result-code'] = 1
-                r['device-id'] = args["device-id"]
-                r['program-id'] = args["program-id"]
-                r['error'] = 1
-                r['message'] = "Failure"
-        except Exception as ex:
-            r['result-code'] = 1
+        if result:
+            r['result-code'] = DeleteDeviceProgram.SUCCESS
             r['device-id'] = args["device-id"]
             r['program-id'] = args["program-id"]
-            r['error'] = 2
-            r['message'] = str(ex)
+            r['message'] = DeleteDeviceProgram.MSG_SUCCESS
+        else:
+            r['result-code'] = pa.last_error_code
+            r['device-id'] = args["device-id"]
+            r['program-id'] = args["program-id"]
+            r['message'] = pa.last_error
 
         return r

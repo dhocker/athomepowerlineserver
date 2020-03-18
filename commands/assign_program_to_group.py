@@ -35,13 +35,20 @@ class AssignProgramToGroup(ServerCommand):
         # For each device in the group...
         assigned_count = 0
         already_assigned_count = 0
+        pa = ProgramAssignments()
         for device in devices:
             # Is the program already assigned to this device?
             # We DO NOT depend on the invoker to only add programs once
-            assigned = ProgramAssignments.is_assigned(device["id"], program_id)
+            assigned = pa.is_assigned(device["id"], program_id)
             # If it isn't, assign the program
-            if not assigned:
-                ProgramAssignments.insert(device["id"], program_id)
+            if assigned is None:
+                r['result-code'] = pa.last_error_code
+                r['message'] = pa.last_error
+                r['device-id'] = device["id"]
+                r['program-id'] = program_id
+                return r
+            elif not assigned:
+                pa.insert(device["id"], program_id)
                 assigned_count += 1
             else:
                 already_assigned_count += 1

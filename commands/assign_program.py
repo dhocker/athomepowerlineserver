@@ -9,11 +9,11 @@
 # See the LICENSE file for more details.
 #
 
-import commands.ServerCommand as ServerCommand
+from commands.ServerCommand import ServerCommand
 from database.program_assignments import ProgramAssignments
 
 
-class AssignProgram(ServerCommand.ServerCommand):
+class AssignProgram(ServerCommand):
     """
     Command handler for assigning a program to a device
     """
@@ -21,19 +21,19 @@ class AssignProgram(ServerCommand.ServerCommand):
         device_id = request["args"]["device-id"]
         program_id = request["args"]["program-id"]
 
-        result = ProgramAssignments.insert(device_id, program_id)
+        pa = ProgramAssignments()
+        result = pa.insert(device_id, program_id)
 
         # Generate a successful response
         r = self.CreateResponse(request["request"])
 
         if result >= 0:
-            r['result-code'] = 0
+            r['result-code'] = ServerCommand.SUCCESS
             r['program-assignment-id'] = result
-            r['message'] = "Success"
+            r['message'] = ServerCommand.MSG_SUCCESS
         else:
             # Probably invalid device type
-            r['result-code'] = 1
-            r['error'] = 1
-            r['message'] = "Failure"
+            r['result-code'] = pa.last_error_code
+            r['message'] = pa.last_error
 
         return r
