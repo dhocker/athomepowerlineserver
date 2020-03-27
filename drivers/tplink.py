@@ -70,8 +70,11 @@ class TPLinkDriver(BaseDriverInterface):
         """
         logger.debug("DeviceOn for: %s %s %s %s", device_type, device_name_tag, ip_address, channel)
         dev = self._create_smart_device(ip_address)
-        result = self._exec_device_function(dev.turn_on)
-        del dev
+        if dev is not None:
+            result = self._exec_device_function(dev.turn_on)
+            del dev
+        else:
+            result = False
         return result
 
     def device_off(self, device_type, device_name_tag, ip_address, channel):
@@ -85,8 +88,11 @@ class TPLinkDriver(BaseDriverInterface):
         """
         logger.debug("DeviceOff for: %s %s %s %s", device_type, device_name_tag, ip_address, channel)
         dev = self._create_smart_device(ip_address)
-        result = self._exec_device_function(dev.turn_off)
-        del dev
+        if dev is not None:
+            result = self._exec_device_function(dev.turn_off)
+            del dev
+        else:
+            result = False
         return result
 
     def device_dim(self, device_type, device_name_tag, ip_address, channel, dim_amount):
@@ -187,7 +193,13 @@ class TPLinkDriver(BaseDriverInterface):
         :param ip_address:
         :return:
         """
-        device = Discover.discover_single(ip_address)
-        if device is None:
-            logger.error("Unable to discover TPLink device %s", ip_address)
+        try:
+            device = Discover.discover_single(ip_address)
+            if device is None:
+                logger.error("Unable to discover TPLink device %s", ip_address)
+        except Exception as ex:
+            logger.error("An exception occurred while discovering TPLink/Kasa device %s", ip_address)
+            logger.error(str(ex))
+            device = None
+
         return device
