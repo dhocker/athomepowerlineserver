@@ -1,6 +1,5 @@
 {
   "name": "name",
-  "device-id": 25,
   "day-mask": "MTWTFSS",
   "trigger-method": "sunset",
   "time": "12:00:00",
@@ -8,5 +7,6 @@
   "command": "on",
   "randomize": 0,
   "randomize-amount": 0,
-  "dimamount": 0
+  "color": "#ffffff",
+  "brightness": 100
 }

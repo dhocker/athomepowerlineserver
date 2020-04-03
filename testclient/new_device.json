@@ -1,8 +1,10 @@
 {
   "description": "Define device test case",
-  "device-name": "Device under test",
-  "device-location": "Unknown test location",
-  "device-type": "tplink",
-  "device-address": "192.168.1.234",
-  "device-selected": 0
+  "device-name": "Meross Color Bulb - device under test",
+  "device-location": "The Agency Studio",
+  "device-mfg": "meross",
+  "device-address": "1909201411104490802748e1e952bc38",
+  "device-channel": 0,
+  "device-color": "#00FF00",
+  "device-brightness": 100
 }

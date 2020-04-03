@@ -1,7 +1,7 @@
 # coding: utf-8
 #
 # AtHomeServer API
-# Copyright ©  2019 Dave Hocker (email: AtHomeX10@gmail.com)
+# Copyright ©  2019, 2020 Dave Hocker (email: AtHomeX10@gmail.com)
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -33,15 +33,15 @@ def read(*paths):
         return f.read()
 
 setup(
-    name='athomeapi',
-    version='2019.0.0',
+    name='ahps_api',
+    version='2020.0.0',
     description='AtHomeServer API module',
     long_description=(read('Readme.md')),
     url='www.github.com/dhocker/athomepowerlineserver',
     license='GPLv3. See LICENSE file.',
     author='Dave Hocker',
     author_email='AtHomeX10@gmail.com',
-    py_modules=["athomeapi"],
+    py_modules=["ahps_api"],
     include_package_data=True,
     packages=[],
     install_requires=[]

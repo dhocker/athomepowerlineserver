@@ -19,7 +19,7 @@ logger = logging.getLogger("server")
 
 _disclaimer = [
     "",
-    "AtHomePowerlineServer Copyright © 2014, 2019 Dave Hocker (AtHomeX10@gmail.com)",
+    "AtHomePowerlineServer Copyright © 2014, 2020 Dave Hocker (AtHomeX10@gmail.com)",
     "Version {0}".format(Version.GetVersion()),
     "",
     "This program comes with ABSOLUTELY NO WARRANTY; for details see the LICENSE file.",

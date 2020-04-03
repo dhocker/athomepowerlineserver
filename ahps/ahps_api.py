@@ -263,7 +263,7 @@ class ServerRequest:
         response = self._send_command(req)
         return response
 
-    def query_all_available_devices(self, manufacturer):
+    def query_available_devices(self, manufacturer):
         """
         Query for all available devices of a given type
         :return:
@@ -348,18 +348,17 @@ class ServerRequest:
 
     # Program related methods
 
-    def delete_program(self, program_id):
+    def query_programs(self):
         """
-        Delete a program by its ID
-        :param program_id:
+        Query for all programs
+        :param device_id:
         :return:
         """
-        req = self._create_request("DeleteProgram")
-        req["args"]["program-id"] = program_id
+        req = self._create_request("QueryPrograms")
         response = self._send_command(req)
         return response
 
-    def get_programs_for_device_id(self, device_id):
+    def query_programs_for_device_id(self, device_id):
         """
         Query for all programs for a given device id
         :param device_id:
@@ -370,7 +369,7 @@ class ServerRequest:
         response = self._send_command(req)
         return response
 
-    def get_available_programs_for_device_id(self, device_id):
+    def query_available_programs_for_device_id(self, device_id):
         """
         Query for all programs available for assignment to a given device id
         :param device_id:
@@ -395,7 +394,7 @@ class ServerRequest:
         response = self._send_command(req)
         return response
 
-    def get_program_by_id(self, program_id):
+    def query_program_by_id(self, program_id):
         """
         Query for a program by its id
         :param program_id:
@@ -406,21 +405,32 @@ class ServerRequest:
         response = self._send_command(req)
         return response
 
-    def define_device_program(self, program):
+    def define_program(self, program):
         req = self._create_request("DefineProgram")
         req["args"] = program
         response = self._send_command(req)
         return response
 
-    def update_device_program(self, program):
+    def update_program(self, program):
         req = self._create_request("UpdateProgram")
         req["args"] = program
         response = self._send_command(req)
         return response
 
+    def delete_program(self, program_id):
+        """
+        Delete a program by its program id
+        :param device_id:
+        :return:
+        """
+        req = self._create_request("DeleteProgram")
+        req["args"]["program-id"] = program_id
+        response = self._send_command(req)
+        return response
+
     def delete_device_program(self, device_id, program_id):
         """
-        Delete a device program from its device
+        Delete a program from a device (unassign)
         :param device_id:
         :param program_id:
         :return:
@@ -433,7 +443,7 @@ class ServerRequest:
 
     # Action group methods
 
-    def get_all_action_groups(self):
+    def get_action_groups(self):
         """
         Query for all action groups
         :return:
@@ -442,7 +452,7 @@ class ServerRequest:
         response = self._send_command(req)
         return response
 
-    def get_action_group(self, group_id):
+    def query_action_group(self, group_id):
         """
         Query for an action group
         :return:
@@ -474,9 +484,10 @@ class ServerRequest:
         response = self._send_command(req)
         return response
 
-    def update_action_group(self, group):
+    def update_action_group(self, group_id, group_name):
         req = self._create_request("UpdateActionGroup")
-        req["args"] = group
+        req["args"]["group-id"] = group_id
+        req["args"]["group-name"] = group_name
         response = self._send_command(req)
         return response
 
@@ -490,7 +501,7 @@ class ServerRequest:
         response = self._send_command(req)
         return response
 
-    def get_available_devices_for_group_id(self, group_id):
+    def query_available_devices_for_group_id(self, group_id):
         """
         Query for all devices available for assignment to a given group id
         :param group_id:

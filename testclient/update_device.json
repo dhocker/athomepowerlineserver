@@ -1,9 +1,11 @@
 {
   "description": "Update device test case",
-  "device-id": 25,
-  "device-name": "Device under test update 1",
+  "device-id": 35,
+  "device-name": "Meross Color Bulb - update 1",
   "device-location": "Unknown test location",
-  "device-type": "tplink",
-  "device-address": "192.168.1.234",
-  "device-selected": 0
+  "device-mfg": "meross",
+  "device-address": "1909201411104490802748e1e952bc38",
+  "device-channel": 0,
+  "device-color": "#0000FF",
+  "device-brightness": 100
 }

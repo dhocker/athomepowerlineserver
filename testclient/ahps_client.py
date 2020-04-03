@@ -1,6 +1,6 @@
 #
 # AtHomePowerlineServer - networked server for X10 and WiFi devices
-# Copyright © 2014, 2019  Dave Hocker (email: AtHomeX10@gmail.com)
+# Copyright © 2014, 2020  Dave Hocker (email: AtHomeX10@gmail.com)
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,8 +20,7 @@ import json
 from optparse import OptionParser
 sys.path.append("./")
 sys.path.append("../")
-# from testclient.ahps import ServerRequest
-from ahps.athomeapi import ServerRequest
+from ahps.ahps_api import ServerRequest
 
 
 # Default global settings
@@ -65,12 +64,22 @@ def _open_request(request_args):
 
 def _device_on(request_args):
     request = ServerRequest(host=host, port=port, verbose=verbose)
-    return request.device_on(request_args[1], request_args[2])
+    return request.device_on(request_args[1])
 
 
 def _device_off(request_args):
     request = ServerRequest(host=host, port=port, verbose=verbose)
-    return request.device_off(request_args[1], request_args[2])
+    return request.device_off(request_args[1])
+
+
+def _all_devices_on(request_args):
+    request = ServerRequest(host=host, port=port, verbose=verbose)
+    return request.all_devices_on()
+
+
+def _all_devices_off(request_args):
+    request = ServerRequest(host=host, port=port, verbose=verbose)
+    return request.all_devices_off()
 
 
 def _device_dim(request_args):
@@ -95,7 +104,6 @@ def _status_request(request_args):
 def _create_timer_program(program):
     timer_program = {
         "name": program["name"],
-        "device-id": str(program["device-id"]),
         "day-mask": program["day-mask"],
         "trigger-method": program["trigger-method"],
         "time": program["time"],
@@ -103,7 +111,8 @@ def _create_timer_program(program):
         "command": program["command"],
         "randomize": True if program["randomize"] else False,
         "randomize-amount": str(program["randomize-amount"]),
-        "dimamount": str(program["dimamount"])
+        "color": str(program["color"]),
+        "brightness": int(program["brightness"])
     }
     return timer_program
 
@@ -111,7 +120,6 @@ def _create_timer_program(program):
 def _define_program(request_args):
     dd_required_keys = [
         "name",
-        "device-id",
         "day-mask",
         "trigger-method",
         "time",
@@ -119,35 +127,35 @@ def _define_program(request_args):
         "command",
         "randomize",
         "randomize-amount",
-        "dimamount"
+        "color",
+        "brightness"
     ]
     try:
         fh = open(args[1], "r")
-        dev_json = json.load(fh)
+        program_json = json.load(fh)
         fh.close()
         # Test for required keys
-        _required_keys(dev_json, dd_required_keys)
+        _required_keys(program_json, dd_required_keys)
     except Exception as ex:
         print(str(ex))
         return None
 
     request = ServerRequest(host=host, port=port, verbose=verbose)
-    return request.define_program(_create_timer_program(dev_json))
+    return request.define_program(_create_timer_program(program_json))
 
 
 def _update_program(request_args):
     dd_required_keys = [
         "id",
         "name",
-        "device-id",
         "day-mask",
         "trigger-method",
         "time",
         "offset",
         "command",
         "randomize",
-        "randomize-amount",
-        "dimamount"
+        "color",
+        "brightness"
     ]
     try:
         fh = open(args[1], "r")
@@ -166,23 +174,25 @@ def _update_program(request_args):
     return request.update_program(program)
 
 
-def _delete_program(request_args):
+def _delete_device_program(request_args):
     """
-    Delete a device program by program ID
+    Delete a program from a device
     :param request_args:
     :return:
     """
     request = ServerRequest(host=host, port=port, verbose=verbose)
-    return request.delete_program(request_args[1])
+    return request.delete_device_program(request_args[1], request_args[2])
 
 
 def _define_device(request_args):
     dd_required_keys = [
         "device-name",
         "device-location",
-        "device-type",
+        "device-mfg",
         "device-address",
-        "device-selected"
+        "device-channel",
+        "device-color",
+        "device-brightness"
     ]
     try:
         fh = open(args[1], "r")
@@ -195,14 +205,17 @@ def _define_device(request_args):
         return None
 
     device = {}
-    device["device-name"] = dev_json["device-name"]
-    device["device-location"] = dev_json["device-location"]
-    device["device-type"] = dev_json["device-type"]
-    device["device-address"] = dev_json["device-address"]
-    device["device-selected"] = dev_json["device-selected"]
+    device_name  = dev_json["device-name"]
+    device_location  = dev_json["device-location"]
+    device_mfg  = dev_json["device-mfg"]
+    device_address  = dev_json["device-address"]
+    device_channel  = dev_json["device-channel"]
+    device_color  = dev_json["device-color"]
+    device_brightness  = dev_json["device-brightness"]
 
     request = ServerRequest(host=host, port=port, verbose=verbose)
-    return request.define_device(device)
+    return request.define_device(device_name, device_location, device_mfg, device_address, device_channel,
+                                 device_color, device_brightness)
 
 
 def _update_device(request_args):
@@ -210,9 +223,11 @@ def _update_device(request_args):
         "device-id",
         "device-name",
         "device-location",
-        "device-type",
+        "device-mfg",
         "device-address",
-        "device-selected"
+        "device-channel",
+        "device-color",
+        "device-brightness"
     ]
     try:
         fh = open(args[1], "r")
@@ -225,15 +240,18 @@ def _update_device(request_args):
         return None
 
     device = {}
-    device["device-id"] = dev_json["device-id"]
-    device["device-name"] = dev_json["device-name"]
-    device["device-location"] = dev_json["device-location"]
-    device["device-type"] = dev_json["device-type"]
-    device["device-address"] = dev_json["device-address"]
-    device["device-selected"] = dev_json["device-selected"]
+    device_id = dev_json["device-id"]
+    device_name  = dev_json["device-name"]
+    device_location  = dev_json["device-location"]
+    device_mfg  = dev_json["device-mfg"]
+    device_address  = dev_json["device-address"]
+    device_channel  = dev_json["device-channel"]
+    device_color  = dev_json["device-color"]
+    device_brightness  = dev_json["device-brightness"]
 
     request = ServerRequest(host=host, port=port, verbose=verbose)
-    return request.update_device(device)
+    return request.update_device(device_id, device_name, device_location, device_mfg, device_address,
+                                 device_channel, device_color, device_brightness)
 
 
 def _delete_device(request_args):
@@ -248,19 +266,29 @@ def _query_devices(request_args):
     :return:
     """
     request = ServerRequest(host=host, port=port, verbose=verbose)
-    if len(request_args) == 2:
+    if len(request_args) >= 2:
         return request.query_device(request_args[1])
     return request.query_devices()
 
 
-def _query_device_programs(request_args):
+def _query_programs(request_args):
     """
-    Query for all programs for a device ID
+    Query for all programs
     :param request_args:
     :return:
     """
     request = ServerRequest(host=host, port=port, verbose=verbose)
-    return request.query_device_programs(request_args[1])
+    return request.query_programs()
+
+
+def _query_device_programs(request_args):
+    """
+    Query for all programs for a device
+    :param request_args:
+    :return:
+    """
+    request = ServerRequest(host=host, port=port, verbose=verbose)
+    return request.query_programs_for_device_id(request_args[1])
 
 
 def _query_device_program(request_args):
@@ -270,7 +298,161 @@ def _query_device_program(request_args):
     :return:
     """
     request = ServerRequest(host=host, port=port, verbose=verbose)
-    return request.query_device_program(request_args[1])
+    return request.query_program_by_id(request_args[1])
+
+
+def _assign_device(request_args):
+    """
+    Assign a device to a group
+    :param request_args:
+    :return:
+    """
+    request = ServerRequest(host=host, port=port, verbose=verbose)
+    return request.assign_device_to_group(request_args[1], request_args[2])
+
+
+def _assign_program(request_args):
+    """
+    Assign a program to a device
+    :param request_args:
+    :return:
+    """
+    request = ServerRequest(host=host, port=port, verbose=verbose)
+    return request.assign_program_to_device(request_args[1], request_args[2])
+
+
+def _assign_program_to_group(request_args):
+    """
+    Assign a program to a device group
+    :param request_args:
+    :return:
+    """
+    request = ServerRequest(host=host, port=port, verbose=verbose)
+    return request.assign_program_to_group_devices(request_args[1], request_args[2])
+
+
+def _define_group(request_args):
+    """
+    Define a device group
+    :param request_args:
+    :return:
+    """
+    request = ServerRequest(host=host, port=port, verbose=verbose)
+    return request.define_action_group(request_args[1])
+
+
+def _update_group(request_args):
+    """
+    Update a device group
+    :param request_args:
+    :return:
+    """
+    request = ServerRequest(host=host, port=port, verbose=verbose)
+    group = {
+        "group-id": request_args[1],
+        "group-name": request_args[2]
+    }
+    return request.update_action_group(group)
+
+
+def _delete_group(request_args):
+    """
+    Delete a device group
+    :param request_args:
+    :return:
+    """
+    request = ServerRequest(host=host, port=port, verbose=verbose)
+    return request.delete_action_group(request_args[1])
+
+
+def _delete_group_device(request_args):
+    """
+    Delete a device from a group
+    :param request_args:
+    :return:
+    """
+    request = ServerRequest(host=host, port=port, verbose=verbose)
+    return request.delete_action_group_device(request_args[1], request_args[2])
+
+
+def _delete_program(request_args):
+    """
+    Delete a program
+    :param request_args:
+    :return:
+    """
+    request = ServerRequest(host=host, port=port, verbose=verbose)
+    return request.delete_program(request_args[1])
+
+
+def _group_on(request_args):
+    request = ServerRequest(host=host, port=port, verbose=verbose)
+    return request.group_on(request_args[1])
+
+
+def _group_off(request_args):
+    request = ServerRequest(host=host, port=port, verbose=verbose)
+    return request.group_off(request_args[1])
+
+
+def _query_action_group(request_args):
+    """
+    Query for a device group
+    :param request_args:
+    :return:
+    """
+    request = ServerRequest(host=host, port=port, verbose=verbose)
+    return request.query_action_group(request_args[1])
+
+
+def _query_group_devices(request_args):
+    """
+    Query for all devices in a group
+    :param request_args:
+    :return:
+    """
+    request = ServerRequest(host=host, port=port, verbose=verbose)
+    return request.get_action_group_devices(request_args[1])
+
+
+def _query_groups(request_args):
+    """
+    Query for all groups
+    :param request_args:
+    :return:
+    """
+    request = ServerRequest(host=host, port=port, verbose=verbose)
+    return request.get_action_groups()
+
+
+def _query_available_devices(request_args):
+    """
+    Query for all devices of a given manufacturer/type
+    :param request_args:
+    :return:
+    """
+    request = ServerRequest(host=host, port=port, verbose=verbose)
+    return request.query_available_devices(request_args[1])
+
+
+def _query_available_group_devices(request_args):
+    """
+    Query for all devices available for assignment to a group
+    :param request_args:
+    :return:
+    """
+    request = ServerRequest(host=host, port=port, verbose=verbose)
+    return request.query_available_devices_for_group_id(request_args[1])
+
+
+def _query_available_programs(request_args):
+    """
+    Query for all programs available for assignment to a device
+    :param request_args:
+    :return:
+    """
+    request = ServerRequest(host=host, port=port, verbose=verbose)
+    return request.query_available_programs_for_device_id(request_args[1])
 
 
 def _request_help(request_args):
@@ -279,20 +461,37 @@ def _request_help(request_args):
     :param request_args:
     :return:
     """
+    # Check for markdown format output
+    md = False
+    if len(request_args) >= 3 and request_args[2].lower() == "md":
+        md = True
+
+    print("Command Line Tool")
+    print()
     print("Help - Request List")
+    if md:
+        print()
     print("Legend")
-    print("  All request names are case insensitive")
-    print("  device-id is the unique identifier for a device")
-    print("  program-id is the unique identifier for a program")
-    print("  <filename.json> is a JSON formatted file")
+    print("* All request names are case insensitive")
+    print("* device-id is the unique identifier for a device")
+    print("* program-id is the unique identifier for a timer/trigger program")
+    print("* group-id is the unique identifier for a device group")
+    print("* <file_name.json> is a JSON formatted file")
     print()
 
     if request_args[1].lower() in ["*", "all"]:
-        for key in request_list.keys():
+        for key in sorted(request_list.keys()):
             r = request_list[key]
-            print(key)
-            print("  Description:", r["description"])
-            print("  Syntax:", r["syntax"])
+            if md:
+                print("##%s" % key)
+                print(r["description"])
+                print("```")
+                print("Syntax:", r["syntax"])
+                print("```")
+            else:
+                print(key)
+                print("  Description:", r["description"])
+                print("  Syntax:", r["syntax"])
     elif request_args[1].lower() in request_list.keys():
         r = request_list[request_args[1]]
         print(request_args[1])
@@ -306,12 +505,15 @@ def _request_help(request_args):
 List of all supported requests
 
 handler: the function that handles the request
-argcount: the number of required request arguments including the request
+syntax:
+    [a | b] one from list is REQUIRED
+    {a | b} optional choice, one from list MAY be chosen
+argcount: the minimum number of required request arguments including the request
 """
 request_list = {
     "help": {
         "description": "Help for one or all requests",
-        "syntax": "help [requestname | all]",
+        "syntax": "help [requestname | all | *] {md}",
         "handler": _request_help,
         "argcount": 2
     },
@@ -329,27 +531,39 @@ request_list = {
     },
     "on": {
         "description": "Turn a device on",
-        "syntax": "on device-id dim-amount",
+        "syntax": "on device-id",
         "handler": _device_on,
-        "argcount": 3
+        "argcount": 2
     },
     "deviceon": {
-        "description": "Turn a device one",
-        "syntax": "deviceon device-id dim-amount",
+        "description": "Turn a device on",
+        "syntax": "deviceon device-id",
         "handler": _device_on,
-        "argcount": 3
+        "argcount": 2
+    },
+    "alldeviceson": {
+        "description": "Turn all devices on",
+        "syntax": "alldeviceson",
+        "handler": _all_devices_on,
+        "argcount": 1
     },
     "off": {
         "description": "Turn a device off",
-        "syntax": "off device-id dim-amount",
+        "syntax": "off device-id",
         "handler": _device_off,
-        "argcount": 3
+        "argcount": 2
     },
     "deviceoff": {
         "description": "Turn a device off",
-        "syntax": "deviceoff device-id dim-amount",
+        "syntax": "deviceoff device-id",
         "handler": _device_off,
-        "argcount": 3
+        "argcount": 2
+    },
+    "alldevicesoff": {
+        "description": "Turn all devices off",
+        "syntax": "alldevicesoff",
+        "handler": _all_devices_off,
+        "argcount": 1
     },
     "definedevice": {
         "description": "Define a new device using a JSON formatted input file",
@@ -387,16 +601,106 @@ request_list = {
         "handler": _query_device_programs,
         "argcount": 2
     },
-    "querydeviceprogram": {
-        "description": "List program details for a program ID",
-        "syntax": "querydeviceprogram program-id",
-        "handler": _query_device_program,
+    "assigndevice": {
+        "description": "Assign a device to a group",
+        "syntax": "assigndevice group-id device-id",
+        "handler": _assign_device,
+        "argcount": 3
+    },
+    "assignprogram": {
+        "description": "Assign a program to a device",
+        "syntax": "assignprogram device-id program-id",
+        "handler": _assign_program,
+        "argcount": 3
+    },
+    "assignprogramtogroup": {
+        "description": "Assign a program to a device group",
+        "syntax": "assignprogramtogroup group-id program-id",
+        "handler": _assign_program_to_group,
+        "argcount": 3
+    },
+    "definegroup": {
+        "description": "Define a new device group",
+        "syntax": "definegroup group-name",
+        "handler": _define_group,
         "argcount": 2
     },
-    "queryprograms": {
-        "description": "List all programs for a device ID",
-        "syntax": "queryprograms device-id",
-        "handler": _query_device_programs,
+    "deletegroup": {
+        "description": "Delete a device group",
+        "syntax": "deletegroup group-id",
+        "handler": _delete_group,
+        "argcount": 2
+    },
+    "deletegroupdevice": {
+        "description": "Delete a device from a group",
+        "syntax": "deletegroupdevice group-id device-id",
+        "handler": _delete_group_device,
+        "argcount": 3
+    },
+    "deletedeviceprogram": {
+        "description": "Delete a program from a device",
+        "syntax": "deletedeviceprogram device-id program-id",
+        "handler": _delete_device_program,
+        "argcount": 3
+    },
+    "defineprogram": {
+        "description": "Define a new program",
+        "syntax": "defineprogram <new_program.json>",
+        "handler": _define_program,
+        "argcount": 2
+    },
+    "deleteprogram": {
+        "description": "Delete a program",
+        "syntax": "deleteprogram program-id",
+        "handler": _delete_program,
+        "argcount": 2
+    },
+    "groupon": {
+        "description": "Turn on all devices in a group",
+        "syntax": "groupon group-id",
+        "handler": _group_on,
+        "argcount": 2
+    },
+    "groupoff": {
+        "description": "Turn off all devices in a group",
+        "syntax": "deviceoff group-id",
+        "handler": _group_off,
+        "argcount": 2
+    },
+    "querygroup": {
+        "description": "List device group details",
+        "syntax": "querygroup group-id",
+        "handler": _query_action_group,
+        "argcount": 2
+    },
+    "querygroupdevices": {
+        "description": "List devices in a group",
+        "syntax": "querygroupdevices group-id",
+        "handler": _query_group_devices,
+        "argcount": 2
+    },
+    "querygroups": {
+        "description": "List all groups",
+        "syntax": "querygroups",
+        "handler": _query_groups,
+        "argcount": 1
+    },
+    "queryavailablemfgdevices": {
+        "description": "List all devices of a manufacturer/type",
+        "syntax": "queryavailablemfgdevices mfg-or-type",
+        "handler": _query_available_devices,
+        "argcount": 2
+    },
+    "queryavailablegroupdevices": {
+        "description": "List all devices available for assignment to a group",
+        "syntax": "queryavailablegroupdevices group-id",
+        "handler": _query_available_group_devices,
+        "argcount": 2
+    },
+    "queryavailableprograms": {
+        "description": "List all programs available for assignment to a device",
+        "syntax": "queryavailableprograms device-id",
+        "handler": _query_available_programs,
         "argcount": 2
     },
     "queryprogram": {
@@ -405,44 +709,48 @@ request_list = {
         "handler": _query_device_program,
         "argcount": 2
     },
-    "defineprogram": {
-        "description": "Define a new program",
-        "syntax": "defineprogram <new_device.json>",
-        "handler": _define_program,
+    "querydeviceprogram": {
+        "description": "List program details for a program ID",
+        "syntax": "querydeviceprogram program-id",
+        "handler": _query_device_program,
         "argcount": 2
+    },
+    "queryprograms": {
+        "description": "List all programs",
+        "syntax": "queryprograms",
+        "handler": _query_programs,
+        "argcount": 1
+    },
+    "updategroup": {
+        "description": "Update a group",
+        "syntax": "updategroup group-id group-name",
+        "handler": _update_group,
+        "argcount": 3
     },
     "updateprogram": {
         "description": "Update a program",
-        "syntax": "updateprogram <update_device.json>",
+        "syntax": "updateprogram <update_program.json>",
         "handler": _update_program,
-        "argcount": 2
-    },
-    "deletedeviceprogram": {
-        "description": "Delete a program by its program ID",
-        "syntax": "deletedeviceprogram program-id",
-        "handler": _delete_program,
-        "argcount": 2
-    },
-    "deleteprogram": {
-        "description": "Delete a program by its program ID",
-        "syntax": "deleteprogram program-id",
-        "handler": _delete_program,
         "argcount": 2
     },
 }
 
 
 def _get_request_handler(request_args):
-    request = request_args[0].lower()
-    if request in request_list.keys():
-        if len(request_args) == request_list[request]["argcount"]:
-            return request_list[request]
+    if request_args is not None and len(request_args) > 0:
+        request = request_args[0].lower()
+        if request in request_list.keys():
+            if len(request_args) >= request_list[request]["argcount"]:
+                return request_list[request]
+            else:
+                print("Wrong number of request arguments")
+                print(request_args)
+                print("%d arguments required (including request), %d provided" % (request_list[request]["argcount"], len(request_args)))
         else:
-            print("Wrong number of request arguments")
-            print(request_args)
-            print("%d arguments required (including request), %d provided" % (request_list[request]["argcount"], len(request_args)))
+            print("Unknown request:", args[0])
     else:
-        print("Unknown request:", args[0])
+        # Show minimal help
+        _request_help(["help", "help"])
 
     return None
 
