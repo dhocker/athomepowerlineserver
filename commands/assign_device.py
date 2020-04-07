@@ -21,19 +21,19 @@ class AssignDevice(ServerCommand):
         device_id = request["args"]["device-id"]
         group_id = request["args"]["group-id"]
 
-        result = ActionGroupDevices.insert_device(group_id, device_id)
+        agd = ActionGroupDevices()
+        result = agd.insert_device(group_id, device_id)
 
         # Generate a successful response
         r = self.CreateResponse(request["request"])
 
         if result >= 0:
-            r['result-code'] = 0
+            r['result-code'] = AssignDevice.SUCCESS
             r['action-group-device-id'] = result
-            r['message'] = "Success"
+            r['message'] = AssignDevice.MSG_SUCCESS
         else:
             # Probably invalid device type
-            r['result-code'] = 1
-            r['error'] = 1
-            r['message'] = "Failure"
+            r['result-code'] = agd.last_error
+            r['message'] = agd.last_error_code
 
         return r
