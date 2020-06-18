@@ -1,4 +1,4 @@
-astral
+astral==1.10.1
 athomesocketserver==1.1.0
 certifi
 chardet
@@ -11,4 +11,4 @@ PyYAML
 requests
 urllib3
 pyHS100
-meross-iot
+meross-iot==0.3.2.21
