@@ -9,7 +9,9 @@
 #
 
 from datetime import datetime, timedelta
-from astral import Astral
+from astral import LocationInfo
+from astral.sun import sun
+from astral.geocoder import database, lookup
 from Configuration import Configuration
 
 
@@ -18,26 +20,42 @@ def get_astral_data(for_datetime):
     Returns the sunrise and sunset times for the given date.
     Uses the Astral package to compute sunrise/sunset for the
     configured city.
-    Reference https://pythonhosted.org/astral/module.html
-    :param for_datetime:
+    Reference https://astral.readthedocs.io/en/latest/index.html
+    :param for_datetime: The date for the astral data
     :return: Returns a dict containing the keys sunrise and sunset.
     The values are datetime objects.
     '''
-    a = Astral()
-    a.solar_depression = "civil"
-    # We use a city just to get a city object. Then we override the lat/long.
-    # The city object can produce sunrise/sunset in local time.
+    city = None
+    # Either city/name or latitude and longitude are required
     if Configuration.City() != "":
-        city = a[Configuration.City()]
-    else:
-        # Default if no city is configured
-        city = a["New York"]
-    if Configuration.Latitude() != "":
-        city.latitude = float(Configuration.Latitude())
-    if Configuration.Longitude() != "":
-        city.longitude = float(Configuration.Longitude())
+        db = database()
+        try:
+            city = lookup(Configuration.City(), db)
+            # Overrides
+            if Configuration.Latitude() != "":
+                city.latitude = float(Configuration.Latitude())
+            if Configuration.Longitude() != "":
+                city.longitude = float(Configuration.Longitude())
+        except KeyError:
+            pass
 
-    return city.sun(date=for_datetime, local=True)
+    if city is None:
+        # Default if no city is configured
+        city = LocationInfo()
+        # We expect latitude and longitude to be configured to override city
+        if Configuration.Latitude() != "" and Configuration.Longitude() != "":
+            city.latitude = float(Configuration.Latitude())
+            city.longitude = float(Configuration.Longitude())
+        else:
+            raise ValueError("Latitude and longitude are required")
+
+    # region is not used
+    # city.region = ""
+
+    # Local timezone
+    city.timezone = datetime.now().astimezone().tzinfo
+
+    return sun(city.observer, date=for_datetime, tzinfo=city.timezone)
 
 
 def get_sun_data(for_datetime):

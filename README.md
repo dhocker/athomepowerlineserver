@@ -314,15 +314,20 @@ template.
         </tr>
         <tr class="odd">
             <td>City</td>
-            <td>The city where the installation is located. City, latitude and longitude are used for accurately calculating the sunset and sunrise (using the astral package).</td>
+            <td>The city where the installation is located. 
+            Used for accurately calculating the sunset and sunrise 
+            (using the astral package). If specified, latitude and longitude override
+            the astral database values. If city is omitted, latitude and longitude are 
+            required.
+            </td>
         </tr>
         <tr class="even">
             <td>Latitude</td>
-            <td>The latitude of installation.</td>
+            <td>The latitude of installation. Required if city is omitted.</td>
         </tr>
         <tr class="odd">
             <td>Longitude</td>
-            <td>The longitude of the installation.</td>
+            <td>The longitude of the installation. Required if city is omitted.</td>
         </tr>
         <tr class="even">
             <td>MerossEmail</td>
