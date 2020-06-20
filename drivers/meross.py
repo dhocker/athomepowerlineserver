@@ -47,8 +47,8 @@ class MerossDriver(BaseDriverInterface):
         for retry in range(1, 11):
             try:
                 logger.debug("Attempt %d to create a MerossManager instance", retry)
-                self._manager = MerossManager(meross_email=Configuration.MerossEmail(),
-                                              meross_password=Configuration.MerossPassword())
+                self._manager = MerossManager.from_email_and_password(meross_email=Configuration.MerossEmail(),
+                                                                      meross_password=Configuration.MerossPassword())
                 logger.info("Meross driver initialized")
                 return
             except Exception as ex:

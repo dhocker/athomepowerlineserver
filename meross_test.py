@@ -1,12 +1,15 @@
 #
-# Meross smart plug device driver
-# Copyright © 2019  Dave Hocker
+# Meross smart plug device driver research
+# Copyright © 2019, 2020  Dave Hocker
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, version 3 of the License.
 #
 # See the LICENSE file for more details.
+#
+# Use meross-iot version 0.3.4.6
+# Version 0.4.x.x appears to be incompatible with 0.3.4.6 - uses asyncio
 #
 
 from meross_iot.manager import MerossManager
@@ -16,46 +19,49 @@ from meross_iot.cloud.devices.power_plugs import GenericPlug
 # from meross_iot.cloud.devices.door_openers import GenericGarageDoorOpener
 # from random import randint
 import time
+# import asyncio
 import os
 import json
 
 
-if __name__ == '__main__':
-    EMAIL = os.environ['MEROSS_EMAIL']
-    PASSWORD = os.environ['MEROSS_PASSWORD']
 
-    def event_handler(eventobj):
-        if eventobj.event_type == MerossEventType.DEVICE_ONLINE_STATUS:
-            print("Device online status changed: %s went %s" % (eventobj.device.name, eventobj.status))
-            pass
+def event_handler(eventobj):
+    if eventobj.event_type == MerossEventType.DEVICE_ONLINE_STATUS:
+        print("Device online status changed: %s went %s" % (eventobj.device.name, eventobj.status))
+        pass
 
-        elif eventobj.event_type == MerossEventType.DEVICE_SWITCH_STATUS:
-            print("Switch state changed: Device %s (channel %d) went %s" % (eventobj.device.name, eventobj.channel_id,
-                                                                            eventobj.switch_state))
-        elif eventobj.event_type == MerossEventType.CLIENT_CONNECTION:
-            print("MQTT connection state changed: client went %s" % eventobj.status)
+    elif eventobj.event_type == MerossEventType.DEVICE_SWITCH_STATUS:
+        print("Switch state changed: Device %s (channel %d) went %s" % (eventobj.device.name, eventobj.channel_id,
+                                                                        eventobj.switch_state))
+    elif eventobj.event_type == MerossEventType.CLIENT_CONNECTION:
+        print("MQTT connection state changed: client went %s" % eventobj.status)
 
-            # TODO: Give example of reconnection?
+        # TODO: Give example of reconnection?
 
-        elif eventobj.event_type == MerossEventType.GARAGE_DOOR_STATUS:
-            print("Garage door is now %s" % eventobj.door_state)
+    elif eventobj.event_type == MerossEventType.GARAGE_DOOR_STATUS:
+        print("Garage door is now %s" % eventobj.door_state)
 
-        else:
-            print("Unknown event!")
+    else:
+        print("Unknown event!")
 
 
+def main():
     # Initiates the Meross Cloud Manager. This is in charge of handling the communication with the remote endpoint
-    manager = MerossManager(meross_email=EMAIL, meross_password=PASSWORD)
+    # http_api_client = MerossHttpClient.from_user_password(email=EMAIL, password=PASSWORD)
+    manager = MerossManager.from_email_and_password(meross_email=EMAIL, meross_password=PASSWORD)
 
     # Register event handlers for the manager...(this does not appear to be required)
     # manager.register_event_handler(event_handler)
 
     # Starts the manager
+    # await manager.async_init()
     manager.start()
 
     # You can retrieve the device you are looking for in various ways:
     # By kind
     # bulbs = manager.get_devices_by_kind(GenericBulb)
+    # await manager.async_device_discovery()
+    # plugs = manager.find_devices()
     plugs = manager.get_devices_by_kind(GenericPlug)
     # door_openers = manager.get_devices_by_kind(GenericGarageDoorOpener)
     # all_devices = manager.get_supported_devices()
@@ -125,3 +131,12 @@ if __name__ == '__main__':
 
     manager.stop()
     print("Done")
+
+if __name__ == '__main__':
+    EMAIL = os.environ['MEROSS_EMAIL']
+    PASSWORD = os.environ['MEROSS_PASSWORD']
+
+    # loop = asyncio.get_event_loop()
+    # loop.run_until_complete(main())
+    # loop.close()
+    main()

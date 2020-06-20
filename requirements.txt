@@ -11,4 +11,4 @@ PyYAML
 requests
 urllib3
 pyHS100
-meross-iot==0.3.2.21
+meross-iot==0.3.4.6
