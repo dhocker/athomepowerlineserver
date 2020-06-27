@@ -1,4 +1,4 @@
-astral
+astral==2.2
 athomesocketserver==1.1.0
 certifi
 chardet
