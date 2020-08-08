@@ -193,13 +193,17 @@ class TPLinkDriver(BaseDriverInterface):
         :param ip_address:
         :return:
         """
-        try:
-            device = Discover.discover_single(ip_address)
-            if device is None:
-                logger.error("Unable to discover TPLink device %s", ip_address)
-        except Exception as ex:
-            logger.error("An exception occurred while discovering TPLink/Kasa device %s", ip_address)
-            logger.error(str(ex))
-            device = None
+        # Try up to 5 times
+        for retry in range(1, 6):
+            try:
+                device = Discover.discover_single(ip_address)
+                if device is None:
+                    logger.error("Unable to discover TPLink device %s retry=%d", ip_address, retry)
+                else:
+                    return device
+            except Exception as ex:
+                logger.error("An exception occurred while discovering TPLink/Kasa device %s retry=%d", ip_address, retry)
+                logger.error(str(ex))
+                device = None
 
         return device
