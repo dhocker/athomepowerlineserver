@@ -64,7 +64,8 @@ def main():
     # plugs = manager.find_devices()
     plugs = manager.get_devices_by_kind(GenericPlug)
     # door_openers = manager.get_devices_by_kind(GenericGarageDoorOpener)
-    # all_devices = manager.get_supported_devices()
+    all_devices = manager.get_supported_devices()
+    # plugs = all_devices
 
     # Print some basic specs about the discovered devices
     # print("All the bulbs I found:")
