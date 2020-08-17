@@ -39,7 +39,9 @@ class ManagedDevices(BaseTable):
         "smartswitch": TPLINK,
         "smartbulb": TPLINK,
         "meross": MEROSS,
-        "mss110": MEROSS
+        "mss110": MEROSS,
+        "msl120": MEROSS,
+        "mss620": MEROSS
     }
 
     #######################################################################
