@@ -14,6 +14,7 @@
 #
 
 import logging
+import colorsys
 
 logger = logging.getLogger("server")
 
@@ -126,12 +127,23 @@ class BaseDriverInterface:
         self.last_error_code = BaseDriverInterface.SUCCESS
         self.last_error = None
 
-    def hex_to_rgb(self, hex):
+    def hex_to_rgb(self, hex_str):
         """
         Convert #rrggbb to tuple(r,g,b).
         From: https://gist.github.com/matthewkremer/3295567
-        :return:
+        :param hex_str: hex representation of an RGB color #rrggbb 
+        :return: rgb as a tuple(r,g,b)
         """
-        hex = hex.lstrip('#')
-        hlen = len(hex)
-        return tuple(int(hex[i:i + hlen // 3], 16) for i in range(0, hlen, hlen // 3))
+        hex_str = hex_str.lstrip('#')
+        hlen = len(hex_str)
+        return tuple(int(hex_str[i:i + hlen // 3], 16) for i in range(0, hlen, hlen // 3))
+
+    def hex_to_hsv(self, hex_str):
+        """
+        Convert #rrggbb to tuple(h,s,v)
+        :param hex_str: hex representation of an RGB color #rrggbb 
+        :return: hsv as a tuple(h,s,v)
+        """
+        rgb = self.hex_to_rgb(hex_str)
+        hsv = colorsys.rgb_to_hsv(rgb[0], rgb[1], rgb[2])
+        return hsv
