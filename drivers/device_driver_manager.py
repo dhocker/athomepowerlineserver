@@ -12,8 +12,8 @@
 import logging
 from drivers.Dummy import Dummy
 from drivers.XTB232 import XTB232
-# from drivers.tplink import TPLinkDriver
-from drivers.py_kasa import PyKasaDriver
+from drivers.tplink import TPLinkDriver
+# from drivers.py_kasa import PyKasaDriver
 from drivers.meross import MerossDriver
 from database.managed_devices import ManagedDevices
 
@@ -42,7 +42,7 @@ class DeviceDriverManager():
     # DriverName:DriverClass
     DRIVER_LIST = {
         "xtb232": XTB232,
-        "tplink": PyKasaDriver,
+        "tplink": TPLinkDriver,
         "meross": MerossDriver,
         "dummy": Dummy
     }
