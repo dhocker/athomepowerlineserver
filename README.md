@@ -114,6 +114,24 @@ Currently, only channel 0 is supported.
 ## WiFi Bulbs
 * MSL120 (untested, on/off only)
 
+# Devices to be Researched
+Devices listed here are not currently supported. They need to be researched
+to determine if they can be supported.
+
+## Wyze
+Wyze currently makes 3 WiFi devices: a bulb, a plug and an outdoor plug. Wyze does not seem to have 
+an API, but there is some activity on GitHub.
+
+[Wyze Web Site](https://wyze.com)
+
+[Wyze Bulb](https://wyze.com/wyze-bulb.html)
+
+[Wyze Bulb Python Support on GitHub](https://github.com/JoshuaMulliken/ha-wyzeapi)
+
+[Wyze Plug](https://wyze.com/wyze-plug.html)
+
+[Wyze Outdoor Plug](https://wyze.com/wyze-plug-outdoor.html)
+
 # Installation
 
 ## Basic Steps for Raspbian
