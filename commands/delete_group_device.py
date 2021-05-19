@@ -21,7 +21,8 @@ class DeleteActionGroupDevice(ServerCommand):
         device_id = request["args"]["device-id"]
         group_id = request["args"]["group-id"]
 
-        result = ActionGroupDevices.delete_device(group_id, device_id)
+        agd = ActionGroupDevices()
+        result = agd.delete_device(group_id, device_id)
 
         # Generate a successful response
         r = self.CreateResponse(request["request"])
