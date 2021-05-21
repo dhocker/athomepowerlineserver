@@ -51,6 +51,8 @@ if __name__ == '__main__':
 
     # Starts the manager
     manager.start()
+    manager.stop()
+    manager.start()
 
     # You can retrieve the device you are looking for in various ways:
     # By kind
@@ -95,6 +97,18 @@ if __name__ == '__main__':
         device.turn_off_channel(0)
 
         time.sleep(1)
+    for p in plugs:
+        print("Name:", p.name, "UUID: ", p.uuid)
+        print(p)
+        if not p.online:
+            print("The plug %s seems to be offline. Cannot test..." % p.name)
+            continue
+
+        print("Let's play with smart plug %s" % p.name)
+        active_list.append(p.uuid)
+
+        channels = len(p.get_channels())
+        print("The plug %s supports %d channels." % (p.name, channels))
 
     manager.stop()
     print("Done")
