@@ -1,5 +1,5 @@
 astral==2.2
-athomesocketserver==1.1.0
+-e git+https://github.com/dhocker/athomesocketserver.git#egg=athomesocketserver
 certifi
 chardet
 future
