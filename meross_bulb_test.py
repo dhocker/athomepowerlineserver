@@ -1,6 +1,6 @@
 #
 # Meross bulb device driver testing
-# Copyright © 2019  Dave Hocker
+# Copyright © 2019, 2021  Dave Hocker
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -8,11 +8,13 @@
 #
 # See the LICENSE file for more details.
 #
+# Requires meross-iot version 0.3.4.6. Will not work with version 4+.
+#
 
 from meross_iot.manager import MerossManager
 from meross_iot.meross_event import MerossEventType
 from meross_iot.cloud.devices.light_bulbs import GenericBulb
-# from meross_iot.cloud.devices.power_plugs import GenericPlug
+from meross_iot.cloud.devices.power_plugs import GenericPlug
 # from meross_iot.cloud.devices.door_openers import GenericGarageDoorOpener
 # from random import randint
 import time
@@ -44,7 +46,7 @@ if __name__ == '__main__':
 
 
     # Initiates the Meross Cloud Manager. This is in charge of handling the communication with the remote endpoint
-    manager = MerossManager(meross_email=EMAIL, meross_password=PASSWORD)
+    manager = MerossManager.from_email_and_password(meross_email=EMAIL, meross_password=PASSWORD)
 
     # Register event handlers for the manager...(this does not appear to be required)
     # manager.register_event_handler(event_handler)
@@ -57,7 +59,7 @@ if __name__ == '__main__':
     # You can retrieve the device you are looking for in various ways:
     # By kind
     bulbs = manager.get_devices_by_kind(GenericBulb)
-    # plugs = manager.get_devices_by_kind(GenericPlug)
+    plugs = manager.get_devices_by_kind(GenericPlug)
     # door_openers = manager.get_devices_by_kind(GenericGarageDoorOpener)
     # all_devices = manager.get_supported_devices()
 
