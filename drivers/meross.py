@@ -1,6 +1,6 @@
 #
 # Meross WiFi device driver
-# Copyright © 2020  Dave Hocker
+# Copyright © 2020, 2021  Dave Hocker
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,6 +20,9 @@
 # TODO Potential design changes
 #   Support multiple channel devices (e.g. multi-outlet surge protector)
 #   Support color changing bulbs (e.g. MSL120)
+#
+# Requires meross-iot module version 0.3.4.6
+#
 
 # Reference: https://github.com/albertogeniola/MerossIot
 from meross_iot.manager import MerossManager
