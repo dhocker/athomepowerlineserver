@@ -27,7 +27,7 @@ class SocketServerThread:
     def __init__(self, host, port):
         self.host = host
         self.port = port
-        self.server_thread = threading.Thread(target=self.RunServer)
+        self.server_thread = threading.Thread(target=self.RunServer, name="SocketServerThread")
         ThreadedTCPServer.ThreadedTCPServer.allow_reuse_address = True
         self.server = ThreadedTCPServer.ThreadedTCPServer((host, port), MyTCPHandlerJson.MyTCPHandlerJson)
 
