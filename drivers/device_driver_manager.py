@@ -14,10 +14,12 @@ from drivers.Dummy import Dummy
 from drivers.XTB232 import XTB232
 from drivers.tplink import TPLinkDriver
 # from drivers.py_kasa import PyKasaDriver
-from drivers.meross import MerossDriver
+# from drivers.meross import MerossDriver
+from drivers.meross_v4 import MerossDriverV4
 from database.managed_devices import ManagedDevices
 
 logger = logging.getLogger("server")
+
 
 class DeviceDriverManager():
     """
@@ -43,7 +45,7 @@ class DeviceDriverManager():
     DRIVER_LIST = {
         "xtb232": XTB232,
         "tplink": TPLinkDriver,
-        "meross": MerossDriver,
+        "meross": MerossDriverV4,
         "dummy": Dummy
     }
 
@@ -109,7 +111,7 @@ class DeviceDriverManager():
             elif device_name in cls.MEROSS_DEVICE_LIST:
                 if driver_name in cls.MEROSS_DRIVER_LIST:
                     if not cls.used_driver_list[driver_name]:
-                        cls.used_driver_list[driver_name] = MerossDriver()
+                        cls.used_driver_list[driver_name] = MerossDriverV4()
                     cls.driver_list[device_name] = cls.used_driver_list[driver_name]
                     logger.info("Device %s using driver %s", device_name, driver_name)
                 else:
@@ -144,6 +146,7 @@ class DeviceDriverManager():
         # Call each driver's close method
         for dn, driver in cls.used_driver_list.items():
             if driver:
+                logger.debug("Closing driver %s", dn)
                 driver.close()
 
     @classmethod
