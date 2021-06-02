@@ -26,6 +26,9 @@ class BaseDriverInterface:
     DEVICE_TYPE_PLUG = "plug"
     DEVICE_TYPE_BULB = "bulb"
     DEVICE_TYPE_STRIP = "strip"
+    DEVICE_TYPE_LIGHTSTRIP = "lightstrip"
+    DEVICE_TYPE_DIMMER = "dimmer"
+    DEVICE_TYPE_UNKNOWN = "unknown"
 
     def __init__(self):
         self.clear_last_error()
