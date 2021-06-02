@@ -12,8 +12,8 @@
 import logging
 from drivers.Dummy import Dummy
 from drivers.XTB232 import XTB232
-from drivers.tplink import TPLinkDriver
-# from drivers.py_kasa import PyKasaDriver
+# from drivers.tplink import TPLinkDriver
+from drivers.py_kasa import PyKasaDriver
 # from drivers.meross import MerossDriver
 from drivers.meross_v4 import MerossDriverV4
 from database.managed_devices import ManagedDevices
@@ -44,7 +44,7 @@ class DeviceDriverManager():
     # DriverName:DriverClass
     DRIVER_LIST = {
         "xtb232": XTB232,
-        "tplink": TPLinkDriver,
+        "tplink": PyKasaDriver,
         "meross": MerossDriverV4,
         "dummy": Dummy
     }
@@ -126,7 +126,9 @@ class DeviceDriverManager():
             else:
                 if driver_name in cls.DRIVER_LIST.keys():
                     # TODO This won't work if the driver is a true singleton like XTB232
-                    cls.driver_list[device_name] = cls.DRIVER_LIST[driver_name]()
+                    if not cls.used_driver_list[driver_name]:
+                        cls.used_driver_list[driver_name] = cls.DRIVER_LIST[driver_name]()
+                    cls.driver_list[device_name] = cls.used_driver_list[driver_name]
                     logger.info("Custom device-to-driver mapping created: %s/%s", device_name, driver_name)
                 else:
                     logger.error("Configuration error: unrecognized device name %s", device_name)

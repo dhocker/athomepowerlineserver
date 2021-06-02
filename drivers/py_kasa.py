@@ -1,7 +1,7 @@
 #
 # Kasa/TPLink device driver for TPLink/Kasa devices
 # Based on python-kasa package: https://github.com/python-kasa/python-kasa
-# © 2020  Dave Hocker
+# © 2020, 2021  Dave Hocker
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,12 +23,14 @@ class PyKasaDriver(BaseDriverInterface):
     Driver for TPLink/Kasa devices (SmartPlugs, SmartSwitch, SmartStrip, SmartBulb).
     Uses python-kasa package.
     """
+    RETRY_COUNT = 5
 
     def __init__(self):
         """
         Initialize an instance of the python-kasa based driver
         """
         super().__init__()
+        self._loop = None
         logger.info("PyKasa driver initialized")
 
     def open(self):
@@ -58,15 +60,14 @@ class PyKasaDriver(BaseDriverInterface):
         :return: True/false
         """
         result = False
-        # TODO Requires a TPLink/Kasa bulb for testing
         logger.debug("set_color for: %s %s %s %s", device_type, device_name_tag, ip_address, channel)
         hsv = self.hex_to_hsv(hex_color)
         dev = self._create_smart_device(ip_address)
         if dev is not None and dev.is_color:
             self.clear_last_error()
-            for r in range(5):
+            for r in range(PyKasaDriver.RETRY_COUNT):
                 try:
-                    asyncio.run(dev.set_hsv(int(hsv[0]), int(hsv[1]), int(hsv[2])))
+                    self._open_loop().run_until_complete(dev.set_hsv(int(hsv[0]), int(hsv[1]), int(hsv[2])))
                     result = True
                     break
                 except Exception as ex:
@@ -75,6 +76,7 @@ class PyKasaDriver(BaseDriverInterface):
                     self.LastError = str(ex)
                     self.LastErrorCode = 1
             del dev
+        self._close_loop()
         return result
 
     def set_brightness(self, device_type, device_name_tag, ip_address, channel, brightness):
@@ -93,9 +95,9 @@ class PyKasaDriver(BaseDriverInterface):
         dev = self._create_smart_device(ip_address)
         if dev is not None and dev.is_dimmable:
             self.clear_last_error()
-            for r in range(5):
+            for r in range(PyKasaDriver.RETRY_COUNT):
                 try:
-                    asyncio.run(dev.brightness(int(brightness)))
+                    self._open_loop().run_until_complete(dev.brightness(int(brightness)))
                     result = True
                     break
                 except Exception as ex:
@@ -104,6 +106,7 @@ class PyKasaDriver(BaseDriverInterface):
                     self.LastError = str(ex)
                     self.LastErrorCode = 1
             del dev
+        self._close_loop()
         return result
 
     def device_on(self, device_type, device_name_tag, ip_address, channel):
@@ -169,16 +172,17 @@ class PyKasaDriver(BaseDriverInterface):
         :return: Returns a dict where the key is the device IP address
         and the value is the human readable name of the device.
         """
+        result = {}
         try:
-            result = {}
             # This can take a few seconds
-            devices = asyncio.run(Discover.discover())
+            devices = self._open_loop().run_until_complete(Discover.discover())
             for ip, dev in devices.items():
                 result[ip] = self._get_device_attrs(dev)
         except Exception as ex:
             logger.error("An exception occurred while trying to enumerate available TPLink/Kasa devices")
             logger.error(str(ex))
 
+        self._close_loop()
         return result
 
     def set_time(self, time_value):
@@ -198,26 +202,26 @@ class PyKasaDriver(BaseDriverInterface):
             attrs["label"] = dev.alias
             attrs["channels"] = 1
             if isinstance(dev, SmartPlug):
-                attrs["type"] = "Plug"
+                attrs["type"] = PyKasaDriver.DEVICE_TYPE_PLUG
             elif isinstance(dev, SmartBulb):
-                attrs["type"] = "Bulb"
+                attrs["type"] = PyKasaDriver.DEVICE_TYPE_BULB
             elif isinstance(dev, SmartStrip):
-                attrs["type"] = "Strip"
+                attrs["type"] = PyKasaDriver.DEVICE_TYPE_STRIP
                 attrs["channels"] = len(sys_info["children"])
             elif isinstance(dev, SmartLightStrip):
-                attrs["type"] = "LightStrip"
+                attrs["type"] = PyKasaDriver.DEVICE_TYPE_LIGHTSTRIP
                 attrs["channels"] = len(sys_info["children"])
             elif isinstance(dev, SmartDimmer):
-                attrs["type"] = "Dimmer"
+                attrs["type"] = PyKasaDriver.DEVICE_TYPE_DIMMER
             else:
-                attrs["type"] = "Unknown"
+                attrs["type"] = PyKasaDriver.DEVICE_TYPE_UNKNOWN
         except Exception as ex:
             logger.error("An exception occurred getting info for TPLink/Kasa device %s (%s)", dev.alias, dev.host)
             logger.error(str(ex))
 
         return attrs
 
-    def _exec_device_function(self, device_function, retries=5):
+    def _exec_device_function(self, device_function):
         """
         Execute a device function with retries
         :param device_function: The function to be executed
@@ -225,37 +229,61 @@ class PyKasaDriver(BaseDriverInterface):
         :return:
         """
         self.clear_last_error()
-        for r in range(retries):
+        result = False
+        for r in range(PyKasaDriver.RETRY_COUNT):
             try:
-                asyncio.run(device_function())
-                return True
+                self._open_loop().run_until_complete(device_function())
+                result = True
             except Exception as ex:
                 logger.error("Retry %d", r)
                 logger.error(str(ex))
                 self.LastError = str(ex)
                 self.LastErrorCode = 1
 
-        return False
+        self._close_loop()
+        return result
 
-    @classmethod
-    def _create_smart_device(cls, ip_address):
+    def _create_smart_device(self, ip_address):
         """
         Create a TPLink SmartDevice instance for the device at a
         given IP address
         :param ip_address:
         :return:
         """
-        # Try up to 5 times
-        for retry in range(1, 6):
+        device = None
+        # Try multiple times
+        for retry in range(1, PyKasaDriver.RETRY_COUNT + 1):
             try:
-                device = asyncio.run(Discover.discover_single(ip_address))
+                device = self._open_loop().run_until_complete(Discover.discover_single(ip_address))
                 if device is None:
                     logger.error("Unable to discover TPLink device %s retry=%d", ip_address, retry)
                 else:
-                    return device
+                    break
             except Exception as ex:
                 logger.error("An exception occurred while discovering TPLink/Kasa device %s retry=%d", ip_address, retry)
                 logger.error(str(ex))
                 device = None
 
+        self._close_loop()
         return device
+
+    def _open_loop(self):
+        """
+        Create an event loop for calling async methods/functions
+        :return: An event loop instance for the current thread
+        """
+        if self._loop is None:
+            self._loop = asyncio.new_event_loop()
+            self._loop.set_debug(True)
+        return self._loop
+
+    def _close_loop(self):
+        """
+        Close the currently allocated event loop
+        :return:
+        """
+        if self._loop is not None:
+            if self._loop.is_running():
+                self._loop.stop()
+            self._loop.close()
+            self._loop = None
