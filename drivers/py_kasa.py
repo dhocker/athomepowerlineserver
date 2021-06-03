@@ -31,6 +31,7 @@ class PyKasaDriver(BaseDriverInterface):
         """
         super().__init__()
         self._loop = None
+        self._all_devices = None
         logger.info("PyKasa driver initialized")
 
     def open(self):
@@ -38,6 +39,8 @@ class PyKasaDriver(BaseDriverInterface):
         Open the driver. Does nothing for TPlink/Kasa devices.
         :return:
         """
+        # Discover all devices
+        self.discover_devices()
         logger.debug("PyKasa driver opened")
         return True
 
@@ -174,9 +177,7 @@ class PyKasaDriver(BaseDriverInterface):
         """
         result = {}
         try:
-            # This can take a few seconds
-            devices = self._open_loop().run_until_complete(Discover.discover())
-            for ip, dev in devices.items():
+            for ip, dev in self._all_devices.items():
                 result[ip] = self._get_device_attrs(dev)
         except Exception as ex:
             logger.error("An exception occurred while trying to enumerate available TPLink/Kasa devices")
@@ -184,6 +185,18 @@ class PyKasaDriver(BaseDriverInterface):
 
         self._close_loop()
         return result
+
+    def discover_devices(self):
+        """
+        Discover all TPLink/Kasa devices. This is
+        equivalent to rescan devices.
+        :return:
+        """
+        # Discover all devices
+        logger.debug("Discovering TPLink/Kasa devices")
+        self._all_devices = self._open_loop().run_until_complete(Discover.discover())
+        for ip, dev in self._all_devices.items():
+            self._open_loop().run_until_complete(dev.update())
 
     def set_time(self, time_value):
         pass

@@ -184,8 +184,15 @@ class MerossDriverV4(BaseDriverInterface):
         :return: Returns a dict where the key is the device UUID
         and the value is the human readable name of the device.
         """
-        available_devices = self._loop.run_until_complete(self._async_adapter.get_available_devices())
+        available_devices = self._async_adapter.get_available_devices()
         return available_devices
+
+    def discover_devices(self):
+        """
+        Rescan for all Meross devices.
+        :return:
+        """
+        self._async_adapter.discover_devices()
 
     #######################################################################
     # Set the controller time to the current, local time.

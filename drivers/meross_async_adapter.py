@@ -38,6 +38,7 @@ class MerossAsyncAdapter():
         self._manager = None
         self._last_error_code = 0
         self._last_error = None
+        self._all_devices = None
 
     @property
     def last_error_code(self):
@@ -108,9 +109,8 @@ class MerossAsyncAdapter():
         self.clear_last_error()
         try:
             result = await self._async_init(email, password)
-            # For now, discover all devices. This takes a while.
-            await self._manager.async_device_discovery(update_subdevice_status=True)
-            # TODO Find and update ALL devices
+            # For now, discover all devices.
+            await self.discover_devices()
             logger.info("Meross driver adapter opened")
             return result
         except Exception as ex:
@@ -281,7 +281,7 @@ class MerossAsyncAdapter():
 
         return False
 
-    async def get_available_devices(self):
+    def get_available_devices(self):
         """
         Get all known available devices for supported types.
         :return: Returns a dict where the key is the device UUID
@@ -291,14 +291,7 @@ class MerossAsyncAdapter():
 
         available_devices = {}
         try:
-            # Update known devices. If devices are added to the Meross
-            # cloud, they may not show up if the last start() was
-            # executed before the device(s) were added.
-            await self._manager.async_device_discovery(update_subdevice_status=False)
-            all_devices = self._manager.find_devices()
-
-            for device in all_devices:
-                await device.async_update()
+            for device in self._all_devices:
                 available_devices[device.uuid] = self._build_device_details(device)
         except Exception as ex:
             logger.error("Exception enumerating available devices")
@@ -311,6 +304,22 @@ class MerossAsyncAdapter():
         elapsed_time = datetime.datetime.now() - start_time
         logger.debug("get_available_devices elapsed time: %f", elapsed_time.total_seconds())
         return available_devices
+
+    async def discover_devices(self):
+        """
+        Discover all Meross devices register to the account. This is
+        equivalent to rescan devices.
+        :return:
+        """
+        logger.debug("Discovering Meross devices")
+        # For now, discover all devices. This takes about 1 sec per device.
+        await self._manager.async_device_discovery(update_subdevice_status=False)
+
+        # Find and update ALL devices
+        self._all_devices = self._manager.find_devices()
+        for device in self._all_devices:
+            # This update takes about 1 sec per device
+            await device.async_update()
 
     def get_device_type(self, device_address, device_channel):
         device = self._get_device(device_address)

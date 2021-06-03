@@ -111,6 +111,13 @@ class BaseDriverInterface:
         """
         return {}
 
+    def discover_devices(self):
+        """
+        Discover all devices for this manufacturer
+        :return:
+        """
+        pass
+
     def get_device_type(self, device_address, device_channel):
         """
         Return the type of device: plug, bulb, strip, etc.
