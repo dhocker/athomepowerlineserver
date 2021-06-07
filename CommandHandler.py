@@ -1,6 +1,6 @@
 #
 # AtHomePowerlineServer - networked server for CM11/CM11A/XTB-232 X10 controllers
-# Copyright (C) 2014, 2020  Dave Hocker
+# Copyright © 2014, 2021  Dave Hocker
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -37,6 +37,7 @@ import commands.delete_device_program
 import commands.all_devices_on
 import commands.all_devices_off
 import commands.query_available_devices
+import commands.discover_devices
 import commands.query_available_programs
 import commands.query_programs
 import commands.assign_program
@@ -78,6 +79,7 @@ class CommandHandler:
         "definedevice": commands.define_device.DefineDevice,
         "querydevices": commands.query_devices.QueryDevices,
         "queryavailabledevices": commands.query_available_devices.QueryAvailableDevices,
+        "discoverdevices": commands.discover_devices.DiscoverDevices,
         "queryavailableprograms": commands.query_available_programs.QueryAvailablePrograms,
         "updatedevice": commands.update_device.UpdateDevice,
         "deletedevice": commands.delete_device.DeleteDevice,
