@@ -156,3 +156,8 @@ class DeviceDriverManager():
         if device_name in cls.driver_list.keys():
             return cls.driver_list[device_name]
         return None
+
+    @classmethod
+    def discover_devices(cls):
+        for device_name, driver in cls.driver_list.items():
+            driver.discover_devices()

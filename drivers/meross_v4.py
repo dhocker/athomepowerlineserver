@@ -192,7 +192,7 @@ class MerossDriverV4(BaseDriverInterface):
         Rescan for all Meross devices.
         :return:
         """
-        self._async_adapter.discover_devices()
+        self._loop.run_until_complete(self._async_adapter.discover_devices())
 
     #######################################################################
     # Set the controller time to the current, local time.
