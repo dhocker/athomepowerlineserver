@@ -435,6 +435,16 @@ def _query_available_devices(request_args):
     return request.query_available_devices(request_args[1])
 
 
+def _discover_devices(request_args):
+    """
+    Discover all devices on the local network
+    :param request_args:
+    :return:
+    """
+    request = ServerRequest(host=host, port=port, verbose=verbose)
+    return request.discover_devices()
+
+
 def _query_available_group_devices(request_args):
     """
     Query for all devices available for assignment to a group
@@ -690,6 +700,12 @@ request_list = {
         "syntax": "queryavailablemfgdevices mfg-or-type",
         "handler": _query_available_devices,
         "argcount": 2
+    },
+    "discoverdevices": {
+        "description": "Discover all devices on the local network",
+        "syntax": "discoverdevices",
+        "handler": _discover_devices,
+        "argcount": 1
     },
     "queryavailablegroupdevices": {
         "description": "List all devices available for assignment to a group",
