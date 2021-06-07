@@ -34,7 +34,7 @@ def read(*paths):
 
 setup(
     name='ahps_api',
-    version='2020.0.0',
+    version='2021.0.0',
     description='AtHomeServer API module',
     long_description=(read('Readme.md')),
     url='www.github.com/dhocker/athomepowerlineserver',

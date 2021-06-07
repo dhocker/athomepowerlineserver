@@ -553,3 +553,12 @@ class ServerRequest:
         data["args"]["device-id"] = device_id
 
         return self._send_command(data)
+
+    def discover_devices(self):
+        """
+        Discover all devices on the local network
+        :return:
+        """
+        req = self._create_request("DiscoverDevices")
+        response = self._send_command(req)
+        return response
