@@ -24,6 +24,8 @@ class PyKasaDriver(BaseDriverInterface):
     Uses python-kasa package.
     """
     RETRY_COUNT = 5
+    # Discover target that limits scan to local network
+    DISCOVER_TARGET = "192.168.1.255"
 
     def __init__(self):
         """
@@ -194,7 +196,7 @@ class PyKasaDriver(BaseDriverInterface):
         """
         # Discover all devices
         logger.debug("Discovering TPLink/Kasa devices")
-        self._all_devices = self._open_loop().run_until_complete(Discover.discover())
+        self._all_devices = self._open_loop().run_until_complete(Discover.discover(target=PyKasaDriver.DISCOVER_TARGET))
         for ip, dev in self._all_devices.items():
             self._open_loop().run_until_complete(dev.update())
 
