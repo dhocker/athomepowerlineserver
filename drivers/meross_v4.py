@@ -11,10 +11,9 @@
 # This driver works with the meross-iot module at version 0.4+.
 #
 
-import asyncio
-import time
 from .base_driver_interface import BaseDriverInterface
-from .meross_async_adapter import MerossAsyncAdapter
+from .meross_adapter_thread import MerossAdapterThread
+from .meross_request import MerossRequest
 from Configuration import Configuration
 import logging
 
@@ -25,50 +24,67 @@ class MerossDriverV4(BaseDriverInterface):
     MEROSS_ERROR = 7
     RETRY_COUNT = 5
 
-    def __init__(self):
-        self._async_adapter = MerossAsyncAdapter()
-        # All async methods use this loop
-        # TODO This is only good for the current thread. It won't work for requests
-        # that come from API commands because they will be on different threads.
-        self._loop = asyncio.get_event_loop()
-        self._loop.set_debug(True)
-
-        logger.info("Meross async adapter initialization started")
+    def __init__(self, request_wait_time=60.0):
+        logger.info("Meross adapter thread initialization started")
+        self._adapter_thread = MerossAdapterThread()
+        # This is the current/last request
+        self._request = MerossRequest()
+        self._request_wait_time = request_wait_time
         super().__init__()
-        logger.info("Meross async adapter initialized")
+        logger.info("Meross adapter thread initialized")
 
     @property
     def last_error_code(self):
-        return self._async_adapter.last_error_code
+        return self._request.last_error_code
 
     @last_error_code.setter
     def last_error_code(self, v):
-        self._async_adapter.last_error_code = v
+        self._request.last_error_code = v
 
     @property
     def last_error(self):
-        return self._async_adapter.last_error
+        return self._request.last_error
 
     @last_error.setter
     def last_error(self, v):
-        self._async_adapter.last_error = v
+        self._request.last_error = v
 
     # Open the device
     def open(self):
-        # Starts the manager
-        result = self._loop.run_until_complete(self._async_adapter.open(Configuration.MerossEmail(), Configuration.MerossPassword()))
-        logger.info("Meross driver opened")
+        # Starts the Meross IOT interface thread
+        self._adapter_thread.start()
 
-        return result
+        # Queue an open request
+        kwargs = {
+            "email": Configuration.MerossEmail(),
+            "password": Configuration.MerossPassword()
+        }
+        self._request = MerossRequest(request=MerossRequest.OPEN, kwargs=kwargs)
+
+        # Run the request on the adapter thread
+        self._run_request(self._request)
+        if self._request.result:
+            logger.info("Meross adapter thread opened")
+        else:
+            logger.error("Meross open adapter thread failed")
+
+        return self._request.result
 
     # Close the device
     def close(self):
-        result = self._loop.run_until_complete(self._async_adapter.close())
-        self._loop.stop()
-        self._loop.close()
+        self._request = MerossRequest(request=MerossRequest.CLOSE)
+
+        self._run_request(self._request)
+        if self._request.result:
+            logger.info("Meross adapter thread closed")
+        else:
+            logger.error("Meross close adapter thread timed out")
+
+        # Wait for the adapter thread to terminate
+        self._adapter_thread.join()
         logger.info("Driver closed")
 
-        return result
+        return self._request.result
 
     def set_color(self, device_type, device_name_tag, house_device_code, channel, hex_color):
         """
@@ -81,9 +97,20 @@ class MerossDriverV4(BaseDriverInterface):
         :return:
         """
         rgb_color = self.hex_to_rgb(hex_color)
-        result = self._loop.run_until_complete(self._async_adapter.set_color(device_type, device_name_tag,
-                                                           house_device_code, channel, rgb_color))
-        return result
+
+        kwargs = {
+            "device_type": device_type,
+            "device_name_tag": device_name_tag,
+            "house_device_code": house_device_code,
+            "channel": channel,
+            "rgb_color": rgb_color
+        }
+
+        # Queue a set color request
+        self._request = MerossRequest(request=MerossRequest.SET_COLOR, kwargs=kwargs)
+        self._run_request(self._request)
+
+        return self._request.result
 
     def set_brightness(self, device_type, device_name_tag, house_device_code, channel, brightness):
         """
@@ -95,9 +122,20 @@ class MerossDriverV4(BaseDriverInterface):
         :param brightness: 0-100 percent
         :return:
         """
-        result = self._loop.run_until_complete(self._async_adapter.set_brightness(device_type, device_name_tag,
-                                                                house_device_code, channel, brightness))
-        return result
+
+        kwargs = {
+            "device_type": device_type,
+            "device_name_tag": device_name_tag,
+            "house_device_code": house_device_code,
+            "channel": channel,
+            "brightness": brightness
+        }
+
+        # Queue a set brightness request
+        self._request = MerossRequest(request=MerossRequest.SET_BRIGHTNESS, kwargs=kwargs)
+        self._run_request(self._request)
+
+        return self._request.result
 
     def device_on(self, device_type, device_name_tag, house_device_code, channel):
         """
@@ -108,10 +146,24 @@ class MerossDriverV4(BaseDriverInterface):
         :param channel: 0-n
         :return:
         """
-        result = self._loop.run_until_complete(self._async_adapter.device_on(device_type, device_name_tag,
-                                                                house_device_code, channel))
-        logger.debug("DeviceOn for: %s %s", house_device_code, channel)
-        return result
+
+        kwargs = {
+            "device_type": device_type,
+            "device_name_tag": device_name_tag,
+            "house_device_code": house_device_code,
+            "channel": channel
+        }
+
+        # Queue a device on request
+        self._request = MerossRequest(request=MerossRequest.DEVICE_ON, kwargs=kwargs)
+        self._run_request(self._request)
+
+        if self._request.result:
+            logger.debug("Meross DeviceOn for: %s %s", house_device_code, channel)
+        else:
+            logger.error("Meross DeviceOn timed out")
+
+        return self._request.result
 
     def device_off(self, device_type, device_name_tag, house_device_code, channel):
         """
@@ -119,13 +171,27 @@ class MerossDriverV4(BaseDriverInterface):
         :param device_type: the device's type (e.g. x10, hs100, smartplug, etc.)
         :param device_name_tag: human readable name of device
         :param house_device_code: address of the device, depending on device type
-        :param dim_amount: a percent 0 to 100
+        :param channel: 0-n
         :return:
         """
-        result = self._loop.run_until_complete(self._async_adapter.device_off(device_type, device_name_tag,
-                                                                house_device_code, channel))
-        logger.debug("DeviceOff for: %s %s", house_device_code, channel)
-        return True
+
+        kwargs = {
+            "device_type": device_type,
+            "device_name_tag": device_name_tag,
+            "house_device_code": house_device_code,
+            "channel": channel
+        }
+
+        # Queue a device off request
+        self._request = MerossRequest(request=MerossRequest.DEVICE_OFF, kwargs=kwargs)
+        self._run_request(self._request)
+
+        if self._request.result:
+            logger.debug("Meross DeviceOff for: %s %s", house_device_code, channel)
+        else:
+            logger.error("Meross DeviceOn timed out")
+
+        return self._request.result
 
     def device_dim(self, device_type, device_name_tag, house_device_code, channel, dim_amount):
         """
@@ -133,6 +199,7 @@ class MerossDriverV4(BaseDriverInterface):
         :param device_type: the device's type (e.g. x10, hs100, smartplug, etc.)
         :param device_name_tag: human readable name of device
         :param house_device_code: address of the device, depending on device type
+        :param channel: 0-n
         :param dim_amount: a percent 0 to 100
         :return:
         """
@@ -145,6 +212,7 @@ class MerossDriverV4(BaseDriverInterface):
         :param device_type: the device's type (e.g. x10, hs100, smartplug, etc.)
         :param device_name_tag: human readable name of device
         :param house_device_code: address of the device, depending on device type
+        :param channel: 0-n
         :param bright_amount: a percent 0 to 100
         :return:
         """
@@ -184,21 +252,55 @@ class MerossDriverV4(BaseDriverInterface):
         :return: Returns a dict where the key is the device UUID
         and the value is the human readable name of the device.
         """
-        available_devices = self._async_adapter.get_available_devices()
-        return available_devices
+
+        # Queue a get available devices request
+        self._request = MerossRequest(request=MerossRequest.GET_AVAILABLE_DEVICES)
+        self._run_request(self._request)
+
+        return self._request.result
 
     def discover_devices(self):
         """
         Rescan for all Meross devices.
         :return:
         """
-        self._loop.run_until_complete(self._async_adapter.discover_devices())
 
-    #######################################################################
-    # Set the controller time to the current, local time.
-    def set_time(self, time_value):
-        pass
+        # Queue a discover devices request
+        self._request = MerossRequest(request=MerossRequest.DISCOVER_DEVICES)
+        self._run_request(self._request)
+
+        return self._request.result
 
     def get_device_type(self, device_address, device_channel):
-        device_type = self._async_adapter.get_device_type(device_address, device_channel)
-        return device_type
+        """
+        Is it a bulb or a plug?
+        :param device_address:
+        :param device_channel:
+        :return:
+        """
+
+        kwargs = {
+            "device_address": device_address,
+            "device_channel": device_channel
+        }
+
+        # Queue a get device type request
+        self._request = MerossRequest(request=MerossRequest.GET_DEVICE_TYPE, kwargs=kwargs)
+        self._run_request(self._request)
+
+        return self._request.result
+
+    def _run_request(self, request):
+        """
+        Queue a Meross device request to run on the adapter thread
+        :param request:
+        :return:
+        """
+        # Thread safe add to the adapter's request queue
+        self._adapter_thread.queue_request(request)
+        # Wait for the request to complete. This isn't an issue because most
+        # of the time we are on a socket server thread.
+        if request.wait(timeout=self._request_wait_time):
+            logger.info("Meross request ran: %s", request.request)
+        else:
+            logger.error("Meross request timed out: %s", request.request)
