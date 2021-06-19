@@ -20,11 +20,16 @@
 #
 # The athomeserver uses multiple threads.
 # For example, each network connection (read incoming command) arrives on its
-# own thread. The device drivers are initialized on the
-# main thread.
+# own thread. The timer program thread checks and triggers timer programs.
+# Device drivers are initialized on the main thread.
 #
 # This means that all Meross-iot code must be isolated to a single thread.
 # Otherwise, asyncio will throw thread related exceptions when least expected.
+#
+# This adapter is inherently thread safe. The request queue (a Queue) is used as the
+# synchronization method. A Queue is thread safe (see Queue.put and Queue.get).
+# The adapter takes/gets one request at a time from the request queue making it
+# thread safe.
 #
 
 import threading
