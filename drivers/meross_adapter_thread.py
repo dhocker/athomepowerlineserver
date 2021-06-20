@@ -40,7 +40,7 @@ from meross_iot.manager import MerossManager
 from meross_iot.model.enums import OnlineStatus
 import logging
 import datetime
-from .meross_request import MerossRequest
+from .adapter_request import AdapterRequest
 
 logger = logging.getLogger("server")
 
@@ -112,25 +112,25 @@ class MerossAdapterThread(threading.Thread):
             result = None
 
             # Cases for each request/command
-            if self._request.request == MerossRequest.DEVICE_ON:
+            if self._request.request == AdapterRequest.DEVICE_ON:
                 result = self._loop.run_until_complete(self.device_on(**self._request.kwargs))
-            elif self._request.request == MerossRequest.DEVICE_OFF:
+            elif self._request.request == AdapterRequest.DEVICE_OFF:
                 result = self._loop.run_until_complete(self.device_off(**self._request.kwargs))
-            elif self._request.request == MerossRequest.SET_BRIGHTNESS:
+            elif self._request.request == AdapterRequest.SET_BRIGHTNESS:
                 result = self._loop.run_until_complete(self.set_brightness(**self._request.kwargs))
-            elif self._request.request == MerossRequest.SET_COLOR:
+            elif self._request.request == AdapterRequest.SET_COLOR:
                 result = self._loop.run_until_complete(self.set_color(**self._request.kwargs))
-            elif self._request.request == MerossRequest.OPEN:
+            elif self._request.request == AdapterRequest.OPEN:
                 result = self._loop.run_until_complete(self.open(**self._request.kwargs))
-            elif self._request.request == MerossRequest.CLOSE:
+            elif self._request.request == AdapterRequest.CLOSE:
                 result = self._loop.run_until_complete(self.close())
-            elif self._request.request == MerossRequest.GET_DEVICE_TYPE:
+            elif self._request.request == AdapterRequest.GET_DEVICE_TYPE:
                 # NOT an asyncio method
                 result = self.get_device_type(**self._request.kwargs)
-            elif self._request.request == MerossRequest.GET_AVAILABLE_DEVICES:
+            elif self._request.request == AdapterRequest.GET_AVAILABLE_DEVICES:
                 # NOT an asyncio method
                 result = self.get_available_devices()
-            elif self._request.request == MerossRequest.DISCOVER_DEVICES:
+            elif self._request.request == AdapterRequest.DISCOVER_DEVICES:
                 result = self._loop.run_until_complete(self.discover_devices())
             else:
                 logger.error("Unrecognized request: %s", self._request.request)

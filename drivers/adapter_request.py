@@ -12,7 +12,7 @@
 import threading
 
 
-class MerossRequest:
+class AdapterRequest:
     """
     Basically a container for passing a request to the adapter thread
     """

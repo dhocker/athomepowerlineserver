@@ -13,7 +13,7 @@
 
 from .base_driver_interface import BaseDriverInterface
 from .meross_adapter_thread import MerossAdapterThread
-from .meross_request import MerossRequest
+from .adapter_request import AdapterRequest
 from Configuration import Configuration
 import logging
 
@@ -28,7 +28,7 @@ class MerossDriverV4(BaseDriverInterface):
         logger.info("Meross adapter thread initialization started")
         self._adapter_thread = MerossAdapterThread()
         # This is the current/last request
-        self._request = MerossRequest()
+        self._request = AdapterRequest()
         self._request_wait_time = request_wait_time
         super().__init__()
         logger.info("Meross adapter thread initialized")
@@ -59,7 +59,7 @@ class MerossDriverV4(BaseDriverInterface):
             "email": Configuration.MerossEmail(),
             "password": Configuration.MerossPassword()
         }
-        self._request = MerossRequest(request=MerossRequest.OPEN, kwargs=kwargs)
+        self._request = AdapterRequest(request=AdapterRequest.OPEN, kwargs=kwargs)
 
         # Run the request on the adapter thread
         self._run_request(self._request)
@@ -72,7 +72,7 @@ class MerossDriverV4(BaseDriverInterface):
 
     # Close the device
     def close(self):
-        self._request = MerossRequest(request=MerossRequest.CLOSE)
+        self._request = AdapterRequest(request=AdapterRequest.CLOSE)
 
         self._run_request(self._request)
         if self._request.result:
@@ -107,7 +107,7 @@ class MerossDriverV4(BaseDriverInterface):
         }
 
         # Queue a set color request
-        self._request = MerossRequest(request=MerossRequest.SET_COLOR, kwargs=kwargs)
+        self._request = AdapterRequest(request=AdapterRequest.SET_COLOR, kwargs=kwargs)
         self._run_request(self._request)
 
         return self._request.result
@@ -132,7 +132,7 @@ class MerossDriverV4(BaseDriverInterface):
         }
 
         # Queue a set brightness request
-        self._request = MerossRequest(request=MerossRequest.SET_BRIGHTNESS, kwargs=kwargs)
+        self._request = AdapterRequest(request=AdapterRequest.SET_BRIGHTNESS, kwargs=kwargs)
         self._run_request(self._request)
 
         return self._request.result
@@ -155,7 +155,7 @@ class MerossDriverV4(BaseDriverInterface):
         }
 
         # Queue a device on request
-        self._request = MerossRequest(request=MerossRequest.DEVICE_ON, kwargs=kwargs)
+        self._request = AdapterRequest(request=AdapterRequest.DEVICE_ON, kwargs=kwargs)
         self._run_request(self._request)
 
         if self._request.result:
@@ -183,7 +183,7 @@ class MerossDriverV4(BaseDriverInterface):
         }
 
         # Queue a device off request
-        self._request = MerossRequest(request=MerossRequest.DEVICE_OFF, kwargs=kwargs)
+        self._request = AdapterRequest(request=AdapterRequest.DEVICE_OFF, kwargs=kwargs)
         self._run_request(self._request)
 
         if self._request.result:
@@ -254,7 +254,7 @@ class MerossDriverV4(BaseDriverInterface):
         """
 
         # Queue a get available devices request
-        self._request = MerossRequest(request=MerossRequest.GET_AVAILABLE_DEVICES)
+        self._request = AdapterRequest(request=AdapterRequest.GET_AVAILABLE_DEVICES)
         self._run_request(self._request)
 
         return self._request.result
@@ -266,7 +266,7 @@ class MerossDriverV4(BaseDriverInterface):
         """
 
         # Queue a discover devices request
-        self._request = MerossRequest(request=MerossRequest.DISCOVER_DEVICES)
+        self._request = AdapterRequest(request=AdapterRequest.DISCOVER_DEVICES)
         self._run_request(self._request)
 
         return self._request.result
@@ -285,7 +285,7 @@ class MerossDriverV4(BaseDriverInterface):
         }
 
         # Queue a get device type request
-        self._request = MerossRequest(request=MerossRequest.GET_DEVICE_TYPE, kwargs=kwargs)
+        self._request = AdapterRequest(request=AdapterRequest.GET_DEVICE_TYPE, kwargs=kwargs)
         self._run_request(self._request)
 
         return self._request.result
