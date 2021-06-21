@@ -32,20 +32,18 @@
 # thread safe.
 #
 
-import threading
-import queue
 import asyncio
 from meross_iot.http_api import MerossHttpClient
 from meross_iot.manager import MerossManager
 from meross_iot.model.enums import OnlineStatus
 import logging
-import datetime
+from .adapter_thread import AdapterThread
 from .adapter_request import AdapterRequest
 
 logger = logging.getLogger("server")
 
 
-class MerossAdapterThread(threading.Thread):
+class MerossAdapterThread(AdapterThread):
     # TODO Reconcile with base device driver definitions
     # Error codes
     SUCCESS = 0
@@ -61,102 +59,43 @@ class MerossAdapterThread(threading.Thread):
         super().__init__(name=name)
         self._http_api_client = None
         self._manager = None
-        self._request = None
         self._all_devices = None
-        self._loop = None
 
-        # For terminating the adapter thread
-        self._terminate_event = threading.Event()
-        # For sending requests to the thread
-        self._request_queue = queue.Queue()
-
-    @property
-    def last_error_code(self):
-        return self._request.last_error_code
-
-    @last_error_code.setter
-    def last_error_code(self, v):
-        self._request.last_error_code = v
-
-    @property
-    def last_error(self):
-        return self._request.last_error
-
-    @last_error.setter
-    def last_error(self, v):
-        self._request.last_error = v
-
-    # Reset the last error info
-    def clear_last_error(self):
-        self.last_error_code = MerossAdapterThread.SUCCESS
-        self.last_error = None
-
-    def run(self):
+    def dispatch_request(self):
         """
-        Run the realtime request server.
-        This method is called on the new thread by the Thread class.
+        Dispatch an adapter request.
+        This method is called on the new thread by the base class run method.
         The server terminates when the close request is received.
-        :return:
+        :return: Returns the result from running the request.
         """
+        result = None
 
-        # This loop can only be used by this thread
-        self._loop = asyncio.new_event_loop()
+        # Cases for each request/command
+        if self._request.request == AdapterRequest.DEVICE_ON:
+            result = self._loop.run_until_complete(self.device_on(**self._request.kwargs))
+        elif self._request.request == AdapterRequest.DEVICE_OFF:
+            result = self._loop.run_until_complete(self.device_off(**self._request.kwargs))
+        elif self._request.request == AdapterRequest.SET_BRIGHTNESS:
+            result = self._loop.run_until_complete(self.set_brightness(**self._request.kwargs))
+        elif self._request.request == AdapterRequest.SET_COLOR:
+            result = self._loop.run_until_complete(self.set_color(**self._request.kwargs))
+        elif self._request.request == AdapterRequest.OPEN:
+            result = self._loop.run_until_complete(self.open(**self._request.kwargs))
+        elif self._request.request == AdapterRequest.CLOSE:
+            result = self._loop.run_until_complete(self.close())
+        elif self._request.request == AdapterRequest.GET_DEVICE_TYPE:
+            # NOT an asyncio method
+            result = self.get_device_type(**self._request.kwargs)
+        elif self._request.request == AdapterRequest.GET_AVAILABLE_DEVICES:
+            # NOT an asyncio method
+            result = self.get_available_devices()
+        elif self._request.request == AdapterRequest.DISCOVER_DEVICES:
+            result = self._loop.run_until_complete(self.discover_devices())
+        else:
+            logger.error("Unrecognized request: %s", self._request.request)
+            result = False
 
-        # Note that the close method sets the terminate event
-        while not self._terminate_event.is_set():
-            # This is a blocking call. The adapter thread will wait here
-            # until a request arrives.
-            # Termination occurs when the close() method is called and the terminate event is set.
-            self._request = self._request_queue.get()
-            start_time = datetime.datetime.now()
-            result = None
-
-            # Cases for each request/command
-            if self._request.request == AdapterRequest.DEVICE_ON:
-                result = self._loop.run_until_complete(self.device_on(**self._request.kwargs))
-            elif self._request.request == AdapterRequest.DEVICE_OFF:
-                result = self._loop.run_until_complete(self.device_off(**self._request.kwargs))
-            elif self._request.request == AdapterRequest.SET_BRIGHTNESS:
-                result = self._loop.run_until_complete(self.set_brightness(**self._request.kwargs))
-            elif self._request.request == AdapterRequest.SET_COLOR:
-                result = self._loop.run_until_complete(self.set_color(**self._request.kwargs))
-            elif self._request.request == AdapterRequest.OPEN:
-                result = self._loop.run_until_complete(self.open(**self._request.kwargs))
-            elif self._request.request == AdapterRequest.CLOSE:
-                result = self._loop.run_until_complete(self.close())
-            elif self._request.request == AdapterRequest.GET_DEVICE_TYPE:
-                # NOT an asyncio method
-                result = self.get_device_type(**self._request.kwargs)
-            elif self._request.request == AdapterRequest.GET_AVAILABLE_DEVICES:
-                # NOT an asyncio method
-                result = self.get_available_devices()
-            elif self._request.request == AdapterRequest.DISCOVER_DEVICES:
-                result = self._loop.run_until_complete(self.discover_devices())
-            else:
-                logger.error("Unrecognized request: %s", self._request.request)
-                result = False
-
-            self._request.set_complete(result)
-            elapsed_time = datetime.datetime.now() - start_time
-            logger.debug("%s elapsed time: %f", self._request.request, elapsed_time.total_seconds())
-
-            # We are finished with this request
-            self._request = None
-
-        # Thread clean up
-        self._loop.stop()
-        self._loop.close()
-        self._loop = None
-
-    def queue_request(self, request):
-        """
-        Queue a request for execution on the Meross adapter thread.
-        If the adapter thread is waiting for a request, it will automatically
-        start running.
-        :param request:
-        :return:
-        """
-        self._request_queue.put(request)
+        return result
 
     async def _async_init(self, email, password):
         """
