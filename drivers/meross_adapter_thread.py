@@ -50,11 +50,6 @@ class MerossAdapterThread(AdapterThread):
     MEROSS_ERROR = 7
     RETRY_COUNT = 5
 
-    # Device types
-    DEVICE_TYPE_PLUG = "plug"
-    DEVICE_TYPE_BULB = "bulb"
-    DEVICE_TYPE_STRIP = "strip"
-
     def __init__(self, name="MerossAdapterThread"):
         super().__init__(name=name)
         self._http_api_client = None
@@ -188,17 +183,20 @@ class MerossAdapterThread(AdapterThread):
 
         return result
 
-    async def set_color(self, device_type, device_name_tag, house_device_code, channel, rgb_color):
+    async def set_color(self, device_type, device_name_tag, house_device_code, channel, hex_color):
         """
         Sets the color of the device. Ignored by devices that do not support color.
         :param device_type: the device's type (e.g. x10, hs100, smartplug, etc.)
         :param device_name_tag: human readable name of device
         :param house_device_code: Device address or UUID
         :param channel: 0-n
-        :param rgb_color: color as an (r,g,b) tuple
+        :param hex_color: color as an (r,g,b) tuple
         :return:
         """
         self.clear_last_error()
+
+        rgb_color = self._hex_to_rgb(hex_color)
+
         for retry in range(MerossAdapterThread.RETRY_COUNT):
             try:
                 device = self._get_device(house_device_code)
@@ -244,7 +242,7 @@ class MerossAdapterThread(AdapterThread):
                 if self._supports_brightness(device):
                     await device.async_set_light_color(channel=channel, luminance=brightness)
                 else:
-                   return False
+                    return False
                 logger.debug("set_brightness for: %s (%s %s) %s",
                              device_name_tag, house_device_code, channel, brightness)
                 return True
@@ -424,7 +422,7 @@ class MerossAdapterThread(AdapterThread):
                 attrs["luminance"] = False
         else:
             attrs["type"] = "Unknown"
-            device_label = dd.name
+            attrs["label"] = dd.name
 
         return attrs
 

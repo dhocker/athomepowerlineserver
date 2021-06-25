@@ -37,7 +37,7 @@ import queue
 import asyncio
 import logging
 import datetime
-from .adapter_request import AdapterRequest
+import colorsys
 
 logger = logging.getLogger("server")
 
@@ -46,13 +46,22 @@ class AdapterThread(threading.Thread):
     # Error codes
     UNDEFINED = -1
     SUCCESS = 0
-    MEROSS_ERROR = 7
     RETRY_COUNT = 5
+
+    # TODO This probably is not the right place for these device types
+    # Device types
+    DEVICE_TYPE_PLUG = "plug"
+    DEVICE_TYPE_BULB = "bulb"
+    DEVICE_TYPE_STRIP = "strip"
+    DEVICE_TYPE_LIGHTSTRIP = "lightstrip"
+    DEVICE_TYPE_DIMMER = "dimmer"
+    DEVICE_TYPE_UNKNOWN = "unknown"
 
     def __init__(self, name="AdapterThread"):
         super().__init__(name=name)
         self._request = None
         self._loop = None
+        self.adapter_name = name
 
         # For terminating the adapter thread
         self._terminate_event = threading.Event()
@@ -107,7 +116,8 @@ class AdapterThread(threading.Thread):
 
             self._request.set_complete(result)
             elapsed_time = datetime.datetime.now() - start_time
-            logger.debug("%s elapsed time: %f", self._request.request, elapsed_time.total_seconds())
+            logger.debug("%s %s elapsed time: %f", self.adapter_name, self._request.request,
+                         elapsed_time.total_seconds())
 
             # We are finished with this request
             self._request = None
@@ -133,3 +143,25 @@ class AdapterThread(threading.Thread):
         :return:
         """
         self._request_queue.put(request)
+
+    # TODO Refactor this code out of here
+    def _hex_to_rgb(self, hex_str):
+        """
+        Convert #rrggbb to tuple(r,g,b).
+        From: https://gist.github.com/matthewkremer/3295567
+        :param hex_str: hex representation of an RGB color #rrggbb
+        :return: rgb as a tuple(r,g,b)
+        """
+        hex_str = hex_str.lstrip('#')
+        hlen = len(hex_str)
+        return tuple(int(hex_str[i:i + hlen // 3], 16) for i in range(0, hlen, hlen // 3))
+
+    def _hex_to_hsv(self, hex_str):
+        """
+        Convert #rrggbb to tuple(h,s,v)
+        :param hex_str: hex representation of an RGB color #rrggbb
+        :return: hsv as a tuple(h,s,v)
+        """
+        rgb = self._hex_to_rgb(hex_str)
+        hsv = colorsys.rgb_to_hsv(rgb[0], rgb[1], rgb[2])
+        return hsv

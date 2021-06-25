@@ -1,5 +1,5 @@
 #
-# Meross WiFi device driver
+# Meross WiFi device driver - DEPRECATED - REPLACED BY meross_v4
 # Copyright © 2020, 2021  Dave Hocker
 #
 # This program is free software: you can redistribute it and/or modify
@@ -16,10 +16,6 @@
 #   MSS210 Smart WiFi Plug
 #   MSS310 Smart WiFi Plug with Energy Monitor
 #   MSS425E Smart WiFi Surge Protector (channel 0 only)
-#
-# TODO Potential design changes
-#   Support multiple channel devices (e.g. multi-outlet surge protector)
-#   Support color changing bulbs (e.g. MSL120)
 #
 # Requires meross-iot module version 0.3.4.6
 #

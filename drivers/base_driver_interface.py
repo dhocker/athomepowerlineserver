@@ -1,6 +1,6 @@
 #
 # AtHomePowerlineServer - base class for a device driver
-# Copyright © 2019  Dave Hocker
+# Copyright © 2019, 2021  Dave Hocker
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -32,6 +32,8 @@ class BaseDriverInterface:
 
     def __init__(self):
         self.clear_last_error()
+        self._last_error = None
+        self._last_error_code = None
         logger.info("Device driver base class initialized")
 
     @property
@@ -50,7 +52,12 @@ class BaseDriverInterface:
     def last_error(self, v):
         self._last_error = v
 
-    def open(self):
+    # Reset the last error info
+    def clear_last_error(self):
+        self.last_error_code = BaseDriverInterface.SUCCESS
+        self.last_error = None
+
+    def open(self, kwargs=None):
         pass
 
     def close(self):
@@ -122,7 +129,7 @@ class BaseDriverInterface:
         """
         Return the type of device: plug, bulb, strip, etc.
         :param device_address:
-        :param channel:
+        :param device_channel:
         :return:
         """
         return BaseDriverInterface.DEVICE_TYPE_PLUG
@@ -131,11 +138,6 @@ class BaseDriverInterface:
     # Set the controller time to the current, local time.
     def set_time(self, time_value):
         raise NotImplementedError()
-
-    # Reset the last error info
-    def clear_last_error(self):
-        self.last_error_code = BaseDriverInterface.SUCCESS
-        self.last_error = None
 
     def hex_to_rgb(self, hex_str):
         """
