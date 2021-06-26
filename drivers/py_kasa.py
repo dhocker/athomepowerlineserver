@@ -10,6 +10,7 @@
 # See the LICENSE file for more details.
 #
 
+from Configuration import Configuration
 from .base_thread_driver import BaseThreadDriver
 from .pykasa_adapter_thread import PyKasaAdapterThread
 import logging
@@ -32,3 +33,18 @@ class PyKasaDriver(BaseThreadDriver):
         self._loop = None
         self._all_devices = None
         logger.info("PyKasa driver initialized")
+
+    def open(self, kwargs=None):
+        """
+        Queue an open request
+        :param kwargs: None expected
+        :return:
+        """
+        kwargs = {
+            "discover_target": Configuration.PyKasaDiscoverTarget()
+        }
+
+        # Run the request on the adapter thread
+        result = super().open(kwargs=kwargs)
+
+        return result

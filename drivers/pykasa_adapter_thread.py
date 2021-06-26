@@ -27,8 +27,7 @@ class PyKasaAdapterThread(AdapterThread):
     Uses python-kasa package.
     """
     RETRY_COUNT = 5
-    # Discover target that limits scan to local network
-    # TODO This needs to be a configuration value
+    # Default discover target that limits scan to local network
     DISCOVER_TARGET = "192.168.1.255"
 
     def __init__(self, name="PyKasaAdapterThread"):
@@ -37,6 +36,7 @@ class PyKasaAdapterThread(AdapterThread):
         """
         super().__init__(name=name)
         self._all_devices = None
+        self._discover_target = PyKasaAdapterThread.DISCOVER_TARGET
         logger.info("PyKasa driver initialized")
 
     def dispatch_request(self):
@@ -59,7 +59,7 @@ class PyKasaAdapterThread(AdapterThread):
         elif self._request.request == AdapterRequest.SET_COLOR:
             result = self.set_color(**self._request.kwargs)
         elif self._request.request == AdapterRequest.OPEN:
-            result = self.open()
+            result = self.open(**self._request.kwargs)
         elif self._request.request == AdapterRequest.CLOSE:
             result = self.close()
         elif self._request.request == AdapterRequest.GET_DEVICE_TYPE:
@@ -74,12 +74,16 @@ class PyKasaAdapterThread(AdapterThread):
 
         return result
 
-    def open(self):
+    def open(self, discover_target):
         """
         Open the driver. Discovers all TPlink/Kasa devices.
+        :param discover_target: Broadcast address to be used for discovering devices
         :return:
         """
         # Discover all devices
+        if discover_target is not None:
+            self._discover_target = discover_target
+        logger.debug("PyKasa discover target: %s", self._discover_target)
         self.discover_devices()
         logger.debug("PyKasa driver opened")
         return True
@@ -208,12 +212,12 @@ class PyKasaAdapterThread(AdapterThread):
     def discover_devices(self):
         """
         Discover all TPLink/Kasa devices. This is
-        equivalent to rescan devices.
+        equivalent to rescan for all devices.
         :return:
         """
         # Discover all devices
         logger.debug("Discovering TPLink/Kasa devices")
-        self._all_devices = self._loop.run_until_complete(Discover.discover(target=PyKasaAdapterThread.DISCOVER_TARGET))
+        self._all_devices = self._loop.run_until_complete(Discover.discover(target=self._discover_target))
         for ip, dev in self._all_devices.items():
             self._loop.run_until_complete(dev.update())
         
@@ -226,7 +230,10 @@ class PyKasaAdapterThread(AdapterThread):
         :param device_channel: 0-n
         :return: Either plug or bulb.
         """
-        device = self._create_smart_device(device_address)
+        if device_address in self._all_devices.keys():
+            device = self._all_devices[device_address]
+        else:
+            device = self._create_smart_device(device_address)
         return self._get_device_type(device)
 
     def _get_device_type(self, dev):

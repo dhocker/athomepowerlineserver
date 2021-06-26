@@ -103,7 +103,6 @@ class Configuration():
         except Exception as ex:
             logger.error("Unable to find configuration variable {0}".format(var_name))
             logger.error(str(ex))
-            pass
         return None
 
     ######################################################################
@@ -183,6 +182,11 @@ class Configuration():
     @classmethod
     def MerossPassword(cls):
         return cls.get_config_var("MerossPassword")
+
+    ######################################################################
+    @classmethod
+    def PyKasaDiscoverTarget(cls):
+        return cls.get_config_var("PyKasaDiscoverTarget")
 
     ######################################################################
     @classmethod
