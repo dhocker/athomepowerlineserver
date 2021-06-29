@@ -278,6 +278,7 @@ class MerossAdapterThread(AdapterThread):
                 await device.async_turn_on(channel)
                 logger.debug("DeviceOn for: %s (%s %s)", device_name_tag, house_device_code, channel)
                 result = True
+                break
             except Exception as ex:
                 logger.error("Exception during DeviceOn for: %s (%s %s)", device_name_tag, house_device_code, channel)
                 logger.error(str(ex))
@@ -305,6 +306,7 @@ class MerossAdapterThread(AdapterThread):
                 await device.async_turn_off(channel)
                 logger.debug("DeviceOff for: %s (%s %s)", device_name_tag, house_device_code, channel)
                 result = True
+                break
             except Exception as ex:
                 logger.error("Exception during DeviceOff for: %s (%s %s)", device_name_tag, house_device_code, channel)
                 logger.error(str(ex))
