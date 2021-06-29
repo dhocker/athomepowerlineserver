@@ -89,7 +89,7 @@ class XTB232(BaseDriverInterface):
 
     # ************************************************************************
     # Open the device
-    def open(self):
+    def open(self, kwargs=None):
         self.InitializeController()
 
     # ************************************************************************

@@ -78,9 +78,8 @@ def main():
 
     logger.info("Using configuration file: %s", Configuration.Configuration.GetConfigurationFilePath())
 
-    # Inject the X10 controller driver
-    # TODO Implement new driver abstraction to cover multiple device types
-    DeviceDriverManager.init(Configuration.Configuration.DeviceDrivers())
+    # Create drivers for all supported devices/manufacturers
+    DeviceDriverManager.init()
 
     # Initialize the database
     logger.info("Initializing database")

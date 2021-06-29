@@ -31,15 +31,13 @@
 
 import os
 import json
-import drivers.XTB232
-import drivers.Dummy
 import logging
 
 logger = logging.getLogger("server")
 
 
 ########################################################################
-class Configuration():
+class Configuration:
     ActiveConfig = None
 
     ######################################################################
@@ -52,6 +50,7 @@ class Configuration():
     @classmethod
     def LoadConfiguration(cls):
         # Try to open the conf file. If there isn't one, we give up.
+        cfg_path = None
         try:
             cfg_path = Configuration.GetConfigurationFilePath()
             print("Opening configuration file {0}".format(cfg_path))
@@ -104,34 +103,6 @@ class Configuration():
             logger.error("Unable to find configuration variable {0}".format(var_name))
             logger.error(str(ex))
         return None
-
-    ######################################################################
-    # Get the X10 controller device. Used to determine what driver should be used.
-    @classmethod
-    def X10ControllerDevice(cls):
-        return cls.ActiveConfig["X10ControllerDevice"]
-
-    @classmethod
-    def DeviceDrivers(cls):
-        return cls.ActiveConfig["Drivers"]
-
-    ######################################################################
-    # Get the driver instance called out by the configuration
-    @classmethod
-    def GetX10ControllerDriver(cls):
-        dev = cls.X10ControllerDevice().upper()
-        if (dev == "XTB232") or (dev == "XTB-232"):
-            return drivers.XTB232.XTB232()
-        elif (dev == "CM11A") or (dev == "CM11"):
-            return drivers.XTB232.XTB232()
-        elif dev == "DUMMY":
-            return drivers.Dummy.Dummy()
-        return None
-
-    ######################################################################
-    @classmethod
-    def ComPort(cls):
-        return cls.get_config_var("ComPort")
 
     ######################################################################
     @classmethod
