@@ -3,6 +3,10 @@
 Copyright © 2014, 2020 Dave Hocker (<AtHomeX10@gmail.com>)
 
 # Overview
+**Notice:
+Version 2021.1.0.3 at tag v2021.1.0.3 is the last version to
+support X10. Versions after that only support WiFi based
+plugs and bulbs.**
 
 The original version of AtHomePowerlineServer was written for X10 
 controllers and modules.
