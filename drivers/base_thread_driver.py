@@ -292,6 +292,25 @@ class BaseThreadDriver(BaseDriverInterface):
 
         return self._request.result
 
+    def is_on(self, device_address, device_channel):
+        """
+        Is it a device on?
+        :param device_address:
+        :param device_channel:
+        :return:
+        """
+
+        kwargs = {
+            "device_address": device_address,
+            "device_channel": device_channel
+        }
+
+        # Queue a on/off status request
+        self._request = AdapterRequest(request=AdapterRequest.ON_OFF_STATUS, kwargs=kwargs)
+        self._run_request(self._request)
+
+        return self._request.result
+
     def _run_request(self, request):
         """
         Queue a Meross device request to run on the adapter thread

@@ -86,6 +86,9 @@ class MerossAdapterThread(AdapterThread):
             result = self.get_available_devices()
         elif self._request.request == AdapterRequest.DISCOVER_DEVICES:
             result = self._loop.run_until_complete(self.discover_devices())
+        elif self._request.request == AdapterRequest.ON_OFF_STATUS:
+            # Currently NOT an asyncio method
+            result = self.is_on(**self._request.kwargs)
         else:
             logger.error("Unrecognized request: %s", self._request.request)
             result = False
@@ -346,12 +349,15 @@ class MerossAdapterThread(AdapterThread):
         logger.debug("Discovering Meross devices")
         # For now, discover all devices. This takes about 1 sec per device.
         await self._manager.async_device_discovery(update_subdevice_status=False)
+        logger.debug("All Meross devices discovered")
 
         # Find and update ALL devices
+        logger.debug("Updating all discovered Meross devices")
         self._all_devices = self._manager.find_devices()
         for device in self._all_devices:
             # This update takes about 1 sec per device
             await device.async_update()
+        logger.debug("All discovered Meross devices have been updated")
 
         return True
 
@@ -367,6 +373,18 @@ class MerossAdapterThread(AdapterThread):
             return MerossAdapterThread.DEVICE_TYPE_BULB
         # The default
         return MerossAdapterThread.DEVICE_TYPE_PLUG
+
+    def is_on(self, device_address, device_channel):
+        """
+        Determine the on/off status of a device
+        :param device_address:
+        :param device_channel: 0-n
+        :return: True if the device is on.
+        """
+        device = self._get_device(device_address)
+        if hasattr(device, "is_on"):
+            return device.is_on()
+        return False
 
     def _get_device(self, device_uuid):
         """

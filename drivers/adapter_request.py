@@ -26,6 +26,7 @@ class AdapterRequest:
     GET_AVAILABLE_DEVICES = "getavailabledevices"
     DISCOVER_DEVICES = "discoverdevices"
     GET_DEVICE_TYPE = "getdevicetype"
+    ON_OFF_STATUS = "onoffstatus"
 
     def __init__(self, request=None, kwargs=None):
         """

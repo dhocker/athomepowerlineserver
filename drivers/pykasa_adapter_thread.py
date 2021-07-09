@@ -68,6 +68,8 @@ class PyKasaAdapterThread(AdapterThread):
             result = self.get_available_devices()
         elif self._request.request == AdapterRequest.DISCOVER_DEVICES:
             result = self.discover_devices()
+        elif self._request.request == AdapterRequest.ON_OFF_STATUS:
+            result = self.is_on(**self._request.kwargs)
         else:
             logger.error("Unrecognized request: %s", self._request.request)
             result = False
@@ -166,10 +168,10 @@ class PyKasaAdapterThread(AdapterThread):
         :return:
         """
         logger.debug("DeviceOn for: %s %s %s %s", device_type, device_name_tag, house_device_code, channel)
-        dev = self._create_smart_device(house_device_code)
+        dev = self._get_device(house_device_code)
         if dev is not None:
             result = self._exec_device_function(dev.turn_on)
-            del dev
+            self._loop.run_until_complete(dev.update())
         else:
             result = False
         return result
@@ -184,10 +186,10 @@ class PyKasaAdapterThread(AdapterThread):
         :return:
         """
         logger.debug("DeviceOff for: %s %s %s %s", device_type, device_name_tag, house_device_code, channel)
-        dev = self._create_smart_device(house_device_code)
+        dev = self._get_device(house_device_code)
         if dev is not None:
             result = self._exec_device_function(dev.turn_off)
-            del dev
+            self._loop.run_until_complete(dev.update())
         else:
             result = False
         return result
@@ -230,11 +232,18 @@ class PyKasaAdapterThread(AdapterThread):
         :param device_channel: 0-n
         :return: Either plug or bulb.
         """
-        if device_address in self._all_devices.keys():
-            device = self._all_devices[device_address]
-        else:
-            device = self._create_smart_device(device_address)
+        device = self._get_device(device_address)
         return self._get_device_type(device)
+
+    def is_on(self, device_address, device_channel):
+        """
+        Determine the on/off status of a device
+        :param device_address:
+        :param device_channel: 0-n
+        :return: True if the device is on.
+        """
+        device = self._get_device(device_address)
+        return device.is_on
 
     def _get_device_type(self, dev):
         """
@@ -271,6 +280,8 @@ class PyKasaAdapterThread(AdapterThread):
             attrs["label"] = dev.alias
             attrs["channels"] = 1
             attrs["type"] = self._get_device_type(dev)
+            # TODO This needs to be "by channel", but currently we only support single channel devices
+            attrs["on"] = dev.is_on
             if isinstance(dev, SmartStrip) or isinstance(dev, SmartLightStrip):
                 attrs["channels"] = len(sys_info["children"])
         except Exception as ex:
@@ -291,6 +302,7 @@ class PyKasaAdapterThread(AdapterThread):
             try:
                 self._loop.run_until_complete(device_function())
                 result = True
+                break
             except Exception as ex:
                 logger.error("Retry %d", r)
                 logger.error(str(ex))
@@ -321,4 +333,19 @@ class PyKasaAdapterThread(AdapterThread):
                 logger.error(str(ex))
                 device = None
 
+        return device
+
+    def _get_device(self, device_address):
+        """
+        Get the python-kasa device instance for a given address
+        :param device_address: The IP address of the device
+        :return: A SmartDevice object, usually a SmartPlug or SmartBulb.
+        """
+        if device_address in self._all_devices.keys():
+            device = self._all_devices[device_address]
+        else:
+            device = self._create_smart_device(device_address)
+            self._loop.run_until_complete(device.update())
+            self._all_devices[device_address] = device
+        # TODO Consider aging the the data in the device object
         return device

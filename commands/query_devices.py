@@ -28,6 +28,7 @@ class QueryDevices(ServerCommand.ServerCommand):
                 # Add device specific properties to result (from driver)
                 driver = self.get_driver_for_id(device_id)
                 result["type"] = driver.get_device_type(result["address"], result["channel"])
+                result["on"] = driver.is_on(result["address"], result["channel"])
             key = "device"
         else:
             result = md.get_all_devices()
@@ -36,6 +37,7 @@ class QueryDevices(ServerCommand.ServerCommand):
                 for device in result:
                     driver = self.get_driver_for_id(device["id"])
                     device["type"] = driver.get_device_type(device["address"], device["channel"])
+                    device["on"] = driver.is_on(device["address"], device["channel"])
             key = "devices"
 
         # Generate a successful response

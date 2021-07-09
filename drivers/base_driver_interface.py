@@ -134,6 +134,16 @@ class BaseDriverInterface:
         """
         return BaseDriverInterface.DEVICE_TYPE_PLUG
 
+    def is_on(self, device_address, device_channel):
+        """
+        Return the current on/off state
+        :param device_address:
+        :param device_channel:
+        :return:
+        """
+        # The on/off state is unknown
+        return False
+
     # TODO Consider defining this as SetCurrentTime taking no parameters.
     # Set the controller time to the current, local time.
     def set_time(self, time_value):
