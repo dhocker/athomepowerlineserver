@@ -42,13 +42,13 @@ class Configuration:
 
     ######################################################################
     def __init__(self):
-        Configuration.LoadConfiguration()
+        Configuration.load_configuration()
         pass
 
     ######################################################################
     # Load the configuration file
     @classmethod
-    def LoadConfiguration(cls):
+    def load_configuration(cls):
         # Try to open the conf file. If there isn't one, we give up.
         cfg_path = None
         try:

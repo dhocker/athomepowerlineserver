@@ -152,7 +152,7 @@ if __name__ == "__main__":
     else:
         # For production, get database path from configuration
         from Configuration import Configuration
-        Configuration.LoadConfiguration()
+        Configuration.load_configuration()
         db = Configuration.GetDatabaseFilePath("AtHomePowerlineServer.sqlite3")
     print("Converting %s to 5.2.0.0" % db)
     main()

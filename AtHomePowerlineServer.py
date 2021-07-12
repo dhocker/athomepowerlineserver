@@ -59,7 +59,7 @@ def main():
     os.chdir(just_the_path)
 
     # Load the configuration file
-    Configuration.Configuration.LoadConfiguration()
+    Configuration.Configuration.load_configuration()
 
     # Per GPL, show the disclaimer
     disclaimer.Disclaimer.DisplayDisclaimer()
