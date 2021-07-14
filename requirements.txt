@@ -11,4 +11,4 @@ PyYAML
 requests
 urllib3
 meross-iot==0.4.0.6.post3
-python-kasa==0.4.0.dev2
+python-kasa==0.4.0.dev3
