@@ -11,6 +11,7 @@
 
 import logging
 import logging.handlers
+import os
 import Configuration
 
 
@@ -23,6 +24,16 @@ def EnableServerLogging():
     # Default overrides
     logformat = '%(asctime)s, %(module)s, %(levelname)s, %(message)s'
     logdateformat = '%Y-%m-%d %H:%M:%S'
+
+    # Remove any existing configuration. However, this results in
+    # output to the console. To avoid this, we send it to the null device.
+    try:
+        null_dev = open(os.devnull, 'w')
+        logging.basicConfig(force=True, format=logformat, datefmt=logdateformat, stream=null_dev)
+    except Exception as ex:
+        # This isn't a terminal error, but we need to let it be known
+        print("Unable to reset basic logging config")
+        print(str(ex))
 
     # Logging level override
     log_level_override = Configuration.Configuration.LogLevel().lower()
