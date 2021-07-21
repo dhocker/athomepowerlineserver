@@ -14,4 +14,6 @@ def GetVersion():
     """
     Returns the current server version
     """
-    return "2021.1.0.3"
+    # See https://semver.org/
+    # major.minor.patch
+    return "2021.1.1"
