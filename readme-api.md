@@ -68,16 +68,6 @@ JSON Format with standard content:
             <td>integer</td>
             <td>
                 <div>
-                <h4>X10 Devices</h4>
-                <p>0 - The command was successfully executed.</p>
-                <p>1 - Time out waiting for checksum from controller.</p>
-                <p>2 - Time out waiting for interface ready from controller.</p>
-                <p>3 - Ack was not received from controller.</p>
-                <p>4 - COM port is not available.</p>
-                <p>5 - An exception occurred.</p>
-                <p>6 - Checksum error.</p>
-                </div>
-                <div>
                 <h4>TPLink and Meross Devices</h4>
                 </div>
                 <p>0 - The command was successfully executed.</p>
@@ -133,10 +123,12 @@ Readme.md file in the athomeserver/ahps directory.
 - [DeleteActionGroupDevice](#deleteactiongroupdevice)
 - [DeleteDevice](#deletedevice)
 - [DeleteDeviceProgram](#deletedeviceprogram)
+- [DiscoverDevices](#discoverdevices)
 - [GroupOff](#groupoff)
 - [GroupOn](#groupon)
 - [Off or DeviceOff](#off)
 - [On or DeviceOn](#on)
+- [OnOffStatus]()
 - [QueryActionGroup](#queryactiongroup)
 - [QueryActionGroupDevices](#queryactiongroupdevices)
 - [QueryActionGroups](#queryactiongroups)
@@ -211,10 +203,11 @@ For all devices
     "devices": [
         {
           "id": 11,
-          "name": "X10-G15",
-          "location": "",
-          "type": "x10",
-          "address": "G15",
+          "name": "Device Name",
+          "location": "Room",
+          "type": "tplink",
+          "on": false,
+          "address": "192.168.1.1",
           "selected": 0,
           "updatetime": "2019-06-06 11:46:58.570884"
         },
@@ -222,8 +215,8 @@ For all devices
           "id": 16,
           "name": "Window Seat Decorations",
           "location": "Breakfast Nook",
-          "type": "x10",
-          "address": "A4",
+          "type": "tplink",
+          "address": "192.168.1.2",
           "selected": 0,
           "updatetime": "2019-06-06 11:46:58.591461"
         },
@@ -244,8 +237,8 @@ For a single device
         "id": 2,
         "name": "Sofa Table",
         "location": "Hallway/Foyer",
-        "type": "x10",
-        "address": "A2",
+        "type": "tplink",
+        "address": "192.168.1.1",
         "selected": 1,
         "updatetime": "2019-06-06 11:46:58.528380"
     },
@@ -276,8 +269,8 @@ Used to add a new device.
 |:---|:---|:---|
 | device-name | string | The human readable name of the device |
 | device-location | string | The human readable description of where the device is located |
-| device-type | x10, tplink, or meross | The type of device |
-| device-address | X10, IP address, UUID | For an X10 device, the house-device-code (A1-L16). For a TPLink device, an IP address. For a Meross device, a UUID. |
+| device-type | tplink or meross | The type of device |
+| device-address | IP address, UUID | For a TPLink device, an IP address. For a Meross device, a UUID. |
 | device-selected | 0 or 1 | Marks the device as in the selected group. |
 
 #### Response
@@ -317,8 +310,8 @@ Used to update the definition of an existing device.
 | device-id | integer | The device ID of the device to be updated. |
 | device-name | string | The human readable name of the device |
 | device-location | string | The human readable description of where the device is located |
-| device-type | x10, tplink, or meross | The type of device |
-| device-address | X10, IP address, UUID | For an X10 device, the house-device-code (A1-L16). For a TPLink device, an IP address. For a Meross device, a UUID. |
+| device-type | tplink or meross | The type of device |
+| device-address | IP address, UUID | For a TPLink device, an IP address. For a Meross device, a UUID. |
 | device-selected | 0 or 1 | Marks the device as in the selected group. |
 
 #### Response
@@ -743,7 +736,6 @@ The Off request returns a standard response.
 Returns a list of available devices for a given device type.
 Be aware that only TPLink/Kasa
 and Meross devices can be discovered using this command.
-X10 modules cannot be discovered.
 
 #### Request
 ```json
@@ -772,9 +764,31 @@ Valid types are tplink and meross.
 
 | Device Type | Address | Example |
 | --- | --- | --- |
-| x10 | house-device-code | e.g. A1, G16 |
 | tplink | IP address | 192.168.1.78 |
 | meross | UUID | 1907226943690825185048e1e901c0b7 |
+
+### DiscoverDevices
+TPLink/Kasa and Meross devices are initially configured using their respective mobile/tablet apps. In order for these devices to be known by AHPS, they must be "discovered". When AHPS starts it runs the "discover devices" process so devices that have been configured will be found. However, if you add additional devices after AHPS starts you must rerun the "discover devices" process.
+
+#### Request
+```json
+{
+    “request”: “DiscoverDevices”
+    }
+}
+```
+#### Response
+```json
+{
+    "request": "DiscoverDevices",
+    "date-time": "2021-06-23 13:03:21.244097",
+    "server": "PerryM2/AtHomePowerlineServer",
+    "server-version": "2021.1.0.3",
+    "result-code": 0,
+    "message": "Success"
+    }
+}
+```
 
 # Client Examples
 

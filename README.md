@@ -1,6 +1,6 @@
 # AtHomePowerlineServer
 
-Copyright © 2014, 2020 Dave Hocker (<AtHomeX10@gmail.com>)
+Copyright © 2014, 2021 Dave Hocker (<AtHomeX10@gmail.com>)
 
 # Overview
 **Notice:
@@ -8,62 +8,47 @@ Version 2021.1.0.3 at tag v2021.1.0.3 is the last version to
 support X10. Versions after that only support WiFi based
 plugs and bulbs.**
 
-The original version of AtHomePowerlineServer was written for X10 
-controllers and modules.
-In the world of X10, most of the power line controllers like the
-CM11/CM11A have been around for years. The majority of the sophisticated
-X10 management applications run on a PC or Mac and more or less use the
-power line controller as a relatively “dumb” controller. There are a
-number of problems with the current configurations that the
-AtHomePowerlineServer aims to address.
+The original version of AtHomePowerlineServer (AHPS) was written for X10 
+controllers and modules. However, time has marched on and today the world
+is dominated by WiFi based controllers, switches and bulbs.
 
-First, the AtHomePowerline server is designed to run on a light weight
+AHPS was designed to run on a light weight
 system (e.g. a Raspberry Pi v1, v2, v3, v4 or Zero W) that can be run
 head-less and fan-less. This is as opposed to a PC or Mac based
-solution. The small size of such a system like the Raspberry Pi allows
-it to be positioned more freely (ideally, close to the breaker panel).
-And, a Raspberry Pi system can be assembled for considerably less than a
+solution. 
+A Raspberry Pi system can be assembled for considerably less than a
 PC. While the server was designed to run on a lightweight system, it
-will run on any system that supports Python 3.5 or later (including
-Windows).
+will run on any system that supports Python 3.5 or later (including Linux,
+Windows and macOS).
 
-Second, the communication mechanism to the AtHomePowerlineServer is
-TCP/IP (over Ethernet). A light weight system like the Raspberry Pi
+The communication mechanism to AHPS is
+TCP/IP. A light weight system like the Raspberry Pi
 supports many WiFi USB interfaces and the later versions of the RPi have
 integrated WiFi interfaces (e.g. RPi 3, RPi 4, RPi Zero W).
 This further improves the freedom of
-location for the X10 controller. In the past, the distance between a PC
-and the X10 controller was gated by the need for physical wiring and
-RS-232 limitations. With the AtHomePowerlineServer architecture, this
-limitation is effectively eliminated. See Illustraion 1.
+location.
 
-Recently, the server was extended to support a new class of WiFi based
-switches and lights. This provides support for a number of TPLink/Kasa
-WiFi devices and Meross WiFi devices. These WiFi devices are less expensive
-than X10 modules and they are easier to position.
+AHPS provides support for a number of TPLink/Kasa
+WiFi devices and Meross WiFi devices. This support covers a wide variety
+of switches and bulbs.
 
-Finally, the AtHomePowerlineServer application is open source. Anyone
+Finally, the AHPS application is open source. Anyone
 can fork it and build upon it.
 
-The remainder of this document describes:
+The remainder of this document covers these topics.
 
-  - Supported devices
-  - Installation
-  - Configuration
-  - Programming interface
+  - [Supported devices](#supporteddevices)
+  - [Installation](#installation)
+  - [Configuration File](#configurationfile)
+  - [Client Web App](#athomecontrolwebapp)
+  - [Programming API](#programmingapi)
 
-While the functionality of the AtHomePowerlineServer is designed with
-knowledge of the CM11/CM11A architecture, it does not really match that
-architecture. The AtHomePowerlineServer is an abstraction of the
-capabilities of the CM11/CM11A. The CM11 has initiators and actions.
-Devices are by definition X10 modules. Initiatators define start and stop
-timers. Actions describe X10 commands. 
-
-AtHomePowerlineServer has devices and timer programs. A device is an X10
-module, a TPLink/Kasa WiFi device or a Meross WiFi device.
+The AHPS is an abstraction of the
+capabilities of the typical switch. 
+It has devices and timer programs. A device is a TPLink/Kasa WiFi device or a Meross WiFi device.
 A timer program defines a trigger and a
 command/action to be executed when the trigger fires. Commands are logcial
-actions like On and Off. Essentially, AtHomePowerlineServer is independent
+actions like On and Off. Essentially, AHPS is independent
 of the actual hardware devices.
 
 # License
@@ -80,21 +65,13 @@ code can be found on [GitHub](https://github.com/dhocker/athomepowerlineserver.g
 
 # Attribution
 This project depends on the following Python packages.
-Many thanks to these contributors.
+Many thanks to the contributors behind these packages.
 
-[TPLink Python Library](https://github.com/GadgetReactor/pyHS100) by GadgetReactor.
+[TPLink Python Library](https://github.com/python-kasa/python-kasa)
 
 [Meross Python Library](https://github.com/albertogeniola/MerossIot) by Alberto Geniola.
 
 # Supported Devices
-## X10
-### Controllers
-* [XTB-232](http://jvde.us/xtb-232.htm)
-* CM11/CM11a
-## X10 Modules
-* AM465 Lamp
-* AM466 Appliance
-* AM486 Appliance
 
 ## TPLink/Kasa WiFi Modules
 ### [Smart Plugs](https://www.kasasmart.com/us/products/smart-plugs)
@@ -104,19 +81,22 @@ Many thanks to these contributors.
 * HS107
 * HS110
 
+###[Smart Switches](https://www.kasasmart.com/us/products/smart-switches)
+* HS210 (3-way)
+
 ### [Smart Bulbs](https://www.kasasmart.com/us/products/smart-lighting)
 * LB130
 
 ## Meross Devices
 [WiFi Devices](https://www.meross.com/)
 
-Currently, only channel 0 is supported.
-
 ## WiFi Plugs
 * MSS110
 * MSS210 (untested)
+* MSS620 (channels 0, 1, 2)
+
 ## WiFi Bulbs
-* MSL120 (untested, on/off only)
+* MSL120, MSL120d, MSL120j (color supported)
 
 # Devices to be Researched
 Devices listed here are not currently supported. They need to be researched
@@ -136,9 +116,11 @@ an API, but there is some activity on GitHub.
 
 [Wyze Outdoor Plug](https://wyze.com/wyze-plug-outdoor.html)
 
+[Wyze Python Client SDK](https://github.com/shauntarves/wyze-sdk)
+
 # Installation
 
-## Basic Steps for Raspbian
+## Basic Steps for Raspberry Pi OS
 
 Open a terminal window and install prerequisites.
 
@@ -159,7 +141,7 @@ source /usr/local/bin/virtualenvwrapper.sh
 ```
 This will set up virtualenvwrapper.
 
-Clone the repository from GitHub. Under Raspbian the
+Clone the repository from GitHub. Under Raspberry Pi OS the
 recommended location for cloning is /home/pi/rpi/athomeserver. Using
 this directory name will minimize the changes you will need to make
 to the init.d script.
@@ -175,12 +157,11 @@ Create a virtual environment named athomeserver:
 mkvirtualenv -p python3 -r requirements.txt athomeserver
 ```
 
-Copy the file sample AtHomePowerlineServer.example.conf to
+Copy the file AtHomePowerlineServer.example.conf to
 AtHomePowerlineServer.conf.
 
 Edit the AtHomePowerlineServer.conf configuration file as needed.
-Generally you will need to edit the ComPort parameter if you are
-using an X10 type of controller. Also, change the
+You will need to change the
 location parameters (city, longitude, latitude) so sunrise/sunset can
 be accurately determined.
 
@@ -194,7 +175,7 @@ section [Files and Their Location](files-and-their-location).
 Be sure to use sudo so that the
 copied/moved file will belong to root. Otherwise, you will have to
 “chown” the copied file to root ownership. If this a new install,
-AtHomePowerlineServer will create the database when needed.
+AHPS will create the database when needed.
 
 ## Files and Their Location
 
@@ -209,7 +190,7 @@ is little to worry about there.
 
 ### Linux Based Systems
 
-On Linux based systems like Raspbian, the key files are
+On Linux based systems like Raspberry Pi OS, the key files are
 kept in traditional locations.
 
 |               |                                                                                                 |
@@ -257,57 +238,6 @@ template.
         <tr class="odd">
             <td>Parameter/Key</td>
             <td>Description</td>
-        </tr>
-        <tr class="even">
-            <td>Drivers</td>
-            <td>
-                <p>
-                    Maps devices to drivers. Currently, there are 4 available drivers.
-                    <ul>
-                        <li>Dummy – A simulated controller. This is good for testing your installation.</li>
-                        <li>XTB232 - The XTB-232 controller from JV Digital Engineering. Also works for CM11/CM11A.</li>
-                        <li>TPLink – Covers most TPLink/Kasa smart devices.</li>
-                        <li>Meross – Covers Meross WiFi devices.</li>
-                    </ul>
-                </p>
-                <p>
-                    Supported Devices
-                    <ul>
-                        <li>X10</li>
-                        <ul>
-                            <li>X10-appliance</li>
-                            <li>X10-lamp</li>
-                        </ul>
-                        <li>TPLink</li>
-                        <ul>
-                            <li>HS100</li>
-                            <li>HS103</li>
-                            <li>HS105</li>
-                            <li>HS107</li>
-                            <li>HS110</li>
-                            <li>HS200</li>
-                            <li>HS210</li>
-                            <li>HS220</li>
-                            <li>smartplug</li>
-                            <li>smartswitch</li>
-                            <li>smartbulb</li>
-                        </ul>
-                        <li>Meross</li>
-                        <ul>
-                            <li>MSS110</li>
-                            <li>MSL120</li>
-                            <li>MSS620</li>
-                        </ul>
-                    </ul>
-                    See example below.
-                </p>
-            </td>
-        </tr>
-        <tr class="odd">
-            <td>ComPort</td>
-            <td>The name of the port where the XTB232/CM11/CM11A X10 controller is attached.
-            Under Windows this will be something like COM3.
-            Under Raspbian it will be something like “/dev/ttyUSB0” (this is for a USB-Serial converter).</td>
         </tr>
         <tr class="even">
             <td>Port</td>
@@ -367,23 +297,6 @@ template.
 {
   "Configuration":
   {
-    "Drivers": {
-        "X10": "XTB232",
-        "X10-appliance": "XTB232",
-        "X10-lamp": "XTB232",
-        "TPLink": "TPLink",
-        "HS100": "TPLink",
-        "HS103": "TPLink",
-        "HS105": "TPLink",
-        "HS107": "TPLink",
-        "SmartPlug": "TPLink",
-        "SmartSwitch": "TPLink",
-        "SmartBulb": "TPLink",
-        "Meross": "Meross",
-        "MSS110": "Meross",
-        "CustomDevice": "Dummy"
-    },
-    "ComPort": "/dev/tty.usbserial",
     "Port": 9999,
     "LogFile": "AtHomePowerlineServer.log",
     "LogConsole": "True",
@@ -407,17 +320,17 @@ Under Windows, you should remove "Everyone" from the file's permissions.
 
 If you are using the [At Home Control](https://github.com/dhocker/athomefrb)
 web client, you will find that it only supports
-X10, TPLink and Meross device drivers. The X10 driver will work with all
-X10 devices, the TPLink driver will work with most TPLink/Kasa devices and
+TPLink and Meross device drivers. The TPLink driver will work with most TPLink/Kasa devices and
 the Meross driver will work with Meross WiFi plugs and bulbs.
 
 ## Running the Server
 
-### Raspbian
+### Raspberry Pi OS
 
 #### As an Application
 
 Start the server:
+
 ```bash
 sudo python AtHomePowerlineServer.py
 ```
@@ -425,7 +338,7 @@ sudo python AtHomePowerlineServer.py
 #### As a Daemon
 
 This technique will set up AtHomePowerlineServer so that it
-automatically starts when Raspbian boots up.
+automatically starts when Raspberry Pi OS boots up.
 
 Change the AtHomePowerlineServerD.sh script as needed.
 * Where you
@@ -435,11 +348,13 @@ required.
 * The path to your virtual environment.
 
 Run:
+
 ```bash
 installD.sh
 ```
 
 If you want to uninstall the daemon run:
+
 ```bash
 uninstallD.sh
 ```
@@ -448,35 +363,43 @@ uninstallD.sh
 
 AtHomePowerlineServer can be run as an ordinary Python application.
 Change into the home directory and run:
+
 ```
 python AtHomePowerlineServer.py
 ```
 
 
-## AtHome Control
+# AtHome Control Web App
 
-AtHome Control is an open source web server based application that works with
-AtHomePowerlineServer. It can be found on GitHub at
+AtHome Control (AthomeFRB) is an open source web server based application that works with
+AHPS. It can be found on GitHub at
 <https://github.com/dhocker/athomefrb>.
+
+Using AthomeFRB you can:
+
+- Add devices to the system
+- Monitor all of the devices in the system
+- Set up timer programs to control devices
+- Assign timer programs to devices (one timer program can be applied to many devices)
+- Place related devices into a group (e.g. devices in a room)
+
+# Programming API
+The programming API is described in [readme-api.md](https://github.com/dhocker/athomepowerlineserver/blob/master/readme-api.md)
 
 # Appendix
 ## Device Identifiers
 The devices supported by AtHome Control use significantly different
 identifiers.
-### X10 Modules
-X10 modules are identified by an address consists of a letter (A to L) and a
-number (from 1 to 16). Thus the range of X10 addresses is A1 to L16.
 ### TPLink/Kasa Devices
 TPLink devices are identifier by their IP address. This address is
-assigned to the device during configuration.
+assigned to the device during configuration via the Kasa mobile app.
 ### Meross Devices
 Meross devices are identified by a UUID. While the UUID looks like a
 GUID, it does not seem to be a valid one. The UUID is 32 hex characters
 without any hyphens. Example: 1907220924955625185048e1e901d533
 # References
 
-1.  [CM11A Protocol](http://jvde.us/info/CM11A_protocol.txt)
-2.  [XTB-232](http://jvde.us//xtb/XTB-232_description.htm)
-3.  [Raspberry Pi](http://www.raspberrypi.org/)
-4.  [TPLink Python Library](https://github.com/GadgetReactor/pyHS100)
-5.  [Meross Python Library](https://github.com/albertogeniola/MerossIot)
+1.  [Raspberry Pi](http://www.raspberrypi.org/)
+1.  [TPLink Python Library](https://github.com/python-kasa/python-kasa)
+1.  [Meross Python Library](https://github.com/albertogeniola/MerossIot)
+1.  [Programming API](https://github.com/dhocker/athomepowerlineserver/blob/master/readme-api.md)
