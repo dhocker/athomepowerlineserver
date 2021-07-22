@@ -203,6 +203,8 @@ class MerossAdapterThread(AdapterThread):
         for retry in range(MerossAdapterThread.RETRY_COUNT):
             try:
                 device = self._get_device(house_device_code)
+                if device is None:
+                    continue
                 await device.async_update()
                 # Currently, a bulb is the only Meross device that supports color
                 if self._supports_color(device):
@@ -240,6 +242,8 @@ class MerossAdapterThread(AdapterThread):
         for retry in range(MerossAdapterThread.RETRY_COUNT):
             try:
                 device = self._get_device(house_device_code)
+                if device is None:
+                    continue
                 await device.async_update()
                 # Currently, a bulb is the only Meross device that supports brightness
                 if self._supports_brightness(device):
@@ -278,6 +282,8 @@ class MerossAdapterThread(AdapterThread):
         for retry in range(MerossAdapterThread.RETRY_COUNT):
             try:
                 device = self._get_device(house_device_code)
+                if device is None:
+                    continue
                 await device.async_turn_on(channel)
                 logger.debug("DeviceOn for: %s (%s %s)", device_name_tag, house_device_code, channel)
                 result = True
@@ -306,6 +312,8 @@ class MerossAdapterThread(AdapterThread):
         for retry in range(MerossAdapterThread.RETRY_COUNT):
             try:
                 device = self._get_device(house_device_code)
+                if device is None:
+                    continue
                 await device.async_turn_off(channel)
                 logger.debug("DeviceOff for: %s (%s %s)", device_name_tag, house_device_code, channel)
                 result = True
@@ -369,6 +377,8 @@ class MerossAdapterThread(AdapterThread):
         :return: Either plug or bulb.
         """
         device = self._get_device(device_address)
+        if device is None:
+            return MerossAdapterThread.DEVICE_TYPE_UNKNOWN
         if device.type.lower().startswith("msl"):
             return MerossAdapterThread.DEVICE_TYPE_BULB
         # The default
@@ -382,7 +392,7 @@ class MerossAdapterThread(AdapterThread):
         :return: True if the device is on.
         """
         device = self._get_device(device_address)
-        if hasattr(device, "is_on"):
+        if device is not None and hasattr(device, "is_on"):
             return device.is_on()
         return False
 
@@ -395,7 +405,12 @@ class MerossAdapterThread(AdapterThread):
         device = None
         for retry in range(MerossAdapterThread.RETRY_COUNT):
             try:
+                # TODO Try looking in _all_devices first
                 devices = self._manager.find_devices(device_uuids=[device_uuid])
+                if devices is None:
+                    continue
+                if len(devices) < 1:
+                    continue
                 device = devices[0]
                 return device
             except Exception as ex:

@@ -15,6 +15,7 @@
 from .base_driver_interface import BaseDriverInterface
 from .adapter_request import AdapterRequest
 import logging
+import datetime
 
 logger = logging.getLogger("server")
 
@@ -73,6 +74,10 @@ class BaseThreadDriver(BaseDriverInterface):
 
     # Close the device
     def close(self):
+        logger.info("%s has %d requests queued",
+                    self._adapter_thread.adapter_name,
+                    self._adapter_thread.queued_requests())
+
         self._request = AdapterRequest(request=AdapterRequest.CLOSE)
 
         self._run_request(self._request)
@@ -82,8 +87,9 @@ class BaseThreadDriver(BaseDriverInterface):
             logger.error("%s close timed out", self._adapter_thread.adapter_name)
 
         # Wait for the adapter thread to terminate
+        logger.debug("Waiting for %s driver adapter thread to terminate", self._adapter_thread.adapter_name)
         self._adapter_thread.join()
-        logger.debug("Driver adapter thread ended")
+        logger.debug("%s driver adapter thread ended", self._adapter_thread.adapter_name)
 
         return self._request.result
 
@@ -322,7 +328,12 @@ class BaseThreadDriver(BaseDriverInterface):
 
         # Wait for the request to complete. This isn't an issue because most
         # of the time we are on a socket server thread.
+        start_wait = datetime.datetime.now()
         if request.wait(timeout=self._request_wait_time):
             logger.info("%s request ran: %s", self._adapter_thread.adapter_name, request.request)
         else:
-            logger.error("%s request timed out: %s", self._adapter_thread.adapter_name, request.request)
+            wait_time = datetime.datetime.now() - start_wait
+            logger.error("%s %s timed out after %f sec",
+                         self._adapter_thread.adapter_name,
+                         request.request,
+                         wait_time.total_seconds())

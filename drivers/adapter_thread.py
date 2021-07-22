@@ -144,6 +144,13 @@ class AdapterThread(threading.Thread):
         """
         self._request_queue.put(request)
 
+    def queued_requests(self):
+        """
+        How many requests are queued up?
+        :return: The number of queued requests
+        """
+        return self._request_queue.qsize()
+
     # TODO Refactor this code out of here
     def _hex_to_rgb(self, hex_str):
         """
