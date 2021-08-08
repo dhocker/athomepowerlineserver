@@ -421,6 +421,9 @@ class MerossAdapterThread(AdapterThread):
             finally:
                 pass
 
+        if device is None:
+            logger.error("Meross device %s was not found", device_uuid)
+
         return device
 
     def _build_device_details(self, dd):
