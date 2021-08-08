@@ -13,7 +13,6 @@
 # Action Factory for Timer Triggered Actions
 #
 
-import drivers.X10ControllerAdapter
 from drivers.device_driver_manager import DeviceDriverManager
 import logging
 
