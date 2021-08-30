@@ -90,13 +90,20 @@ Many thanks to the contributors behind these packages.
 ## Meross Devices
 [WiFi Devices](https://www.meross.com/)
 
-## WiFi Plugs
+### WiFi Plugs
 * MSS110
 * MSS210 (untested)
 * MSS620 (channels 0, 1, 2)
 
-## WiFi Bulbs
+### WiFi Bulbs
 * MSL120, MSL120d, MSL120j (color supported)
+
+### References
+* [https://github.com/albertogeniola/MerossIot](https://github.com/albertogeniola/MerossIot)
+  * The original Meross package
+* [https://github.com/woder/MerossIot](https://github.com/woder/MerossIot)
+  * A fork of the original package at 0.2.x.x. 
+  * This version works significantly different from the original at version 0.4.x.x
 
 # Devices to be Researched
 Devices listed here are not currently supported. They need to be researched

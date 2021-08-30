@@ -167,7 +167,7 @@ class BaseThreadDriver(BaseDriverInterface):
         if self._request.result:
             logger.debug("%s DeviceOn for: %s %s", self._adapter_thread.adapter_name, house_device_code, channel)
         else:
-            logger.error("%s DeviceOn timed out", self._adapter_thread.adapter_name)
+            logger.error("%s DeviceOn failed", self._adapter_thread.adapter_name)
 
         return self._request.result
 
@@ -195,7 +195,7 @@ class BaseThreadDriver(BaseDriverInterface):
         if self._request.result:
             logger.debug("%s DeviceOff for: %s %s", self._adapter_thread.adapter_name, house_device_code, channel)
         else:
-            logger.error("%s DeviceOff timed out", self._adapter_thread.adapter_name)
+            logger.error("%s DeviceOff failed", self._adapter_thread.adapter_name)
 
         return self._request.result
 
