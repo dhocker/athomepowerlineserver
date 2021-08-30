@@ -33,9 +33,11 @@
 #
 
 import asyncio
+from datetime import timedelta, datetime
 from meross_iot.http_api import MerossHttpClient
 from meross_iot.manager import MerossManager
 from meross_iot.model.enums import OnlineStatus
+from meross_iot.utilities.limiter import RateLimitChecker
 import logging
 from .adapter_thread import AdapterThread
 from .adapter_request import AdapterRequest
@@ -50,11 +52,23 @@ class MerossAdapterThread(AdapterThread):
     MEROSS_ERROR = 7
     RETRY_COUNT = 5
 
+    # Device list entry keys
+    # device_list = {"uuid-n": {"base_device": device, "last_update": datetime}}
+    BASE_DEVICE = "base_device" # As known by the Meross module
+    LAST_UPDATE = "last_update" # Time of last device update
+    UPDATE_LIFETIME = 60.0 * 10.0 # 10 minutes
+    ASYNC_UPDATE_TIMEOUT = 5.0 # 5 seconds
+
     def __init__(self, name="MerossAdapterThread"):
         super().__init__(name=name)
         self._http_api_client = None
+        self._rate_limiter = None
         self._manager = None
-        self._all_devices = None
+
+        # This dict contains all currently known devices.
+        # It is keyed by device uuid.
+        # Each device uuid entry contains a base_device and updated indicator.
+        self._all_devices = {}
 
     def dispatch_request(self):
         """
@@ -64,6 +78,8 @@ class MerossAdapterThread(AdapterThread):
         :return: Returns the result from running the request.
         """
         result = None
+
+        logger.debug("Dispatching Meross request %s", self._request.request)
 
         # Cases for each request/command
         if self._request.request == AdapterRequest.DEVICE_ON:
@@ -87,11 +103,12 @@ class MerossAdapterThread(AdapterThread):
         elif self._request.request == AdapterRequest.DISCOVER_DEVICES:
             result = self._loop.run_until_complete(self.discover_devices())
         elif self._request.request == AdapterRequest.ON_OFF_STATUS:
-            # Currently NOT an asyncio method
-            result = self.is_on(**self._request.kwargs)
+            result = self._loop.run_until_complete(self.is_on(**self._request.kwargs))
         else:
             logger.error("Unrecognized request: %s", self._request.request)
             result = False
+
+        logger.debug("Dispatched Meross request %s", self._request.request)
 
         return result
 
@@ -107,21 +124,35 @@ class MerossAdapterThread(AdapterThread):
         """
         for retry in range(1, 11):
             try:
-                logger.debug("Attempt %d to create a MerossManager instance", retry)
+                logger.debug("Attempting %d to create a MerossHttpClient instance", retry)
                 # Initiates the Meross Cloud Manager.
                 # This is in charge of handling the communication with the Meross cloud (MQTT service)
                 self._http_api_client = await MerossHttpClient.async_from_user_password(email=email, password=password)
+
                 # What was learned by trial and error:
                 # The design of the meross-iot module was targeted for smaller sets of devices (<10).
-                # We have more than 20.
-                # burst_requests_per_second_limit default value = 1 was too small for our 19 devices.
-                # over_limit_threshold_percentage default of 400.0 was too small for a large number of devices.
+                # We have more than 20. The meross-iot package has gone through a number of
+                # designs.
+
                 logger.debug("Creating Meross manager instance")
+                # global_burst_rate: Global burst rate, max number of commands that can be executed within the global_time_window
+                # global_time_window: Time window in seconds that is used to aggregate the API counting
+                # global_tokens_per_interval: Number of calls allowed within the time interval at run time (globally)
+                # device_burst_rate: Per device burst rate, max number of commands that can be executed on a specific device within he device_time_window
+                # device_time_window: Time window in seconds that is used to aggregate the API counting for a given device
+                # device_tokens_per_interval: Number of calls allowed within the time interval at run time (per device)
+                # device_max_command_queue: Maximum number of commands that can be delayed for a given device, after which commands are dropped
+                self._rate_limiter = RateLimitChecker(
+                    global_burst_rate=10,
+                    global_time_window=timedelta(seconds=1),
+                    global_tokens_per_interval=10,
+                    device_burst_rate=1,
+                    device_time_window=timedelta(seconds=1),
+                    device_tokens_per_interval=1,
+                    device_max_command_queue=5)
                 self._manager = MerossManager(http_client=self._http_api_client,
                                               loop=self._loop,
-                                              burst_requests_per_second_limit=3,  # default was 1
-                                              over_limit_delay_seconds=1,
-                                              over_limit_threshold_percentage=2000.0)  # default was 400.0
+                                              rate_limiter=self._rate_limiter)
 
                 # Starts the manager
                 logger.debug("Meross driver calling async_init")
@@ -202,10 +233,11 @@ class MerossAdapterThread(AdapterThread):
 
         for retry in range(MerossAdapterThread.RETRY_COUNT):
             try:
-                device = self._get_device(house_device_code)
-                if device is None:
+                device_entry = self._get_device(house_device_code)
+                if device_entry is None:
                     continue
-                await device.async_update()
+                device = device_entry[MerossAdapterThread.BASE_DEVICE]
+                await self._update_device(device.uuid)
                 # Currently, a bulb is the only Meross device that supports color
                 if self._supports_color(device):
                     await device.async_set_light_color(channel=channel, rgb=rgb_color)
@@ -241,10 +273,11 @@ class MerossAdapterThread(AdapterThread):
         self.clear_last_error()
         for retry in range(MerossAdapterThread.RETRY_COUNT):
             try:
-                device = self._get_device(house_device_code)
-                if device is None:
+                device_entry = self._get_device(house_device_code)
+                if device_entry is None:
                     continue
-                await device.async_update()
+                device = device_entry[MerossAdapterThread.BASE_DEVICE]
+                await self._update_device(device.uuid)
                 # Currently, a bulb is the only Meross device that supports brightness
                 if self._supports_brightness(device):
                     await device.async_set_light_color(channel=channel, luminance=brightness)
@@ -281,9 +314,11 @@ class MerossAdapterThread(AdapterThread):
         result = False
         for retry in range(MerossAdapterThread.RETRY_COUNT):
             try:
-                device = self._get_device(house_device_code)
-                if device is None:
+                device_entry = self._get_device(house_device_code)
+                if device_entry is None:
                     continue
+                device = device_entry[MerossAdapterThread.BASE_DEVICE]
+                await self._update_device(device.uuid)
                 await device.async_turn_on(channel)
                 logger.debug("DeviceOn for: %s (%s %s)", device_name_tag, house_device_code, channel)
                 result = True
@@ -311,9 +346,11 @@ class MerossAdapterThread(AdapterThread):
         result = False
         for retry in range(MerossAdapterThread.RETRY_COUNT):
             try:
-                device = self._get_device(house_device_code)
+                device_entry = self._get_device(house_device_code)
+                device = device_entry[MerossAdapterThread.BASE_DEVICE]
                 if device is None:
                     continue
+                await self._update_device(device.uuid)
                 await device.async_turn_off(channel)
                 logger.debug("DeviceOff for: %s (%s %s)", device_name_tag, house_device_code, channel)
                 result = True
@@ -336,8 +373,8 @@ class MerossAdapterThread(AdapterThread):
         """
         available_devices = {}
         try:
-            for device in self._all_devices:
-                available_devices[device.uuid] = self._build_device_details(device)
+            for uuid, device_entry in self._all_devices.items():
+                available_devices[uuid] = self._build_device_details(device_entry[MerossAdapterThread.BASE_DEVICE])
         except Exception as ex:
             logger.error("Exception enumerating available devices")
             logger.error(str(ex))
@@ -356,16 +393,30 @@ class MerossAdapterThread(AdapterThread):
         """
         logger.debug("Discovering Meross devices")
         # For now, discover all devices. This takes about 1 sec per device.
-        await self._manager.async_device_discovery(update_subdevice_status=False)
+        try:
+            await self._manager.async_device_discovery(update_subdevice_status=False)
+        except Exception as ex:
+            logger.error("Unhandled exception from async_device_discovery")
+            logger.error(str(ex))
+            return False
+
         logger.debug("All Meross devices discovered")
 
         # Find and update ALL devices
         logger.debug("Updating all discovered Meross devices")
-        self._all_devices = self._manager.find_devices()
-        for device in self._all_devices:
-            # This update takes about 1 sec per device
-            await device.async_update()
-        logger.debug("All discovered Meross devices have been updated")
+        self._all_devices = {}
+        try:
+            discovered_devices = self._manager.find_devices()
+            for device in discovered_devices:
+                self._all_devices[device.uuid] = {
+                    MerossAdapterThread.BASE_DEVICE: device,
+                    MerossAdapterThread.LAST_UPDATE: None
+                }
+            logger.debug("All discovered Meross devices have been updated")
+        except Exception as ex:
+            logger.error("Unhandled exception from async_update")
+            logger.error(str(ex))
+            return False
 
         return True
 
@@ -376,43 +427,64 @@ class MerossAdapterThread(AdapterThread):
         :param device_channel: 0-n
         :return: Either plug or bulb.
         """
-        device = self._get_device(device_address)
-        if device is None:
+        device_entry = self._get_device(device_address)
+        if device_entry is None:
             return MerossAdapterThread.DEVICE_TYPE_UNKNOWN
+        device = device_entry[MerossAdapterThread.BASE_DEVICE]
         if device.type.lower().startswith("msl"):
             return MerossAdapterThread.DEVICE_TYPE_BULB
         # The default
         return MerossAdapterThread.DEVICE_TYPE_PLUG
 
-    def is_on(self, device_address, device_channel):
+    async def is_on(self, device_address, device_channel):
         """
         Determine the on/off status of a device
         :param device_address:
         :param device_channel: 0-n
         :return: True if the device is on.
         """
-        device = self._get_device(device_address)
+        device_entry = self._get_device(device_address)
+        if device_entry is None:
+            return False
+        device = device_entry[MerossAdapterThread.BASE_DEVICE]
         if device is not None and hasattr(device, "is_on"):
-            return device.is_on()
+            await self._update_device(device.uuid)
+            logger.debug("Calling is_on for Meross device %s", device.uuid)
+            try:
+                return device.is_on()
+            except Exception as ex:
+                logger.error("Unhandled exception from is_on %s", device_address)
+                logger.error(str(ex))
         return False
 
     def _get_device(self, device_uuid):
         """
         Return the device instance for a given device.
-        :param device_uuid: UUID of device
-        :return: Device instance or None
+        :param device_uuid: UUID of device, the key to the device list entry
+        :return: Device dict entry or None
         """
         device = None
+
+        # Look in current set of all devices first
+        if device_uuid in self._all_devices:
+            logger.debug("Meross device %s found in all_devices dict", device_uuid)
+            return self._all_devices[device_uuid]
+
+        logger.warning("Meross device %s was not found in all_devices dict", device_uuid)
         for retry in range(MerossAdapterThread.RETRY_COUNT):
             try:
-                # TODO Try looking in _all_devices first
                 devices = self._manager.find_devices(device_uuids=[device_uuid])
                 if devices is None:
                     continue
                 if len(devices) < 1:
                     continue
                 device = devices[0]
-                return device
+                # Add to dict of all known devices
+                self._all_devices[device_uuid] = {
+                    MerossAdapterThread.BASE_DEVICE: device,
+                    MerossAdapterThread.LAST_UPDATE: None
+                }
+                return self._all_devices[device_uuid]
             except Exception as ex:
                 logger.error("Exception attempting to get Meross device instance for %s", device_uuid)
                 logger.error(str(ex))
@@ -478,3 +550,27 @@ class MerossAdapterThread(AdapterThread):
         """
         a = getattr(device, "get_supports_luminance", None)
         return a is not None
+
+    async def _update_device(self, device_uuid):
+        """
+        Optimally update the state of a device
+        :param device_uuid: uuid of device to be updated
+        :return: None
+        """
+        # An update is required if one has not been done OR the last update has expired
+        update_required = self._all_devices[device_uuid][MerossAdapterThread.LAST_UPDATE] is None
+        if not update_required:
+            elapsed = datetime.now() - self._all_devices[device_uuid][MerossAdapterThread.LAST_UPDATE]
+            update_required = elapsed.total_seconds() > MerossAdapterThread.UPDATE_LIFETIME
+
+        if update_required:
+            logger.debug("Running async_update for Meross device %s", device_uuid)
+            try:
+                await self._all_devices[device_uuid][MerossAdapterThread.BASE_DEVICE].async_update(
+                    timeout=MerossAdapterThread.ASYNC_UPDATE_TIMEOUT)
+                self._all_devices[device_uuid][MerossAdapterThread.LAST_UPDATE] = datetime.now()
+            except Exception as ex:
+                logger.error("Unhandled exception from async_update %s", device_uuid)
+                logger.error(str(ex))
+        else:
+            logger.debug("async_update was not required for Meross device %s", device_uuid)
