@@ -35,7 +35,7 @@
 import asyncio
 from datetime import timedelta, datetime
 from meross_iot.http_api import MerossHttpClient
-from meross_iot.manager import MerossManager
+from meross_iot.manager import MerossManager, CommandTimeoutError
 from meross_iot.model.enums import OnlineStatus
 from meross_iot.utilities.limiter import RateLimitChecker
 import logging
@@ -58,6 +58,7 @@ class MerossAdapterThread(AdapterThread):
     LAST_UPDATE = "last_update" # Time of last device update
     UPDATE_LIFETIME = 60.0 * 10.0 # 10 minutes
     ASYNC_UPDATE_TIMEOUT = 5.0 # 5 seconds
+    COMMAND_TIMEOUT = 5.0 # 5 seconds
 
     def __init__(self, name="MerossAdapterThread"):
         super().__init__(name=name)
@@ -240,7 +241,9 @@ class MerossAdapterThread(AdapterThread):
                 await self._update_device(device.uuid)
                 # Currently, a bulb is the only Meross device that supports color
                 if self._supports_color(device):
-                    await device.async_set_light_color(channel=channel, rgb=rgb_color)
+                    await device.async_set_light_color(channel=channel,
+                                                       rgb=rgb_color,
+                                                       timeout=MerossAdapterThread.COMMAND_TIMEOUT)
                 else:
                     return False
                 logger.debug("set_color for: %s (%s %s) %s", device_name_tag, house_device_code, channel, rgb_color)
@@ -280,7 +283,9 @@ class MerossAdapterThread(AdapterThread):
                 await self._update_device(device.uuid)
                 # Currently, a bulb is the only Meross device that supports brightness
                 if self._supports_brightness(device):
-                    await device.async_set_light_color(channel=channel, luminance=brightness)
+                    await device.async_set_light_color(channel=channel,
+                                                       luminance=brightness,
+                                                       timeout=MerossAdapterThread.COMMAND_TIMEOUT)
                 else:
                     return False
                 logger.debug("set_brightness for: %s (%s %s) %s",
@@ -292,10 +297,6 @@ class MerossAdapterThread(AdapterThread):
                 logger.error(str(ex))
                 self.last_error_code = MerossAdapterThread.MEROSS_ERROR
                 self.last_error = str(ex)
-                # Clean up device instance
-                del device
-                # TODO Restart the Meross manager
-                # self._restart_manager()
             finally:
                 pass
 
@@ -319,7 +320,7 @@ class MerossAdapterThread(AdapterThread):
                     continue
                 device = device_entry[MerossAdapterThread.BASE_DEVICE]
                 await self._update_device(device.uuid)
-                await device.async_turn_on(channel)
+                await device.async_turn_on(channel, timeout=MerossAdapterThread.COMMAND_TIMEOUT)
                 logger.debug("DeviceOn for: %s (%s %s)", device_name_tag, house_device_code, channel)
                 result = True
                 break
@@ -351,7 +352,7 @@ class MerossAdapterThread(AdapterThread):
                 if device is None:
                     continue
                 await self._update_device(device.uuid)
-                await device.async_turn_off(channel)
+                await device.async_turn_off(channel, timeout=MerossAdapterThread.COMMAND_TIMEOUT)
                 logger.debug("DeviceOff for: %s (%s %s)", device_name_tag, house_device_code, channel)
                 result = True
                 break
@@ -543,7 +544,11 @@ class MerossAdapterThread(AdapterThread):
         :return:
         """
         a = getattr(device, "get_supports_rgb", None)
-        return a is not None
+        supports_color = False
+        if a is not None:
+            supports_color = device.get_supports_rgb()
+        return supports_color
+
 
     def _supports_brightness(self, device):
         """
@@ -552,7 +557,10 @@ class MerossAdapterThread(AdapterThread):
         :return:
         """
         a = getattr(device, "get_supports_luminance", None)
-        return a is not None
+        supports_luminance = False
+        if a is not None:
+            supports_luminance = device.get_supports_luminance()
+        return supports_luminance
 
     async def _update_device(self, device_uuid):
         """
@@ -566,14 +574,28 @@ class MerossAdapterThread(AdapterThread):
             elapsed = datetime.now() - self._all_devices[device_uuid][MerossAdapterThread.LAST_UPDATE]
             update_required = elapsed.total_seconds() > MerossAdapterThread.UPDATE_LIFETIME
 
+        success = False
+
         if update_required:
-            logger.debug("Running async_update for Meross device %s", device_uuid)
-            try:
-                await self._all_devices[device_uuid][MerossAdapterThread.BASE_DEVICE].async_update(
-                    timeout=MerossAdapterThread.ASYNC_UPDATE_TIMEOUT)
-                self._all_devices[device_uuid][MerossAdapterThread.LAST_UPDATE] = datetime.now()
-            except Exception as ex:
-                logger.error("Unhandled exception from async_update %s", device_uuid)
-                logger.error(str(ex))
+            for retry in range(MerossAdapterThread.RETRY_COUNT):
+                logger.debug("Running async_update (retry=%d) for Meross device %s", retry + 1, device_uuid)
+                try:
+                    await self._all_devices[device_uuid][MerossAdapterThread.BASE_DEVICE].async_update(
+                        timeout=MerossAdapterThread.ASYNC_UPDATE_TIMEOUT)
+                    self._all_devices[device_uuid][MerossAdapterThread.LAST_UPDATE] = datetime.now()
+                    success = True
+                except CommandTimeoutError as ex:
+                    logger.error("CommandTimeoutError exception during async_update")
+                    logger.error(ex.message)
+                    logger.error("uuid %s", ex.target_device_uuid)
+                    logger.error("timeout %f", ex.timeout)
+                except Exception as ex:
+                    logger.error("Unhandled exception from async_update %s", device_uuid)
+                    logger.error(str(ex))
+                    logger.error(ex)
+                if success:
+                    break
         else:
             logger.debug("async_update was not required for Meross device %s", device_uuid)
+
+        return success
