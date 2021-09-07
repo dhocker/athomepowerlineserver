@@ -58,7 +58,7 @@ class Configuration:
         except Exception as ex:
             print("Unable to open {0}".format(cfg_path))
             print(str(ex))
-            return
+            return False
 
         # Read the entire contents of the conf file
         cfg_json = cfg.read()
@@ -73,10 +73,10 @@ class Configuration:
         except Exception as ex:
             print("Unable to parse configuration file as JSON")
             print(str(ex))
-            return
+            return False
 
         # print str(Configuration.ActiveConfig)
-        return
+        return True
 
     ######################################################################
     @classmethod
@@ -158,6 +158,10 @@ class Configuration:
     @classmethod
     def PyKasaDiscoverTarget(cls):
         return cls.get_config_var("PyKasaDiscoverTarget")
+
+    @classmethod
+    def MerossIot(cls):
+        return cls.get_config_var("MerossIot")
 
     ######################################################################
     @classmethod
