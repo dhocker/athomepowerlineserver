@@ -165,6 +165,15 @@ class MerossAdapterThread(AdapterThread):
                     dtpi = cfg["device_tokens_per_interval"]
                     dmcq = cfg["device_max_command_queue"]
 
+                logger.info("Using the following Meross rate limit checker values")
+                logger.info("global_burst_rate %d", gbr)
+                logger.info("global_time_window %d", gtw)
+                logger.info("global_tokens_per_interval %d", gtpi)
+                logger.info("device_burst_rate %d", dbr)
+                logger.info("device_time_window %d", dtw)
+                logger.info("device_tokens_per_interval %d", dtpi)
+                logger.info("device_max_command_queue %d", dmcq)
+
                 # Create a rate-limiter instance using the configured values
                 self._rate_limiter = RateLimitChecker(
                     global_burst_rate=gbr,
@@ -437,6 +446,7 @@ class MerossAdapterThread(AdapterThread):
                     MerossAdapterThread.BASE_DEVICE: device,
                     MerossAdapterThread.LAST_UPDATE: None
                 }
+                await self._update_device(device.uuid)
             logger.debug("All discovered Meross devices have been updated")
         except Exception as ex:
             logger.error("Unhandled exception from async_update")
@@ -621,5 +631,6 @@ class MerossAdapterThread(AdapterThread):
                     break
         else:
             logger.debug("async_update was not required for Meross device %s", device_uuid)
+            success = True
 
         return success
