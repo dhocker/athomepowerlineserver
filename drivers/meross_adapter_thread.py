@@ -41,6 +41,7 @@ from meross_iot.utilities.limiter import RateLimitChecker
 import logging
 from .adapter_thread import AdapterThread
 from .adapter_request import AdapterRequest
+from Configuration import Configuration
 
 logger = logging.getLogger("server")
 
@@ -143,14 +144,37 @@ class MerossAdapterThread(AdapterThread):
                 # device_time_window: Time window in seconds that is used to aggregate the API counting for a given device
                 # device_tokens_per_interval: Number of calls allowed within the time interval at run time (per device)
                 # device_max_command_queue: Maximum number of commands that can be delayed for a given device, after which commands are dropped
+
+                cfg = Configuration.MerossIot()
+                # Defaults
+                gbr = 20
+                gtw = 1
+                gtpi = 20
+                dbr = 2
+                dtw = 1
+                dtpi = 2
+                dmcq = 5
+
+                # If configured, apply overrides to defaults
+                if cfg is not None:
+                    gbr = cfg["global_burst_rate"]
+                    gtw = cfg["global_time_window"]
+                    gtpi = cfg["global_tokens_per_interval"]
+                    dbr = cfg["device_burst_rate"]
+                    dtw = cfg["device_time_window"]
+                    dtpi = cfg["device_tokens_per_interval"]
+                    dmcq = cfg["device_max_command_queue"]
+
+                # Create a rate-limiter instance using the configured values
                 self._rate_limiter = RateLimitChecker(
-                    global_burst_rate=10,
-                    global_time_window=timedelta(seconds=1),
-                    global_tokens_per_interval=10,
-                    device_burst_rate=1,
-                    device_time_window=timedelta(seconds=1),
-                    device_tokens_per_interval=1,
-                    device_max_command_queue=5)
+                    global_burst_rate=gbr,
+                    global_time_window=timedelta(seconds=gtw),
+                    global_tokens_per_interval=gtpi,
+                    device_burst_rate=dbr,
+                    device_time_window=timedelta(seconds=dtw),
+                    device_tokens_per_interval=dtpi,
+                    device_max_command_queue=dmcq)
+
                 self._manager = MerossManager(http_client=self._http_api_client,
                                               loop=self._loop,
                                               rate_limiter=self._rate_limiter)
