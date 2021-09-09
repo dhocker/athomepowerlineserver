@@ -617,6 +617,7 @@ class MerossAdapterThread(AdapterThread):
                     await self._all_devices[device_uuid][MerossAdapterThread.BASE_DEVICE].async_update(
                         timeout=MerossAdapterThread.ASYNC_UPDATE_TIMEOUT)
                     self._all_devices[device_uuid][MerossAdapterThread.LAST_UPDATE] = datetime.now()
+                    logger.debug("async_update successful for Meross device %s after %d tries", device_uuid, retry + 1)
                     success = True
                 except CommandTimeoutError as ex:
                     logger.error("CommandTimeoutError exception during async_update")
