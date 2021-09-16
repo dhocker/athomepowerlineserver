@@ -57,7 +57,7 @@ class MerossAdapterThread(AdapterThread):
     # device_list = {"uuid-n": {"base_device": device, "last_update": datetime}}
     BASE_DEVICE = "base_device" # As known by the Meross module
     LAST_UPDATE = "last_update" # Time of last device update
-    UPDATE_LIFETIME = 60.0 * 10.0 # 10 minutes
+    UPDATE_LIFETIME = 60.0 * 10.0 # default to 10 minutes
     ASYNC_UPDATE_TIMEOUT = 5.0 # 5 seconds
     COMMAND_TIMEOUT = 5.0 # 5 seconds
 
@@ -66,6 +66,17 @@ class MerossAdapterThread(AdapterThread):
         self._http_api_client = None
         self._rate_limiter = None
         self._manager = None
+
+        # Check configuration for async update lifetime value
+        # If the configuration has no valid setting fall back to default
+        # Note that any value less than zero turns off lifetime checking
+        cfg = Configuration.MerossIot()
+        if cfg is not None:
+            try:
+                MerossAdapterThread.UPDATE_LIFETIME = float(cfg["async_update_lifetime"]) * 60.0
+            except Exception as ex:
+                logger.error("Invalid async_update_lifetime value in MerossIot config section")
+                logger.error(str(ex))
 
         # This dict contains all currently known devices.
         # It is keyed by device uuid.
@@ -604,7 +615,7 @@ class MerossAdapterThread(AdapterThread):
         """
         # An update is required if one has not been done OR the last update has expired
         update_required = self._all_devices[device_uuid][MerossAdapterThread.LAST_UPDATE] is None
-        if not update_required:
+        if not update_required and MerossAdapterThread.UPDATE_LIFETIME > 0.0:
             elapsed = datetime.now() - self._all_devices[device_uuid][MerossAdapterThread.LAST_UPDATE]
             update_required = elapsed.total_seconds() > MerossAdapterThread.UPDATE_LIFETIME
 
