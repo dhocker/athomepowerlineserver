@@ -34,9 +34,11 @@
 
 import asyncio
 from datetime import timedelta, datetime
+import json
 from meross_iot.http_api import MerossHttpClient
 from meross_iot.manager import MerossManager, CommandTimeoutError
-from meross_iot.model.enums import OnlineStatus
+from meross_iot.model.enums import OnlineStatus, Namespace
+from meross_iot.model.push.online import OnlinePushNotification, GenericPushNotification
 from meross_iot.utilities.limiter import RateLimitChecker
 import logging
 from .adapter_thread import AdapterThread
@@ -203,6 +205,9 @@ class MerossAdapterThread(AdapterThread):
                 logger.debug("Meross driver calling async_init")
                 await self._manager.async_init()
                 logger.debug("Meross driver initialized")
+
+                # Register notification handler
+                self._manager.register_push_notification_handler_coroutine(self._notification_handler)
                 return True
             except Exception as ex:
                 logger.error("Unhandled exception attempting to create a MerossManager instance")
@@ -245,6 +250,7 @@ class MerossAdapterThread(AdapterThread):
         try:
             if self._manager:
                 logger.debug("Closing meross-iot manager instance")
+                self._manager.unregister_push_notification_handler_coroutine(self._notification_handler)
                 self._manager.close()
             if self._http_api_client:
                 logger.debug("Logging out from meross-iot http client service")
@@ -646,3 +652,28 @@ class MerossAdapterThread(AdapterThread):
             success = True
 
         return success
+
+    async def _notification_handler(self, push_notification=None, target_devices=None):
+        """
+        Notification handler for all devices
+        :param namespace:
+        :param data:
+        :param device_internal_id:
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        for device in target_devices:
+            logger.debug("Event notification received for device %s %s", device.uuid, str(device))
+        logger.debug(str(push_notification))
+
+        for device in target_devices:
+            # Offline due to connection drop
+            if isinstance(push_notification, OnlinePushNotification):
+                if push_notification.status == -1:
+                    # Force an async_update on all offline devices
+                    self._all_devices[device.uuid][MerossAdapterThread.LAST_UPDATE] = None
+                    logger.debug("Device status notification %s %s", device.uuid, str(push_notification.status))
+            elif isinstance(push_notification, GenericPushNotification):
+                logger.debug(json.dumps(push_notification.raw_data, indent=4))
+
