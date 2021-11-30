@@ -676,4 +676,5 @@ class MerossAdapterThread(AdapterThread):
                     logger.debug("Device status notification %s %s", device.uuid, str(push_notification.status))
             elif isinstance(push_notification, GenericPushNotification):
                 logger.debug(json.dumps(push_notification.raw_data, indent=4))
-
+            else:
+                logger.debug("Unhandled notification %s", type(push_notification))
