@@ -653,7 +653,7 @@ class MerossAdapterThread(AdapterThread):
 
         return success
 
-    async def _notification_handler(self, push_notification=None, target_devices=None):
+    async def _notification_handler(self, push_notification, target_devices, meross_manager):
         """
         Notification handler for all devices
         :param namespace:
