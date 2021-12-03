@@ -79,6 +79,12 @@ class MerossAdapterThread(AdapterThread):
             except Exception as ex:
                 logger.error("Invalid async_update_lifetime value in MerossIot config section")
                 logger.error(str(ex))
+            try:
+                if "command_timeout" in cfg.keys():
+                    MerossAdapterThread.COMMAND_TIMEOUT = float(cfg["command_timeout"])
+            except Exception as ex:
+                logger.error("Invalid command_timeout value in MerossIot config section")
+                logger.error(str(ex))
 
         # This dict contains all currently known devices.
         # It is keyed by device uuid.
