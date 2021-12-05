@@ -82,6 +82,7 @@ class MerossAdapterThread(AdapterThread):
             try:
                 if "command_timeout" in cfg.keys():
                     MerossAdapterThread.COMMAND_TIMEOUT = float(cfg["command_timeout"])
+                    MerossAdapterThread.ASYNC_UPDATE_TIMEOUT = float(cfg["command_timeout"])
             except Exception as ex:
                 logger.error("Invalid command_timeout value in MerossIot config section")
                 logger.error(str(ex))
@@ -677,8 +678,8 @@ class MerossAdapterThread(AdapterThread):
             # Offline due to connection drop
             if isinstance(push_notification, OnlinePushNotification):
                 if push_notification.status == -1:
-                    # Force an async_update on all offline devices
-                    self._all_devices[device.uuid][MerossAdapterThread.LAST_UPDATE] = None
+                    # Consider this equivalent to an async update
+                    self._all_devices[device.uuid][MerossAdapterThread.LAST_UPDATE] = datetime.now()
                     logger.debug("Device status notification %s %s", device.uuid, str(push_notification.status))
             elif isinstance(push_notification, GenericPushNotification):
                 logger.debug(json.dumps(push_notification.raw_data, indent=4))
