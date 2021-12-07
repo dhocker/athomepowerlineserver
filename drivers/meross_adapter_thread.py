@@ -36,9 +36,10 @@ import asyncio
 from datetime import timedelta, datetime
 import json
 from meross_iot.http_api import MerossHttpClient
-from meross_iot.manager import MerossManager, CommandTimeoutError
+from meross_iot.manager import MerossManager
 from meross_iot.model.enums import OnlineStatus, Namespace
 from meross_iot.model.push.online import OnlinePushNotification, GenericPushNotification
+from meross_iot.model.exception import CommandTimeoutError, CommandError, UnconnectedError, UnknownDeviceType
 from meross_iot.utilities.limiter import RateLimitChecker
 import logging
 from .adapter_thread import AdapterThread
@@ -311,10 +312,6 @@ class MerossAdapterThread(AdapterThread):
                 logger.error(str(ex))
                 self.last_error_code = MerossAdapterThread.MEROSS_ERROR
                 self.last_error = str(ex)
-                # Clean up device instance
-                del device
-                # TODO Restart the Meross manager
-                # self._restart_manager()
             finally:
                 pass
 
