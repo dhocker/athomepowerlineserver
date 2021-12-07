@@ -39,7 +39,8 @@ from meross_iot.http_api import MerossHttpClient
 from meross_iot.manager import MerossManager
 from meross_iot.model.enums import OnlineStatus, Namespace
 from meross_iot.model.push.online import OnlinePushNotification, GenericPushNotification
-from meross_iot.model.exception import CommandTimeoutError, CommandError, UnconnectedError, UnknownDeviceType
+from meross_iot.model.exception import CommandTimeoutError, CommandError, UnconnectedError, \
+    UnknownDeviceType, RateLimitExceeded, MqttError
 from meross_iot.utilities.limiter import RateLimitChecker
 import logging
 from .adapter_thread import AdapterThread
@@ -307,11 +308,8 @@ class MerossAdapterThread(AdapterThread):
                 logger.debug("set_color for: %s (%s %s) %s", device_name_tag, house_device_code, channel, rgb_color)
                 return True
             except Exception as ex:
-                logger.error("Exception during set_color for: %s (%s %s) %s",
-                             device_name_tag, house_device_code, channel, rgb_color)
-                logger.error(str(ex))
-                self.last_error_code = MerossAdapterThread.MEROSS_ERROR
-                self.last_error = str(ex)
+                msg = f"Exception during set_color for: {device_name_tag} ({house_device_code} {channel}) {rgb_color}"
+                self._handle_exception(ex, msg)
             finally:
                 pass
 
@@ -346,11 +344,8 @@ class MerossAdapterThread(AdapterThread):
                              device_name_tag, house_device_code, channel, brightness)
                 return True
             except Exception as ex:
-                logger.error("Exception during set_brightness for: %s (%s %s) %s",
-                             device_name_tag, house_device_code, channel, brightness)
-                logger.error(str(ex))
-                self.last_error_code = MerossAdapterThread.MEROSS_ERROR
-                self.last_error = str(ex)
+                msg = f"Exception during set_brightness for: {device_name_tag} ({house_device_code} {channel}) {brightness}"
+                self._handle_exception(ex, msg)
             finally:
                 pass
 
@@ -379,10 +374,8 @@ class MerossAdapterThread(AdapterThread):
                 result = True
                 break
             except Exception as ex:
-                logger.error("Exception during DeviceOn for: %s (%s %s)", device_name_tag, house_device_code, channel)
-                logger.error(str(ex))
-                self.last_error_code = MerossAdapterThread.MEROSS_ERROR
-                self.last_error = str(ex)
+                msg = f"Exception during device_on for: {device_name_tag} ({house_device_code} {channel})"
+                self._handle_exception(ex, msg)
             finally:
                 pass
 
@@ -411,10 +404,8 @@ class MerossAdapterThread(AdapterThread):
                 result = True
                 break
             except Exception as ex:
-                logger.error("Exception during DeviceOff for: %s (%s %s)", device_name_tag, house_device_code, channel)
-                logger.error(str(ex))
-                self.last_error_code = MerossAdapterThread.MEROSS_ERROR
-                self.last_error = str(ex)
+                msg = f"Exception during device_off for: {device_name_tag} ({house_device_code} {channel})"
+                self._handle_exception(ex, msg)
             finally:
                 pass
 
@@ -470,8 +461,8 @@ class MerossAdapterThread(AdapterThread):
                 await self._update_device(device.uuid)
             logger.debug("All discovered Meross devices have been updated")
         except Exception as ex:
-            logger.error("Unhandled exception from async_update")
-            logger.error(str(ex))
+            msg = "Unhandled exception from async_update"
+            self._handle_exception(ex, msg)
             return False
 
         return True
@@ -509,8 +500,8 @@ class MerossAdapterThread(AdapterThread):
             try:
                 return device.is_on()
             except Exception as ex:
-                logger.error("Unhandled exception from is_on %s", device_address)
-                logger.error(str(ex))
+                msg = f"Unhandled exception from is_on {device_address}"
+                self._handle_exception(ex, msg)
         return False
 
     def _get_device(self, device_uuid):
@@ -542,10 +533,8 @@ class MerossAdapterThread(AdapterThread):
                 }
                 return self._all_devices[device_uuid]
             except Exception as ex:
-                logger.error("Exception attempting to get Meross device instance for %s", device_uuid)
-                logger.error(str(ex))
-                self.last_error_code = MerossAdapterThread.MEROSS_ERROR
-                self.last_error = str(ex)
+                msg = f"Exception attempting to get Meross device instance for {device_uuid}"
+                self._handle_exception(ex, msg)
             finally:
                 pass
 
@@ -646,9 +635,8 @@ class MerossAdapterThread(AdapterThread):
                     logger.error("uuid %s", ex.target_device_uuid)
                     logger.error("timeout %f", ex.timeout)
                 except Exception as ex:
-                    logger.error("Unhandled exception from async_update %s", device_uuid)
-                    logger.error(str(ex))
-                    logger.error(ex)
+                    msg = f"Unhandled exception from async_update {device_uuid}"
+                    self._handle_exception(ex, msg)
                 if success:
                     break
         else:
@@ -682,3 +670,41 @@ class MerossAdapterThread(AdapterThread):
                 logger.debug(json.dumps(push_notification.raw_data, indent=4))
             else:
                 logger.debug("Unhandled notification %s", type(push_notification))
+
+    def _handle_exception(self, ex, msg):
+        """
+        Handling for exceptions produced by the Meross manager
+        :param ex: The thrown exception
+        :param msg: Context message
+        :return:
+        """
+        logger.error(msg)
+        logger.error("str(ex): %s", str(ex))
+        logger.error("ex: %s", ex)
+
+        if isinstance(ex, CommandTimeoutError):
+            logger.error("CommandTimeoutError")
+            logger.error(ex.message)
+            logger.error(ex.target_device_uuid)
+            logger.error(ex.timeout)
+        elif isinstance(ex, CommandError):
+            logger.error("CommandError")
+            logger.error("error_payload: %s", ex.error_payload)
+        elif isinstance(ex, UnconnectedError):
+            logger.error("UnconnectedError")
+            logger.error("No info available")
+        elif isinstance(ex, UnknownDeviceType):
+            logger.error("UnknownDeviceType")
+            logger.error("No info available")
+        elif isinstance(ex, RateLimitExceeded):
+            logger.error("RateLimitExceeded")
+            logger.error("No info available")
+        elif isinstance(ex, MqttError):
+            logger.error("MqttError")
+            logger.error("message: ", ex._message)
+        else:
+            logger.error("Not a meross-iot exception")
+
+        self.last_error_code = MerossAdapterThread.MEROSS_ERROR
+        self.last_error = str(ex)
+
