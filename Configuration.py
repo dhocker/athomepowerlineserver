@@ -163,6 +163,10 @@ class Configuration:
     def MerossIot(cls):
         return cls.get_config_var("MerossIot")
 
+    @classmethod
+    def logformat(cls):
+        return cls.get_config_var("logformat")
+
     ######################################################################
     @classmethod
     def GetConfigurationFilePath(cls):

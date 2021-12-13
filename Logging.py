@@ -22,7 +22,9 @@ import Configuration
 # instance here. In the mean time, we'll use logging to file.
 def EnableServerLogging():
     # Default overrides
-    logformat = '%(asctime)s, %(threadName)s, %(module)s, %(levelname)s, %(message)s'
+    logformat = Configuration.Configuration.logformat()
+    if not logformat:
+        logformat = '%(asctime)s, %(threadName)s, %(module)s, %(levelname)s, %(message)s'
     logdateformat = '%Y-%m-%d %H:%M:%S'
 
     # Remove any existing configuration. However, this results in
