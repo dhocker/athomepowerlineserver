@@ -40,8 +40,7 @@ from meross_iot.manager import MerossManager
 from meross_iot.model.enums import OnlineStatus, Namespace
 from meross_iot.model.push.online import OnlinePushNotification, GenericPushNotification
 from meross_iot.model.exception import CommandTimeoutError, CommandError, UnconnectedError, \
-    UnknownDeviceType, RateLimitExceeded, MqttError
-from meross_iot.utilities.limiter import RateLimitChecker
+    UnknownDeviceType, MqttError
 import logging
 from .adapter_thread import AdapterThread
 from .adapter_request import AdapterRequest
@@ -159,56 +158,8 @@ class MerossAdapterThread(AdapterThread):
                 # designs.
 
                 logger.debug("Creating Meross manager instance")
-                # global_burst_rate: Global burst rate, max number of commands that can be executed within the global_time_window
-                # global_time_window: Time window in seconds that is used to aggregate the API counting
-                # global_tokens_per_interval: Number of calls allowed within the time interval at run time (globally)
-                # device_burst_rate: Per device burst rate, max number of commands that can be executed on a specific device within he device_time_window
-                # device_time_window: Time window in seconds that is used to aggregate the API counting for a given device
-                # device_tokens_per_interval: Number of calls allowed within the time interval at run time (per device)
-                # device_max_command_queue: Maximum number of commands that can be delayed for a given device, after which commands are dropped
-
-                cfg = Configuration.MerossIot()
-                # Defaults
-                gbr = 20
-                gtw = 1
-                gtpi = 20
-                dbr = 2
-                dtw = 1
-                dtpi = 2
-                dmcq = 5
-
-                # If configured, apply overrides to defaults
-                if cfg is not None:
-                    gbr = cfg["global_burst_rate"]
-                    gtw = cfg["global_time_window"]
-                    gtpi = cfg["global_tokens_per_interval"]
-                    dbr = cfg["device_burst_rate"]
-                    dtw = cfg["device_time_window"]
-                    dtpi = cfg["device_tokens_per_interval"]
-                    dmcq = cfg["device_max_command_queue"]
-
-                logger.info("Using the following Meross rate limit checker values")
-                logger.info("global_burst_rate %d", gbr)
-                logger.info("global_time_window %d", gtw)
-                logger.info("global_tokens_per_interval %d", gtpi)
-                logger.info("device_burst_rate %d", dbr)
-                logger.info("device_time_window %d", dtw)
-                logger.info("device_tokens_per_interval %d", dtpi)
-                logger.info("device_max_command_queue %d", dmcq)
-
-                # Create a rate-limiter instance using the configured values
-                self._rate_limiter = RateLimitChecker(
-                    global_burst_rate=gbr,
-                    global_time_window=timedelta(seconds=gtw),
-                    global_tokens_per_interval=gtpi,
-                    device_burst_rate=dbr,
-                    device_time_window=timedelta(seconds=dtw),
-                    device_tokens_per_interval=dtpi,
-                    device_max_command_queue=dmcq)
-
                 self._manager = MerossManager(http_client=self._http_api_client,
-                                              loop=self._loop,
-                                              rate_limiter=self._rate_limiter)
+                                              loop=self._loop)
 
                 # Starts the manager
                 logger.debug("Meross driver calling async_init")
@@ -695,9 +646,6 @@ class MerossAdapterThread(AdapterThread):
             logger.error("No info available")
         elif isinstance(ex, UnknownDeviceType):
             logger.error("UnknownDeviceType")
-            logger.error("No info available")
-        elif isinstance(ex, RateLimitExceeded):
-            logger.error("RateLimitExceeded")
             logger.error("No info available")
         elif isinstance(ex, MqttError):
             logger.error("MqttError")
