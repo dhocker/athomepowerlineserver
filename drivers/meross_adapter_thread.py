@@ -615,7 +615,8 @@ class MerossAdapterThread(AdapterThread):
             if isinstance(push_notification, OnlinePushNotification):
                 if push_notification.status == -1:
                     # Consider this equivalent to an async update
-                    self._all_devices[device.uuid][MerossAdapterThread.LAST_UPDATE] = datetime.now()
+                    # self._all_devices[device.uuid][MerossAdapterThread.LAST_UPDATE] = datetime.now()
+                    self._all_devices[device.uuid][MerossAdapterThread.LAST_UPDATE] = None
                     logger.debug("Device status notification %s %s", device.uuid, str(push_notification.status))
             elif isinstance(push_notification, GenericPushNotification):
                 logger.debug(json.dumps(push_notification.raw_data, indent=4))
