@@ -611,17 +611,22 @@ class MerossAdapterThread(AdapterThread):
         logger.debug(str(push_notification))
 
         for device in target_devices:
-            # Offline due to connection drop
+            # Offline due to connection drop?
             if isinstance(push_notification, OnlinePushNotification):
+                logger.debug("Device status notification %s %s", device.uuid, str(push_notification.status))
+                logger.debug(json.dumps(push_notification.raw_data, indent=4))
                 if push_notification.status == -1:
-                    # Consider this equivalent to an async update
-                    # self._all_devices[device.uuid][MerossAdapterThread.LAST_UPDATE] = datetime.now()
+                    # Status unknown?
                     self._all_devices[device.uuid][MerossAdapterThread.LAST_UPDATE] = None
-                    logger.debug("Device status notification %s %s", device.uuid, str(push_notification.status))
+                else:
+                    # Status on or off?
+                    pass
             elif isinstance(push_notification, GenericPushNotification):
+                # onoff==0 appears to be ON and onoff==1 is OFF
                 logger.debug(json.dumps(push_notification.raw_data, indent=4))
             else:
                 logger.debug("Unhandled notification %s", type(push_notification))
+                logger.debug(json.dumps(push_notification.raw_data, indent=4))
 
     def _handle_exception(self, ex, msg):
         """
