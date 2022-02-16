@@ -613,20 +613,39 @@ class MerossAdapterThread(AdapterThread):
         for device in target_devices:
             # Offline due to connection drop?
             if isinstance(push_notification, OnlinePushNotification):
-                logger.debug("Device status notification %s %s", device.uuid, str(push_notification.status))
-                logger.debug(json.dumps(push_notification.raw_data, indent=4))
-                if push_notification.status == -1:
-                    # Status unknown?
+                logger.debug("OnlinePushNotification for device: %s", device.uuid)
+                logger.debug("Device status: %s", MerossAdapterThread._str_online_status(push_notification.status))
+                logger.debug("Notification raw_data: %s", json.dumps(push_notification.raw_data, indent=4))
+                if push_notification.status == OnlineStatus.UNKNOWN:
+                    # Status is unknown, so device update is needed
                     self._all_devices[device.uuid][MerossAdapterThread.LAST_UPDATE] = None
                 else:
                     # Status on or off?
                     pass
             elif isinstance(push_notification, GenericPushNotification):
                 # onoff==0 appears to be ON and onoff==1 is OFF
-                logger.debug(json.dumps(push_notification.raw_data, indent=4))
+                logger.debug("GenericPushNotification raw_data: %s", json.dumps(push_notification.raw_data, indent=4))
             else:
                 logger.debug("Unhandled notification %s", type(push_notification))
                 logger.debug(json.dumps(push_notification.raw_data, indent=4))
+
+    @staticmethod
+    def _str_online_status(online_status):
+        """
+        Return a human-readable translation of online status
+        :param online_status: One of the values of enums.OnlineStatus
+        :return: String version of online status
+        """
+        decoder = {
+            -1: "Unknown",
+            0: "NotOnline",
+            1: "Online",
+            2: "Offline",
+            3: "Upgrading"
+        }
+        if online_status in decoder.keys():
+            return decoder[online_status]
+        return f"Unrecognized status: {online_status}"
 
     def _handle_exception(self, ex, msg):
         """
