@@ -29,6 +29,7 @@ import signal
 import os
 import time
 import sys
+import ntplib
 
 
 #
@@ -78,6 +79,31 @@ def main():
     logger.info("Starting up...")
 
     logger.info("Using configuration file: %s", Configuration.Configuration.GetConfigurationFilePath())
+
+    # Verify Internet access. This is required for Meross devices to work.
+    # This is mostly about recovering from power outages.
+    logger.info("Verifying Internet connection...")
+    ntp_client = ntplib.NTPClient()
+    while True:
+        try:
+            # Internet access is verified by connecting to a reliable, well-known
+            # server (in this case an NTP server).
+            response = ntp_client.request("time.nist.gov")
+            if response is not None:
+                logger.info("Internet verification successful")
+                break
+            time.sleep(5.0)
+        except KeyboardInterrupt:
+            logger.info("AtHomePowerlineServer shutting down after Internet verification failed...")
+            exit(999)
+        except ntplib.NTPException:
+            # Wait 5 sec and try again
+            time.sleep(5.0)
+        except Exception as e:
+            logger.error("Unhandled exception occurred during Internet verification")
+            logger.error(str(e))
+            # logger.error(sys.exc_info()[0])
+            time.sleep(5.0)
 
     # Create drivers for all supported devices/manufacturers
     DeviceDriverManager.init()

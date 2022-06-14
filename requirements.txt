@@ -6,6 +6,7 @@ future
 idna
 iso8601
 pyserial
+ntplib
 pytz
 PyYAML
 requests
