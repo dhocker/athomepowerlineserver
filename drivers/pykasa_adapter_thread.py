@@ -203,8 +203,9 @@ class PyKasaAdapterThread(AdapterThread):
         """
         result = {}
         try:
+            # Key result item by device_id instead of IP address
             for ip, dev in self._all_devices.items():
-                result[ip] = self._get_device_attrs(dev)
+                result[dev.device_id] = self._get_device_attrs(dev)
         except Exception as ex:
             logger.error("An exception occurred while trying to enumerate available TPLink/Kasa devices")
             logger.error(str(ex))
@@ -219,8 +220,11 @@ class PyKasaAdapterThread(AdapterThread):
         """
         # Discover all devices
         logger.debug("Discovering TPLink/Kasa devices")
-        self._all_devices = self._loop.run_until_complete(Discover.discover(target=self._discover_target))
-        for ip, dev in self._all_devices.items():
+        # The returned dict is keyed by IP address. Change to device_id.
+        devices = self._loop.run_until_complete(Discover.discover(target=self._discover_target))
+        self._all_devices = {}
+        for ip, dev in devices.items():
+            self._all_devices[dev.device_id] = dev
             self._loop.run_until_complete(dev.update())
         
         return True
@@ -280,6 +284,8 @@ class PyKasaAdapterThread(AdapterThread):
             attrs["label"] = dev.alias
             attrs["channels"] = 1
             attrs["type"] = self._get_device_type(dev)
+            # Note that this is the IP address of the device
+            attrs["host"] =  dev.host
             # TODO This needs to be "by channel", but currently we only support single channel devices
             attrs["on"] = dev.is_on
             if isinstance(dev, SmartStrip) or isinstance(dev, SmartLightStrip):
@@ -311,34 +317,29 @@ class PyKasaAdapterThread(AdapterThread):
 
         return result
 
-    def _create_smart_device(self, ip_address):
+    def _create_smart_device(self, address):
         """
         Create a TPLink SmartDevice instance for the device at a
         given IP address
-        :param ip_address:
+        :param address: The mac address (device_id) of interest
         :return:
         """
         device = None
-        # Try multiple times
-        for retry in range(1, PyKasaAdapterThread.RETRY_COUNT + 1):
-            try:
-                device = self._loop.run_until_complete(Discover.discover_single(ip_address))
-                if device is None:
-                    logger.error("Unable to discover TPLink device %s retry=%d", ip_address, retry)
-                else:
-                    break
-            except Exception as ex:
-                logger.error("An exception occurred while discovering TPLink/Kasa device %s retry=%d",
-                             ip_address, retry)
-                logger.error(str(ex))
-                device = None
+        # Discover all devices. This will take some time...
+        device = None
+        devices = self._loop.run_until_complete(Discover.discover(target=self._discover_target))
+        # Look for address in the discovered devices
+        for ip, dev in devices.items():
+            if ip == address:
+                device = dev
+                break
 
         return device
 
     def _get_device(self, device_address):
         """
         Get the python-kasa device instance for a given address
-        :param device_address: The IP address of the device
+        :param device_address: The mac address of the device (the device_id)
         :return: A SmartDevice object, usually a SmartPlug or SmartBulb.
         """
         if device_address in self._all_devices.keys():
