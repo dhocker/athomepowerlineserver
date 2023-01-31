@@ -12,6 +12,10 @@ Maintenance on this project seems to be somewhat erratic. Because there are a nu
 devices it is hard to test them all. For example, there were a number of issues with the HSL200 3-way switch
 that required local changes.
 
+```
+pip install python-kasa
+```
+
 #### Repository
 [python-kasa](https://github.com/python-kasa/python-kasa)
 
@@ -42,6 +46,11 @@ pip install /Users/username/Source/python-kasa/dist/python_kasa-0.4.0.dev3-py3-n
 ```
 
 ### merossiot
+Install the latest version from pypi.
+
+```
+pip install meross-iot
+```
 
 #### Repository
 [Meross Python Library](https://github.com/albertogeniola/MerossIot)
@@ -49,5 +58,8 @@ pip install /Users/username/Source/python-kasa/dist/python_kasa-0.4.0.dev3-py3-n
 ## Research Tools
 These scripts can be used to explore different devices.
 
-* meross\_asyncio\_test.py* meross\_bulb\_test.py* meross\_test.py* tplink\_test.py
+* meross\_asyncio\_test.py
+* meross\_bulb\_test.py
+* meross\_test.py
+* tplink\_test.py
 
