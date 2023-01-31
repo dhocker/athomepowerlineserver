@@ -16,4 +16,4 @@ def GetVersion():
     """
     # See https://semver.org/
     # major.minor.patch
-    return "2021.1.1"
+    return "2023.1.1"
