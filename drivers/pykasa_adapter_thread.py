@@ -123,7 +123,7 @@ class PyKasaAdapterThread(AdapterThread):
                     break
                 except Exception as ex:
                     logger.error("Retry %d", r)
-                    logger.error(str(ex))
+                    self._log_device_exception(dev, ex)
                     self.last_error = str(ex)
                     self.last_error_code = 1
             del dev
@@ -152,7 +152,7 @@ class PyKasaAdapterThread(AdapterThread):
                     break
                 except Exception as ex:
                     logger.error("Retry %d", r)
-                    logger.error(str(ex))
+                    self._log_device_exception(dev, ex)
                     self.last_error = str(ex)
                     self.last_error_code = 1
             del dev
@@ -170,7 +170,7 @@ class PyKasaAdapterThread(AdapterThread):
         logger.debug("DeviceOn for: %s %s %s %s", device_type, device_name_tag, house_device_code, channel)
         dev = self._get_device(house_device_code)
         if dev is not None:
-            result = self._exec_device_function(dev.turn_on)
+            result = self._exec_device_function(dev, dev.turn_on)
             self._loop.run_until_complete(dev.update())
         else:
             result = False
@@ -188,7 +188,7 @@ class PyKasaAdapterThread(AdapterThread):
         logger.debug("DeviceOff for: %s %s %s %s", device_type, device_name_tag, house_device_code, channel)
         dev = self._get_device(house_device_code)
         if dev is not None:
-            result = self._exec_device_function(dev.turn_off)
+            result = self._exec_device_function(dev, dev.turn_off)
             self._loop.run_until_complete(dev.update())
         else:
             result = False
@@ -208,7 +208,7 @@ class PyKasaAdapterThread(AdapterThread):
                 result[dev.device_id] = self._get_device_attrs(dev)
         except Exception as ex:
             logger.error("An exception occurred while trying to enumerate available TPLink/Kasa devices")
-            logger.error(str(ex))
+            self._log_device_exception(dev, ex)
 
         return result
 
@@ -292,11 +292,11 @@ class PyKasaAdapterThread(AdapterThread):
                 attrs["channels"] = len(sys_info["children"])
         except Exception as ex:
             logger.error("An exception occurred getting info for TPLink/Kasa device %s (%s)", dev.alias, dev.host)
-            logger.error(str(ex))
+            self._log_device_exception(dev, ex)
 
         return attrs
 
-    def _exec_device_function(self, device_function):
+    def _exec_device_function(self, dev, device_function):
         """
         Execute a device function with retries
         :param device_function: The function to be executed
@@ -311,7 +311,7 @@ class PyKasaAdapterThread(AdapterThread):
                 break
             except Exception as ex:
                 logger.error("Retry %d", r)
-                logger.error(str(ex))
+                self._log_device_exception(dev, ex)
                 self.last_error = str(ex)
                 self.last_error_code = 1
 
@@ -350,3 +350,13 @@ class PyKasaAdapterThread(AdapterThread):
             self._all_devices[device_address] = device
         # TODO Consider aging the the data in the device object
         return device
+
+    def _log_device_exception(self, dev, ex):
+        """
+        Log an exception on a TPLink/Kasa device including human identifiable info
+        :param dev: The device object where the error occurred
+        :param ex: The exception
+        :return: None
+        """
+        logger.error(f"Exception on TPLink/Kasa device {dev.alias} at {dev.host}")
+        logger.error(str(ex))
