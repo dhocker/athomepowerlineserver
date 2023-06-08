@@ -159,6 +159,11 @@ class Configuration:
     def PyKasaDiscoverTarget(cls):
         return cls.get_config_var("PyKasaDiscoverTarget")
 
+    ######################################################################
+    @classmethod
+    def PyKasaRequestWaitTime(cls):
+        return cls.get_config_var("PyKasaRequestWaitTime")
+
     @classmethod
     def MerossIot(cls):
         return cls.get_config_var("MerossIot")

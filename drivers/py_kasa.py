@@ -29,7 +29,8 @@ class PyKasaDriver(BaseThreadDriver):
         """
         Initialize an instance of the python-kasa based driver
         """
-        super().__init__(adapter_thread=PyKasaAdapterThread())
+        super().__init__(adapter_thread=PyKasaAdapterThread(),
+                         request_wait_time=Configuration.PyKasaRequestWaitTime())
         self._loop = None
         self._all_devices = None
         logger.info("PyKasa driver initialized")

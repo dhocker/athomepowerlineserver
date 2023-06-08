@@ -337,3 +337,5 @@ class BaseThreadDriver(BaseDriverInterface):
                          self._adapter_thread.adapter_name,
                          request.request,
                          wait_time.total_seconds())
+            if request.kwargs is not None:
+                logger.error(f"request kwargs: {request.kwargs}")
