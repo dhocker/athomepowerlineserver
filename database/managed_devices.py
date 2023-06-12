@@ -58,7 +58,6 @@ class ManagedDevices(BaseTable):
         conn.commit()
         conn.close()
 
-
     def get_all_devices(self):
         self.clear_last_error()
 
@@ -68,6 +67,31 @@ class ManagedDevices(BaseTable):
             c = AtHomePowerlineServerDb.GetCursor(conn)
             # The results are sorted based on the most probable use
             rset = c.execute("SELECT * from ManagedDevices ORDER BY location, name")
+            result = ManagedDevices.rows_to_dict_list(rset)
+        except Exception as ex:
+            self.last_error_code = ManagedDevices.SERVER_ERROR
+            self.last_error = str(ex)
+            result = None
+        finally:
+            # Make sure connection is closed
+            if conn:
+                conn.close()
+
+        return result
+
+    def get_devices_for_mfg(self, mfg):
+        """
+        Query DB for all managed devices of a specific manufacturer (tplink or meross)
+        :param mfg: tplink or meross
+        :return: List of records where each record is a dict
+        """
+        self.clear_last_error()
+
+        conn = None
+        try:
+            conn = AtHomePowerlineServerDb.GetConnection()
+            c = AtHomePowerlineServerDb.GetCursor(conn)
+            rset = c.execute("SELECT * from ManagedDevices WHERE mfg=:mfg", {"mfg": mfg})
             result = ManagedDevices.rows_to_dict_list(rset)
         except Exception as ex:
             self.last_error_code = ManagedDevices.SERVER_ERROR
