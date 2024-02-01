@@ -150,7 +150,11 @@ class MerossAdapterThread(AdapterThread):
                 logger.debug("Attempting %d to create a MerossHttpClient instance", retry)
                 # Initiates the Meross Cloud Manager.
                 # This is in charge of handling the communication with the Meross cloud (MQTT service)
-                self._http_api_client = await MerossHttpClient.async_from_user_password(email=email, password=password)
+                self._http_api_client = await MerossHttpClient.async_from_user_password(
+                    email=email,
+                    password=password,
+                    api_base_url='https://iotx-eu.meross.com'
+                )
 
                 # What was learned by trial and error:
                 # The design of the meross-iot module was targeted for smaller sets of devices (<10).
