@@ -40,9 +40,16 @@ class MerossDriverV4(BaseThreadDriver):
         :param kwargs: None expected
         :return:
         """
+        # Determine Meross host url
+        meross_iot = Configuration.MerossIot()
+        api_base_url = "https://iotx-eu.meross.com"
+        if "api_base_url" in meross_iot.keys():
+            api_base_url = meross_iot["api_base_url"]
+
         kwargs = {
             "email": Configuration.MerossEmail(),
-            "password": Configuration.MerossPassword()
+            "password": Configuration.MerossPassword(),
+            "api_base_url": api_base_url
         }
 
         # Run the request on the adapter thread

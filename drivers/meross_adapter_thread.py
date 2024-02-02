@@ -135,7 +135,7 @@ class MerossAdapterThread(AdapterThread):
 
         return result
 
-    async def _async_init(self, email, password):
+    async def _async_init(self, email, password, api_base_url):
         """
         Initiates the Meross Cloud Manager. This is in charge of handling the communication with the remote endpoint.
         There is an inordinate amount of retry code here. But, the Meross-iot package seems
@@ -148,12 +148,13 @@ class MerossAdapterThread(AdapterThread):
         for retry in range(1, 11):
             try:
                 logger.debug("Attempting %d to create a MerossHttpClient instance", retry)
+                logger.debug("Using api_base_url %s", api_base_url)
                 # Initiates the Meross Cloud Manager.
                 # This is in charge of handling the communication with the Meross cloud (MQTT service)
                 self._http_api_client = await MerossHttpClient.async_from_user_password(
                     email=email,
                     password=password,
-                    api_base_url='https://iotx-eu.meross.com'
+                    api_base_url=api_base_url
                 )
 
                 # What was learned by trial and error:
@@ -183,7 +184,7 @@ class MerossAdapterThread(AdapterThread):
         logger.error("After 10 retries, unable to create MerossManager instance")
         return False
 
-    async def open(self, email, password):
+    async def open(self, email, password, api_base_url):
         """
         Open the meross-iot manager
         :param email:
@@ -192,7 +193,7 @@ class MerossAdapterThread(AdapterThread):
         """
         self.clear_last_error()
         try:
-            result = await self._async_init(email, password)
+            result = await self._async_init(email, password, api_base_url)
             # For now, discover all devices.
             await self.discover_devices()
             logger.info("Meross driver adapter opened")
