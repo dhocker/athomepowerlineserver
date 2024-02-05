@@ -1,7 +1,7 @@
 #
 # Kasa/TPLink adapter thread for TPLink/Kasa devices
 # Based on python-kasa package: https://github.com/python-kasa/python-kasa
-# © 2020, 2021  Dave Hocker
+# © 2020, 2024  Dave Hocker
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -12,8 +12,9 @@
 # The whole point of this design is to make sure that the asyncio based code
 # always runs on the same thread.
 #
-
+import asyncio
 import logging
+import datetime
 from kasa import SmartPlug, SmartBulb, SmartStrip, SmartLightStrip, SmartDimmer, Discover
 from .adapter_thread import AdapterThread
 from .adapter_request import AdapterRequest
@@ -39,10 +40,44 @@ class PyKasaAdapterThread(AdapterThread):
         self._discover_target = PyKasaAdapterThread.DISCOVER_TARGET
         logger.info("PyKasa driver initialized")
 
-    def dispatch_request(self):
+    def run(self):
+        """
+        Run the driver in async mode
+        :return: None
+        """
+        asyncio.run(self.async_run())
+
+    async def async_run(self):
+        """
+        Run the realtime request server.
+        This method is called on the new thread by the Thread class.
+        The server terminates when the close request is received.
+        :return: None
+        """
+
+        # Note that the close method sets the terminate event
+        while not self._terminate_event.is_set():
+            # This is a blocking call. The adapter thread will wait here
+            # until a request arrives.
+            # Termination occurs when the close() method is called and the terminate event is set.
+            self._request = self._request_queue.get()
+            start_time = datetime.datetime.now()
+
+            # Cases for each request/command
+            result = await self.dispatch_request()
+
+            self._request.set_complete(result)
+            elapsed_time = datetime.datetime.now() - start_time
+            logger.debug("%s %s elapsed time: %f", self.adapter_name, self._request.request,
+                         elapsed_time.total_seconds())
+
+            # We are finished with this request
+            self._request = None
+
+    async def dispatch_request(self):
         """
         Dispatch an adapter request.
-        This method is called on the new thread by the base class run method.
+        This method is called on the new thread.
         The server terminates when the close request is received.
         :return: Returns the result from running the request.
         """
@@ -50,33 +85,36 @@ class PyKasaAdapterThread(AdapterThread):
 
         # Cases for each request/command
         # Unlike the meross-iot module, none of the python-kasa methods are async
+
+        # TODO Make all of the requests async
+
         if self._request.request == AdapterRequest.DEVICE_ON:
-            result = self.device_on(**self._request.kwargs)
+            result = await self.device_on(**self._request.kwargs)
         elif self._request.request == AdapterRequest.DEVICE_OFF:
-            result = self.device_off(**self._request.kwargs)
+            result = await self.device_off(**self._request.kwargs)
         elif self._request.request == AdapterRequest.SET_BRIGHTNESS:
-            result = self.set_brightness(**self._request.kwargs)
+            result = await self.set_brightness(**self._request.kwargs)
         elif self._request.request == AdapterRequest.SET_COLOR:
-            result = self.set_color(**self._request.kwargs)
+            result = await self.set_color(**self._request.kwargs)
         elif self._request.request == AdapterRequest.OPEN:
-            result = self.open(**self._request.kwargs)
+            result = await self.open(**self._request.kwargs)
         elif self._request.request == AdapterRequest.CLOSE:
-            result = self.close()
+            result = await self.close()
         elif self._request.request == AdapterRequest.GET_DEVICE_TYPE:
-            result = self.get_device_type(**self._request.kwargs)
+            result = await self.get_device_type(**self._request.kwargs)
         elif self._request.request == AdapterRequest.GET_AVAILABLE_DEVICES:
-            result = self.get_available_devices()
+            result = await self.get_available_devices()
         elif self._request.request == AdapterRequest.DISCOVER_DEVICES:
-            result = self.discover_devices()
+            result = await self.discover_devices()
         elif self._request.request == AdapterRequest.ON_OFF_STATUS:
-            result = self.is_on(**self._request.kwargs)
+            result = await self.is_on(**self._request.kwargs)
         else:
             logger.error("Unrecognized request: %s", self._request.request)
             result = False
 
         return result
 
-    def open(self, discover_target):
+    async def open(self, discover_target):
         """
         Open the driver. Discovers all TPlink/Kasa devices.
         :param discover_target: Broadcast address to be used for discovering devices
@@ -86,11 +124,11 @@ class PyKasaAdapterThread(AdapterThread):
         if discover_target is not None:
             self._discover_target = discover_target
         logger.debug("PyKasa discover target: %s", self._discover_target)
-        self.discover_devices()
+        await self.discover_devices()
         logger.debug("PyKasa driver opened")
         return True
 
-    def close(self):
+    async def close(self):
         """
         Close the driver. Does nothing for TPLink/Kasa devices.
         :return:
@@ -100,7 +138,7 @@ class PyKasaAdapterThread(AdapterThread):
         logger.debug("PyKasaAdapterThread closed")
         return True
 
-    def set_color(self, device_type, device_name_tag, house_device_code, channel, hex_color):
+    async def set_color(self, device_type, device_name_tag, house_device_code, channel, hex_color):
         """
         Sets the color of the device. Ignored by devices that do not support color.
         :param device_type: the device's type (e.g. x10, hs100, smartplug, etc.)
@@ -113,12 +151,12 @@ class PyKasaAdapterThread(AdapterThread):
         result = False
         logger.debug("set_color for: %s %s %s %s", device_type, device_name_tag, house_device_code, channel)
         hsv = self._hex_to_hsv(hex_color)
-        dev = self._get_device(house_device_code)
+        dev = await self._get_device(house_device_code)
         if dev is not None and dev.is_color:
             self.clear_last_error()
             for r in range(PyKasaAdapterThread.RETRY_COUNT):
                 try:
-                    self._loop.run_until_complete(dev.set_hsv(int(hsv[0]), int(hsv[1]), int(hsv[2])))
+                    await dev.set_hsv(int(hsv[0]), int(hsv[1]), int(hsv[2]))
                     result = True
                     break
                 except Exception as ex:
@@ -129,7 +167,7 @@ class PyKasaAdapterThread(AdapterThread):
             del dev
         return result
 
-    def set_brightness(self, device_type, device_name_tag, house_device_code, channel, brightness):
+    async def set_brightness(self, device_type, device_name_tag, house_device_code, channel, brightness):
         """
         Sets the color of the device. Ignored by devices that do not support color.
         :param device_type: the device's type (e.g. x10, hs100, smartplug, etc.)
@@ -142,12 +180,12 @@ class PyKasaAdapterThread(AdapterThread):
         result = False
         # TODO Requires a TPLink/Kasa bulb for testing
         logger.debug("set_brightness for: %s %s %s %s", device_type, device_name_tag, house_device_code, channel)
-        dev = self._get_device(house_device_code)
+        dev = await self._get_device(house_device_code)
         if dev is not None and dev.is_dimmable:
             self.clear_last_error()
             for r in range(PyKasaAdapterThread.RETRY_COUNT):
                 try:
-                    self._loop.run_until_complete(dev.brightness(int(brightness)))
+                    await dev.brightness(int(brightness))
                     result = True
                     break
                 except Exception as ex:
@@ -158,7 +196,7 @@ class PyKasaAdapterThread(AdapterThread):
             del dev
         return result
 
-    def device_on(self, device_type, device_name_tag, house_device_code, channel):
+    async def device_on(self, device_type, device_name_tag, house_device_code, channel):
         """
         Turn device on
         :param device_type: the device's type (e.g. x10, hs100, smartplug, etc.)
@@ -168,15 +206,15 @@ class PyKasaAdapterThread(AdapterThread):
         :return:
         """
         logger.debug("DeviceOn for: %s %s %s %s", device_type, device_name_tag, house_device_code, channel)
-        dev = self._get_device(house_device_code)
+        dev = await self._get_device(house_device_code)
         if dev is not None:
-            result = self._exec_device_function(dev, dev.turn_on)
-            self._loop.run_until_complete(dev.update())
+            result = await self._exec_device_function(dev, dev.turn_on)
+            await dev.update()
         else:
             result = False
         return result
 
-    def device_off(self, device_type, device_name_tag, house_device_code, channel):
+    async def device_off(self, device_type, device_name_tag, house_device_code, channel):
         """
         Turn device off
         :param device_type: the device's type (e.g. x10, hs100, smartplug, etc.)
@@ -186,15 +224,15 @@ class PyKasaAdapterThread(AdapterThread):
         :return:
         """
         logger.debug("DeviceOff for: %s %s %s %s", device_type, device_name_tag, house_device_code, channel)
-        dev = self._get_device(house_device_code)
+        dev = await self._get_device(house_device_code)
         if dev is not None:
-            result = self._exec_device_function(dev, dev.turn_off)
-            self._loop.run_until_complete(dev.update())
+            result = await self._exec_device_function(dev, dev.turn_off)
+            await dev.update()
         else:
             result = False
         return result
 
-    def get_available_devices(self):
+    async def get_available_devices(self):
         """
         Get all known available TPLink/Kasa devices.
         Reference: https://github.com/GadgetReactor/pyHS100
@@ -212,7 +250,7 @@ class PyKasaAdapterThread(AdapterThread):
 
         return result
 
-    def discover_devices(self):
+    async def discover_devices(self):
         """
         Discover all TPLink/Kasa devices. This is
         equivalent to rescan for all devices.
@@ -221,32 +259,32 @@ class PyKasaAdapterThread(AdapterThread):
         # Discover all devices
         logger.debug("Discovering TPLink/Kasa devices")
         # The returned dict is keyed by IP address. Change to device_id.
-        devices = self._loop.run_until_complete(Discover.discover(target=self._discover_target))
+        devices = await Discover.discover(target=self._discover_target)
         self._all_devices = {}
         for ip, dev in devices.items():
             self._all_devices[dev.device_id] = dev
-            self._loop.run_until_complete(dev.update())
+            await dev.update()
         
         return True
 
-    def get_device_type(self, device_address, device_channel):
+    async def get_device_type(self, device_address, device_channel):
         """
         Determine the type of a given device
         :param device_address:
         :param device_channel: 0-n
         :return: Either plug or bulb.
         """
-        device = self._get_device(device_address)
+        device = await self._get_device(device_address)
         return self._get_device_type(device)
 
-    def is_on(self, device_address, device_channel):
+    async def is_on(self, device_address, device_channel):
         """
         Determine the on/off status of a device
         :param device_address:
         :param device_channel: 0-n
         :return: True if the device is on.
         """
-        device = self._get_device(device_address)
+        device = await self._get_device(device_address)
         return device.is_on
 
     def _get_device_type(self, dev):
@@ -296,7 +334,7 @@ class PyKasaAdapterThread(AdapterThread):
 
         return attrs
 
-    def _exec_device_function(self, dev, device_function):
+    async def _exec_device_function(self, dev, device_function):
         """
         Execute a device function with retries
         :param device_function: The function to be executed
@@ -306,7 +344,7 @@ class PyKasaAdapterThread(AdapterThread):
         result = False
         for r in range(PyKasaAdapterThread.RETRY_COUNT):
             try:
-                self._loop.run_until_complete(device_function())
+                await device_function()
                 result = True
                 break
             except Exception as ex:
@@ -317,7 +355,7 @@ class PyKasaAdapterThread(AdapterThread):
 
         return result
 
-    def _create_smart_device(self, address):
+    async def _create_smart_device(self, address):
         """
         Create a TPLink SmartDevice instance for the device at a
         given IP address
@@ -327,7 +365,7 @@ class PyKasaAdapterThread(AdapterThread):
         device = None
         # Discover all devices. This will take some time...
         device = None
-        devices = self._loop.run_until_complete(Discover.discover(target=self._discover_target))
+        devices = await Discover.discover(target=self._discover_target)
         # Look for address in the discovered devices
         for ip, dev in devices.items():
             if ip == address:
@@ -336,7 +374,7 @@ class PyKasaAdapterThread(AdapterThread):
 
         return device
 
-    def _get_device(self, device_address):
+    async def _get_device(self, device_address):
         """
         Get the python-kasa device instance for a given address
         :param device_address: The mac address of the device (the device_id)
@@ -346,7 +384,7 @@ class PyKasaAdapterThread(AdapterThread):
             device = self._all_devices[device_address]
         else:
             device = self._create_smart_device(device_address)
-            self._loop.run_until_complete(device.update())
+            await device.update()
             self._all_devices[device_address] = device
         # TODO Consider aging the the data in the device object
         return device
