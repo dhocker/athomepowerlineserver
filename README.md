@@ -296,6 +296,21 @@ template.
             <td>Meross Password</td>
             <td>The password to your Meross account. See notes below discussing security.</td>
         </tr>
+        <tr class="even">
+            <td>Meross Settings</td>
+            <td>
+                <p>command_timeout (in seconds)</br>
+                api_base_url (for Meross cloud server: https://iotx-us.meross.com)</p> 
+            </td>
+        </tr>
+        <tr class="odd">
+            <td>PyKasaDiscoverTarget</td>
+            <td>The IP address to be used as the target of device discovery</td>
+        </tr>
+        <tr class="even">
+            <td>PyKasaRequestWaitTime</td>
+            <td>The time (in seconds) to wait for a request to complete</td>
+        </tr>
     </tbody>
 </table>
 
@@ -313,16 +328,25 @@ template.
     "Latitude": "29.9947",
     "Longitude": "-95.6675",
     "MerossEmail": "your Meross email",
-    "MerossPassword": "your Meross account password"
+    "MerossPassword": "your Meross account password",
+    "MerossIot": {
+        "command_timeout": 2.0,
+        "api_base_url": "https://iotx-us.meross.com"
+        },
+    "PyKasaDiscoverTarget": "192.168.1.255",
+    "PyKasaRequestWaitTime": 5.0
    }
 }
 ```
 
 ### Notes
-If your are using Meross devices, you should set the permissions of the
+For api_base_url use https://iotx-us.meross.com in the US and https://iotx-eu.meross.com 
+in Europe.
+
+If you are using Meross devices, you should set the permissions of the
 configuration file to limit access. At a minimum, you should disallow
 any access by "everyone". Under Linux, you should at least chmod the
-file to permissions something like 640 or even the more restrictive 600.
+file to permissions to something like 640 or even the more restrictive 600.
 Under Windows, you should remove "Everyone" from the file's permissions.
 
 If you are using the [At Home Control](https://github.com/dhocker/athomefrb)
