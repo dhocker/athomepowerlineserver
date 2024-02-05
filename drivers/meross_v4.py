@@ -42,7 +42,7 @@ class MerossDriverV4(BaseThreadDriver):
         """
         # Determine Meross host url
         meross_iot = Configuration.MerossIot()
-        api_base_url = "https://iotx-eu.meross.com"
+        api_base_url = "https://iotx-us.meross.com"
         if "api_base_url" in meross_iot.keys():
             api_base_url = meross_iot["api_base_url"]
 
