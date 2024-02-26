@@ -213,7 +213,7 @@ class TimerServiceThread(threading.Thread):
         # allowing the factor to vary over a range of dates.
         now = datetime.datetime.now()
         now_date = datetime.date(now.year, now.month, now.day)
-        random.seed(now_date)
+        random.seed(str(now_date))
 
         # We'll try to inject a little more controlled randomness by using today's
         # day as an additional factor.
