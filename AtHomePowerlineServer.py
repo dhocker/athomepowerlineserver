@@ -76,7 +76,7 @@ def main():
     # For additional coverage, log the disclaimer
     disclaimer.Disclaimer.LogDisclaimer()
 
-    logger.info("Starting up...")
+    logger.info(f"Starting up under user {os.getlogin()}...")
 
     logger.info("Using configuration file: %s", Configuration.Configuration.GetConfigurationFilePath())
 
