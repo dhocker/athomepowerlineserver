@@ -27,6 +27,7 @@ import disclaimer.Disclaimer
 import logging
 import signal
 import os
+import pwd
 import time
 import sys
 import ntplib
@@ -76,7 +77,8 @@ def main():
     # For additional coverage, log the disclaimer
     disclaimer.Disclaimer.LogDisclaimer()
 
-    logger.info(f"Starting up under user {os.getlogin()}...")
+    current_user = pwd.getpwuid(os.getuid()).pw_name
+    logger.info(f"Starting up under user {current_user}...")
 
     logger.info("Using configuration file: %s", Configuration.Configuration.GetConfigurationFilePath())
 
