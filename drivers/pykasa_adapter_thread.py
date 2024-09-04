@@ -152,7 +152,7 @@ class PyKasaAdapterThread(AdapterThread):
         logger.debug("set_color for: %s %s %s %s", device_type, device_name_tag, house_device_code, channel)
         hsv = self._hex_to_hsv(hex_color)
         dev = await self._get_device(house_device_code)
-        if dev is not None and dev.is_color:
+        if dev is not None:
             self.clear_last_error()
             for r in range(PyKasaAdapterThread.RETRY_COUNT):
                 try:
@@ -181,7 +181,7 @@ class PyKasaAdapterThread(AdapterThread):
         # TODO Requires a TPLink/Kasa bulb for testing
         logger.debug("set_brightness for: %s %s %s %s", device_type, device_name_tag, house_device_code, channel)
         dev = await self._get_device(house_device_code)
-        if dev is not None and dev.is_dimmable:
+        if dev is not None:
             self.clear_last_error()
             for r in range(PyKasaAdapterThread.RETRY_COUNT):
                 try:
