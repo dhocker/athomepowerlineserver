@@ -16,6 +16,7 @@ import asyncio
 import logging
 import datetime
 from kasa import SmartPlug, SmartBulb, SmartStrip, SmartLightStrip, SmartDimmer, Discover
+from kasa import Module
 from .adapter_thread import AdapterThread
 from .adapter_request import AdapterRequest
 
@@ -149,22 +150,39 @@ class PyKasaAdapterThread(AdapterThread):
         :return: True/false
         """
         result = False
+
+        # TODO Requires an accessible TPLink/Kasa bulb for testing
         logger.debug("set_color for: %s %s %s %s", device_type, device_name_tag, house_device_code, channel)
         hsv = self._hex_to_hsv(hex_color)
         dev = await self._get_device(house_device_code)
         if dev is not None:
             self.clear_last_error()
-            for r in range(PyKasaAdapterThread.RETRY_COUNT):
-                try:
-                    await dev.set_hsv(int(hsv[0]), int(hsv[1]), int(hsv[2]))
-                    result = True
-                    break
-                except Exception as ex:
-                    logger.error("Retry %d", r)
-                    self._log_device_exception(dev, ex)
-                    self.last_error = str(ex)
-                    self.last_error_code = 1
+            if Module.Light in dev.modules:
+                light = dev.modules[Module.Light]
+                # The light must support color
+                if light.is_color:
+                    for r in range(PyKasaAdapterThread.RETRY_COUNT):
+                        try:
+                            await light.set_hsv(int(hsv[0]), int(hsv[1]), int(hsv[2]))
+                            result = True
+                            break
+                        except Exception as ex:
+                            logger.error("Retry %d", r)
+                            self._log_device_exception(dev, ex)
+                            self.last_error = str(ex)
+                            self.last_error_code = 1
+                else:
+                    logger.debug("Device %s supports Light but does not support color", device_name_tag)
+                    result = False
+            else:
+                logger.debug("Device %s does not support Light", device_name_tag)
+                result = False
+
             del dev
+
+        else:
+            logger.error("Device %s was not found", device_name_tag)
+
         return result
 
     async def set_brightness(self, device_type, device_name_tag, house_device_code, channel, brightness):
@@ -178,22 +196,33 @@ class PyKasaAdapterThread(AdapterThread):
         :return: True/false
         """
         result = False
-        # TODO Requires a TPLink/Kasa bulb for testing
+
+        # TODO Requires an accessible TPLink/Kasa bulb for testing
         logger.debug("set_brightness for: %s %s %s %s", device_type, device_name_tag, house_device_code, channel)
         dev = await self._get_device(house_device_code)
         if dev is not None:
             self.clear_last_error()
-            for r in range(PyKasaAdapterThread.RETRY_COUNT):
-                try:
-                    await dev.brightness(int(brightness))
-                    result = True
-                    break
-                except Exception as ex:
-                    logger.error("Retry %d", r)
-                    self._log_device_exception(dev, ex)
-                    self.last_error = str(ex)
-                    self.last_error_code = 1
+            if Module.Light in dev.modules:
+                light = dev.modules[Module.Light]
+                for r in range(PyKasaAdapterThread.RETRY_COUNT):
+                    try:
+                        await light.set_brightness(brightness)
+                        result = True
+                        break
+                    except Exception as ex:
+                        logger.error("Retry %d", r)
+                        self._log_device_exception(dev, ex)
+                        self.last_error = str(ex)
+                        self.last_error_code = 1
+            else:
+                logger.info("Device %s does not support Light", device_name_tag)
+                result = False
+
             del dev
+
+        else:
+            logger.error("Device %s was not found", device_name_tag)
+
         return result
 
     async def device_on(self, device_type, device_name_tag, house_device_code, channel):
