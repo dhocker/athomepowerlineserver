@@ -169,6 +169,10 @@ class Configuration:
         return cls.get_config_var("MerossIot")
 
     @classmethod
+    def enabled_drivers(cls):
+        return cls.get_config_var("EnabledDrivers")
+
+    @classmethod
     def logformat(cls):
         return cls.get_config_var("logformat")
 
