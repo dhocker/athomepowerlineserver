@@ -21,7 +21,8 @@ class QueryAvailableDevices(ServerCommand.ServerCommand):
         result = {}
         if "type" in args.keys():
             driver = DeviceDriverManager.get_driver(args['type'])
-            result = driver.get_available_devices()
+            if driver is not None:
+                result = driver.get_available_devices()
 
         # Generate a successful response
         r = self.CreateResponse(request["request"])
