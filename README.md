@@ -311,7 +311,14 @@ template.
             <td>PyKasaRequestWaitTime</td>
             <td>The time (in seconds) to wait for a request to complete</td>
         </tr>
-    </tbody>
+        <tr class="odd">
+            <td>EnabledDrivers</td>
+            <td>
+                List of driver names to be enabled for use. Recognized drivers are 
+                tplink, meross and dummy.
+            </td>
+        </tr>
+     </tbody>
 </table>
 
 ### Example
@@ -334,7 +341,11 @@ template.
         "api_base_url": "https://iotx-us.meross.com"
         },
     "PyKasaDiscoverTarget": "192.168.1.255",
-    "PyKasaRequestWaitTime": 5.0
+    "PyKasaRequestWaitTime": 5.0,
+    "EnabledDrivers":
+        [
+          "tplink"
+        ]
    }
 }
 ```

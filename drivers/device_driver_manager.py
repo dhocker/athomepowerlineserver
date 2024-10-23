@@ -13,6 +13,7 @@ import logging
 from drivers.Dummy import Dummy
 from drivers.py_kasa import PyKasaDriver
 from drivers.meross_v4 import MerossDriverV4
+from Configuration import Configuration
 
 logger = logging.getLogger("server")
 
@@ -24,7 +25,7 @@ class DeviceDriverManager:
     # device name to device driver look up table
     driver_list = {}
 
-    # Driver list mapping names to driver class
+    # Driver list mapping all driver names to driver class
     DRIVER_LIST = {
         "tplink": PyKasaDriver,
         "meross": MerossDriverV4,
@@ -36,15 +37,29 @@ class DeviceDriverManager:
         # Create driver instances for all supported manufacturers
         # Note that only one instance of each driver is created making
         # each driver a singleton.
-        for name, driver_class in cls.DRIVER_LIST.items():
-            cls.driver_list[name] = driver_class()
+
+        enabled_drivers = Configuration.enabled_drivers()
+
+        if enabled_drivers is None or len(enabled_drivers) == 0:
+            # Default to all known devices
+            enabled_drivers = cls.DRIVER_LIST.keys()
+            logger.debug("Configuration file does not define enabled drivers")
+            logger.debug("Defaulting to all known drivers")
+
+        for name in enabled_drivers:
+            if name in cls.DRIVER_LIST.keys():
+                # Create an instance of the driver
+                cls.driver_list[name] = cls.DRIVER_LIST[name]()
+                logger.info("Created driver for %s", name)
+            else:
+                logger.error("%s is not a recognized driver", name)
 
         # Open all used drivers
         for dn, driver in cls.driver_list.items():
             if driver is not None:
                 driver.open()
 
-        logger.debug("Driver instances created for all drivers")
+        logger.debug("Driver instances created for all enabled drivers")
 
     @classmethod
     def close_drivers(cls):
