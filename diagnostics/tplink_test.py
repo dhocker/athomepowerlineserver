@@ -1,6 +1,6 @@
 #
 # TPLink smart plug device research
-# Copyright © 2019  Dave Hocker
+# Copyright © 2019, 2024  Dave Hocker
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by

@@ -411,6 +411,17 @@ python AtHomePowerlineServer.py
 ```
 
 
+# Diagnostic Tools
+## TPLink Devices
+Occasionally, it dan be difficult to identify a device that needs to be reset (unplugged/replugged).
+There are two script tools that can be used to diagnose problems.
+
+* run\_discover\_devices - prints results of invoking the python-kasa Discover.discover API.
+* run\_tplink\_diag - attempts to verify that all managed devices can be discovered
+
+These tools are run from the project root directory. They depend on the presence of a configuration
+file. And, run\_tplink\_diag depends on the presence of a database file.
+
 # AtHome Control Web App
 
 AtHome Control (AthomeFRB) is an open source web server based application that works with

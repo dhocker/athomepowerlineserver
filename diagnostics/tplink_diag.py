@@ -1,6 +1,6 @@
 #
 # TPLink/Kasa diagnostic test tool
-# Copyright © 2023  Dave Hocker
+# Copyright © 2023, 2024  Dave Hocker
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,6 +16,10 @@
 #   python tplink_diag.py
 #
 
+
+# Set up access to parent directories (e.g. database)
+import os, sys
+sys.path.insert(1, "/".join(os.path.realpath(__file__).split("/")[0:-2]))
 
 from kasa import SmartDevice, SmartPlug, Discover
 import asyncio

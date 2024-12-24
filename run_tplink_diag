@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# Add the VENV to the path. When its python is run the VENV will activate.
+VENV=~/Virtualenvs/python-kasa3
+PATH=$VENV/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+# This diagnostic depends on the following files being in the current directory.
+# AtHomePowerlineServer.conf
+# AtHomePowerlineServer.sqlite3
+python diagnostics/tplink_diag.py
